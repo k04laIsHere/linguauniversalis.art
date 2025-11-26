@@ -5,7 +5,7 @@ on:
       - main
 
 permissions:
-  contents: read
+  contents: write
   pages: write
   id-token: write
 
@@ -29,18 +29,22 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Configure Pages
-        uses: actions/configure-pages@v3
-
-      - name: Upload artifact
-        id: upload-pages-artifact
-        uses: actions/upload-pages-artifact@v2
-        with:
-          path: ./dist
+      - name: Show dist contents
+        run: |
+          echo '--- dist listing ---'
+          ls -la dist || true
+          echo '--- js files head ---'
+          find dist -type f -name '*.js' -print -exec sh -c 'echo "== {} =="; head -n 5 "{}" || true' \;
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Deploy to GitHub Pages
-        uses: actions/deploy-pages@v1
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy to gh-pages (peaceiris)
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist
