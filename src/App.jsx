@@ -19,7 +19,7 @@ export default function App(){
   const locale = data[lang]
 
   return (
-    <div className="min-h-screen text-paper">
+    <div className="min-h-screen">
       <Nav lang={lang} setLang={setLang} label={locale.langLabel} />
 
       <main>

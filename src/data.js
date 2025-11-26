@@ -1,70 +1,50 @@
-const ASSETS_BASE = '/assets'
+const placeholder = 'https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1600&q=80'
 
-const data = {
+export default {
   ru: {
-    langLabel: 'RU',
+    langLabel: 'EN',
     hero: {
-      title: 'Lingua Universalis',
-      subtitle: 'Искусство Созидания',
-      image: `${ASSETS_BASE}/Афиша.jpg`
+      title: 'Лингва\nУниверсалис',
+      subtitle: 'Искусство создания — языки, образы, время',
+      image: placeholder
     },
     manifesto: {
       heading: 'Манифест',
-      text: `Искусство — универсальный язык, связующий нас с древними предками. Через образ, след и символ мы находим мост между временами.`
+      text: 'Мы говорим на языке образа. В каждом звуке — штрих, в каждом штрихе — звук. Это эксперимент и ритуал; коллаж из смыслов и пустот.'
     },
     characters: [
-      { name: 'Джослен', role: 'Шаман', desc: 'Хранитель первобытной памяти', img: `${ASSETS_BASE}/Работа1.jpg` },
-      { name: 'Режиссёр', role: 'Искатель', desc: 'Ведёт путь к смыслу', img: `${ASSETS_BASE}/Работа2.jpg` },
-      { name: 'Художник', role: 'Создатель', desc: 'Переводит мир в образ', img: `${ASSETS_BASE}/Работа3.jpg` }
+      { name: 'Автор', role: 'Создатель', desc: 'Тот, кто шепчет краскам.', img: placeholder },
+      { name: 'Язык', role: 'Проявление', desc: 'Система, что рождает образы.', img: placeholder },
+      { name: 'Зритель', role: 'Соавтор', desc: 'Тот, кто завершает работу взглядом.', img: placeholder }
     ],
     journey: [
-      { year: '2023', title: 'Выставка', desc: 'Кураторская экспозиция — диалог с древним.' },
-      { year: '2024', title: 'Круглый стол', desc: 'Философская дискуссия о языке искусства.' },
-      { year: 'Будущее', title: 'Тёмная мастерская', desc: 'Место для экспериментов и ритуалов.' }
+      { year: '2024', text: 'Начало, первые эскизы.' },
+      { year: '2025', text: 'Выставки и эксперименты.' }
     ],
-    gallery: [
-      `${ASSETS_BASE}/Работа1.jpg`,
-      `${ASSETS_BASE}/Работа2.jpg`,
-      `${ASSETS_BASE}/Работа3.jpg`,
-      `${ASSETS_BASE}/Работа4.jpg`
-    ],
-    contact: {
-      email: 'info@lingua-universalis.example',
-      links: ['Проект', 'Контакты']
-    }
+    gallery: [placeholder, placeholder, placeholder, placeholder, placeholder, placeholder],
+    contact: { email: 'info@lingua.art' }
   },
   en: {
-    langLabel: 'EN',
+    langLabel: 'RU',
     hero: {
-      title: 'Lingua Universalis',
-      subtitle: 'The Art of Creation',
-      image: `${ASSETS_BASE}/Афиша.jpg`
+      title: 'Lingua\nUniversalis',
+      subtitle: 'The art of creation — languages, images, time',
+      image: placeholder
     },
     manifesto: {
       heading: 'Manifesto',
-      text: `Art is a universal language connecting us with our ancient ancestors. Through form and symbol we build bridges across time.`
+      text: 'We speak the language of image. Every sound is a stroke, every stroke a sound. This is experiment and ritual; a collage of meanings and gaps.'
     },
     characters: [
-      { name: 'Joslen', role: 'The Shaman', desc: 'Keeper of primal memory', img: `${ASSETS_BASE}/Работа1.jpg` },
-      { name: 'The Director', role: 'The Seeker', desc: 'Guides toward meaning', img: `${ASSETS_BASE}/Работа2.jpg` },
-      { name: 'The Artist', role: 'The Creator', desc: 'Translates the world into image', img: `${ASSETS_BASE}/Работа3.jpg` }
+      { name: 'Author', role: 'Creator', desc: 'One who whispers to pigments.', img: placeholder },
+      { name: 'Language', role: 'Apparition', desc: 'The system that births images.', img: placeholder },
+      { name: 'Viewer', role: 'Co-author', desc: 'One who completes the work with a gaze.', img: placeholder }
     ],
     journey: [
-      { year: '2023', title: 'Exhibition', desc: 'Curated show — a dialogue with the ancient.' },
-      { year: '2024', title: 'Round Table', desc: 'Philosophical conversation about the language of art.' },
-      { year: 'Future', title: 'The Dark Workshop', desc: 'A place for experiments and rituals.' }
+      { year: '2024', text: 'The beginning, first sketches.' },
+      { year: '2025', text: 'Exhibitions and experiments.' }
     ],
-    gallery: [
-      `${ASSETS_BASE}/Работа1.jpg`,
-      `${ASSETS_BASE}/Работа2.jpg`,
-      `${ASSETS_BASE}/Работа3.jpg`,
-      `${ASSETS_BASE}/Работа4.jpg`
-    ],
-    contact: {
-      email: 'info@lingua-universalis.example',
-      links: ['Project', 'Contacts']
-    }
+    gallery: [placeholder, placeholder, placeholder, placeholder, placeholder, placeholder],
+    contact: { email: 'info@lingua.art' }
   }
 }
-
-export default data

@@ -3,14 +3,43 @@
 @tailwind utilities;
 
 :root{
-  --bg: #0b0b0b;
+  --bg: #070707;
   --paper: #e9e6e1;
+  --muted: #bfbab3;
   --accent: #b76e2f;
 }
 
 html,body,#root{height:100%;}
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--paper);font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial}
+
+/* Serif utility */
+.font-serif{font-family:Merriweather, Georgia, 'Times New Roman', serif}
+
+/* Avant-garde display title */
+.display-title{white-space:pre-line;line-height:0.92;letter-spacing:0.02em;font-weight:700}
+.display-sub{opacity:0.9;transform:translateY(4px);font-style:italic}
+
+/* Manifesto styling */
+.manifesto-wrap{max-width:56ch}
+.manifesto-wrap p{font-size:1.125rem;line-height:1.7;color:var(--muted)}
+
+/* Characters editorial layout */
+.characters-row{display:grid;grid-template-columns:1fr;gap:3rem}
+@media(min-width:900px){
+  .characters-row{grid-template-columns:1fr 1fr;align-items:center}
+  .character-card{display:flex;gap:1.5rem}
+  .character-card img{flex:0 0 46%;height:300px;object-fit:cover}
+}
+
+/* Gallery: asymmetric masonry using CSS grid */
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:160px;gap:12px}
+.gallery-grid img{width:100%;height:100%;object-fit:cover;display:block}
+.gallery-grid img:nth-child(3n){grid-row:span 2}
+.gallery-grid img:nth-child(5n){grid-column:span 2}
+
+/* Subtle overlay text */
+.overlay-note{position:absolute;right:2rem;top:2rem;opacity:0.12;font-size:6rem;transform:rotate(-10deg);pointer-events:none}
 
 /* Simple custom cursor */
 .cursor-dot{position:fixed;left:0;top:0;pointer-events:none;z-index:9999;mix-blend-mode:screen}

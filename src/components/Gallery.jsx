@@ -6,9 +6,9 @@ export default function Gallery({images}){
     <section className="min-h-screen py-16 px-6" id="gallery">
       <div className="max-w-6xl mx-auto">
         <h3 className="font-serif text-2xl mb-6">Gallery</h3>
-        <div className="columns-2 md:columns-4 gap-4">
+        <div className="gallery-grid">
           {images.map((src,i)=> (
-            <motion.img key={i} src={src} alt={`gallery-${i}`} className="mb-4 w-full object-cover rounded" initial={{opacity:0}} whileInView={{opacity:1}} viewport={{once:true}} transition={{duration:0.7}} />
+            <motion.img key={i} src={src} alt={`gallery-${i}`} className="rounded" initial={{opacity:0, scale:0.98}} whileInView={{opacity:1,scale:1}} viewport={{once:true}} transition={{duration:0.7}} />
           ))}
         </div>
       </div>
