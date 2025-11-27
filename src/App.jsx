@@ -1,21 +1,26 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { content } from './data/content';
 
-// Components
+// Use the requested background image
+import heroBg from '../assets/images/background.png';
+
+// --- Components ---
+
 const Navbar = ({ lang, setLang, t, isOpen, setIsOpen }) => (
-  <nav className="fixed top-0 left-0 w-full z-50 px-6 py-6 flex justify-between items-center mix-blend-difference text-white">
-    <div className="font-cormorant text-2xl tracking-widest uppercase font-bold">
-      Lingua Universalis
+  <nav className="fixed top-0 left-0 w-full z-50 px-8 py-8 flex justify-between items-center mix-blend-difference text-white">
+    <div className="font-serif text-2xl tracking-[0.2em] uppercase font-bold relative group cursor-pointer">
+      <span className="relative z-10">Lingua Universalis</span>
+      <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-lu-gold group-hover:w-full transition-all duration-500"></span>
     </div>
     
-    <div className="flex items-center gap-8">
+    <div className="flex items-center gap-12">
       <button 
         onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-        className="flex items-center gap-2 text-sm tracking-widest hover:text-lu-gold transition-colors uppercase"
+        className="flex items-center gap-2 text-xs tracking-[0.2em] hover:text-lu-gold transition-colors uppercase font-light"
       >
-        <Globe size={16} />
+        <Globe size={14} />
         {lang}
       </button>
       
@@ -26,185 +31,269 @@ const Navbar = ({ lang, setLang, t, isOpen, setIsOpen }) => (
         {isOpen ? <X /> : <Menu />}
       </button>
 
-      <ul className="hidden md:flex gap-8 text-sm tracking-widest uppercase">
-        <li><a href="#about" className="hover:text-lu-gold transition-colors">{t.nav.about}</a></li>
-        <li><a href="#events" className="hover:text-lu-gold transition-colors">{t.nav.events}</a></li>
-        <li><a href="#participants" className="hover:text-lu-gold transition-colors">{t.nav.participants}</a></li>
+      <ul className="hidden md:flex gap-12 text-xs tracking-[0.2em] uppercase font-light">
+        <li><a href="#about" className="hover:text-lu-gold transition-colors duration-300">{t.nav.about}</a></li>
+        <li><a href="#events" className="hover:text-lu-gold transition-colors duration-300">{t.nav.events}</a></li>
+        <li><a href="#participants" className="hover:text-lu-gold transition-colors duration-300">{t.nav.participants}</a></li>
       </ul>
     </div>
 
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div 
-          initial={{ opacity: 0, x: '100%' }}
-          animate={{ opacity: 1, x: 0 }}
-          exit={{ opacity: 0, x: '100%' }}
-          className="fixed inset-0 bg-lu-dark flex flex-col items-center justify-center gap-8 md:hidden"
-        >
-          <a href="#about" onClick={() => setIsOpen(false)} className="text-2xl font-cormorant">{t.nav.about}</a>
-          <a href="#events" onClick={() => setIsOpen(false)} className="text-2xl font-cormorant">{t.nav.events}</a>
-          <a href="#participants" onClick={() => setIsOpen(false)} className="text-2xl font-cormorant">{t.nav.participants}</a>
-        </motion.div>
-      )}
-    </AnimatePresence>
+    {/* Mobile Menu Overlay */}
+    {isOpen && (
+      <motion.div 
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center gap-12 md:hidden z-40"
+      >
+        <a href="#about" onClick={() => setIsOpen(false)} className="text-3xl font-serif text-lu-gold">{t.nav.about}</a>
+        <a href="#events" onClick={() => setIsOpen(false)} className="text-3xl font-serif text-lu-gold">{t.nav.events}</a>
+        <a href="#participants" onClick={() => setIsOpen(false)} className="text-3xl font-serif text-lu-gold">{t.nav.participants}</a>
+      </motion.div>
+    )}
   </nav>
 );
 
-const Hero = ({ t }) => (
-  <section className="relative h-screen w-full flex items-center justify-center overflow-hidden">
-    {/* Background with Noise and Gradient */}
-    <div className="absolute inset-0 bg-noise opacity-30 z-10 pointer-events-none"></div>
-    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-lu-dark/50 to-lu-dark z-10"></div>
-    
-    {/* Background Image/Video Placeholder */}
-    <div className="absolute inset-0 z-0">
-      <img 
-        src={t.hero.image} 
-        alt="Background" 
-        className="w-full h-full object-cover opacity-40 scale-105 animate-float"
-      />
-    </div>
-
-    <div className="relative z-20 text-center px-4 max-w-5xl mx-auto">
-      <motion.h1 
-        initial={{ opacity: 0, y: 50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1, delay: 0.2 }}
-        className="font-cormorant text-6xl md:text-8xl lg:text-9xl font-light tracking-tighter leading-none mb-6 text-lu-gold-light"
-      >
-        {t.hero.title}
-      </motion.h1>
-      
-      <motion.p 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 0.8 }}
-        className="font-sans text-sm md:text-base tracking-[0.2em] text-lu-text/80 uppercase mb-12 max-w-2xl mx-auto"
-      >
-        {t.hero.description}
-      </motion.p>
-
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 1.2 }}
-      >
-        <a href="#about" className="inline-flex items-center gap-2 border border-lu-gold/30 px-8 py-3 rounded-full text-sm tracking-widest hover:bg-lu-gold/10 hover:border-lu-gold transition-all group">
-          {t.hero.cta} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-        </a>
+const Hero = ({ t }) => {
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 500], [0, 200]);
+  
+  return (
+    <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-lu-dark">
+      {/* Darkened Background Image with Parallax */}
+      <motion.div style={{ y }} className="absolute inset-0 z-0">
+        <img 
+          src={heroBg} 
+          alt="Background" 
+          className="w-full h-full object-cover opacity-20 scale-110 filter contrast-125 brightness-50"
+        />
+        {/* Extra overlay for darkness */}
+        <div className="absolute inset-0 bg-black/60 mix-blend-multiply"></div>
+        <div className="absolute inset-0 bg-gradient-to-t from-lu-dark via-transparent to-lu-dark/80"></div>
       </motion.div>
+
+      {/* Glowing Lines Effect */}
+      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-lu-gold/5 rounded-full blur-[120px] animate-pulse-glow"></div>
+        <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-purple-900/10 rounded-full blur-[100px] animate-pulse-glow" style={{ animationDelay: '2s' }}></div>
+        
+        {/* Thin sacred geometry lines */}
+        <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
+          <line x1="50%" y1="0" x2="50%" y2="100%" stroke="url(#grad1)" strokeWidth="0.5" />
+          <line x1="0" y1="50%" x2="100%" y2="50%" stroke="url(#grad1)" strokeWidth="0.5" />
+          <circle cx="50%" cy="50%" r="20%" fill="none" stroke="url(#grad1)" strokeWidth="0.5" />
+          <defs>
+            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="transparent" />
+              <stop offset="50%" stopColor="#C5A059" />
+              <stop offset="100%" stopColor="transparent" />
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+
+      {/* Content */}
+      <div className="relative z-20 text-center px-6 max-w-6xl mx-auto flex flex-col items-center">
+        <motion.div
+          initial={{ opacity: 0, y: 100 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 1.5, ease: "easeOut" }}
+          className="relative mb-12"
+        >
+          <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl font-normal tracking-widest leading-none text-transparent bg-clip-text bg-gradient-to-b from-lu-gold-light via-lu-gold to-lu-gold-dim drop-shadow-2xl">
+            LINGUA<br />UNIVERSALIS
+          </h1>
+          <div className="absolute -right-8 -top-8 w-24 h-24 border-t border-r border-lu-gold/30 hidden md:block"></div>
+          <div className="absolute -left-8 -bottom-8 w-24 h-24 border-b border-l border-lu-gold/30 hidden md:block"></div>
+        </motion.div>
+        
+        <motion.p 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1.5, delay: 0.5 }}
+          className="font-sans text-xs md:text-sm tracking-[0.3em] text-lu-text/70 uppercase mb-16 max-w-xl leading-loose"
+        >
+          {t.hero.subtitle}
+        </motion.p>
+
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1, delay: 1 }}
+        >
+          <ChevronDown className="text-lu-gold/50 animate-bounce w-8 h-8" />
+        </motion.div>
+      </div>
+    </section>
+  );
+};
+
+const About = ({ t }) => (
+  <section id="about" className="min-h-screen py-32 px-6 relative bg-lu-dark flex items-center">
+    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center w-full">
+      {/* Asymmetric Layout - Text First on Large Screens */}
+      <div className="lg:col-span-5 space-y-12 order-2 lg:order-1 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+           <span className="text-lu-gold text-xs tracking-[0.3em] uppercase mb-4 block">Manifesto</span>
+          <h2 className="font-serif text-4xl md:text-6xl text-white leading-tight mb-8">
+            {t.about.title}
+          </h2>
+          <div className="space-y-8 font-light text-lg leading-relaxed text-gray-400">
+            {t.about.text.map((paragraph, idx) => (
+              <p key={idx} className="first-letter:text-5xl first-letter:font-serif first-letter:text-lu-gold first-letter:mr-2 first-letter:float-left">
+                {paragraph}
+              </p>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Image Section with "Sacred" Geometry */}
+      <div className="lg:col-span-7 relative order-1 lg:order-2">
+        <div className="relative z-10 w-full aspect-[4/5] lg:aspect-square max-w-xl mx-auto">
+           <div className="absolute inset-0 border border-lu-gold/20 transform rotate-3 scale-105"></div>
+           <div className="absolute inset-0 border border-lu-gold/10 transform -rotate-3 scale-95"></div>
+           <motion.div 
+             className="w-full h-full overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-1000"
+             initial={{ clipPath: 'inset(10% 10% 10% 10%)' }}
+             whileInView={{ clipPath: 'inset(0% 0% 0% 0%)' }}
+             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
+           >
+              <img 
+                src={t.about.image} 
+                alt="Art" 
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-lu-dark/80 to-transparent opacity-50"></div>
+           </motion.div>
+        </div>
+        {/* Abstract Elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-lu-gold/5 blur-[80px] -z-10"></div>
+      </div>
     </div>
-    
-    {/* Decorative Elements */}
-    <div className="absolute bottom-10 left-10 w-px h-24 bg-gradient-to-b from-transparent to-lu-gold/50 hidden md:block"></div>
-    <div className="absolute top-32 right-10 w-24 h-px bg-gradient-to-r from-transparent to-lu-gold/50 hidden md:block"></div>
   </section>
 );
 
-const About = ({ t }) => (
-  <section id="about" className="min-h-screen py-24 px-6 relative overflow-hidden">
-    <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-12 items-center">
-      {/* Asymmetric Layout */}
-      <div className="md:col-span-5 relative">
-        <div className="aspect-[3/4] bg-lu-gray/20 relative overflow-hidden">
-           <img 
-            src={t.about.image} 
-            alt="Art" 
-            className="w-full h-full object-cover opacity-80 mix-blend-luminosity hover:mix-blend-normal transition-all duration-700"
-          />
-        </div>
-        <div className="absolute -bottom-6 -right-6 w-32 h-32 border border-lu-gold/30 z-10 hidden md:block"></div>
-      </div>
+const EventSection = ({ event, index, isReversed }) => (
+  <section className="min-h-screen relative flex items-center justify-center py-24 overflow-hidden border-t border-white/5">
+    {/* Background Elements */}
+    <div className="absolute inset-0 bg-noise opacity-10 pointer-events-none"></div>
+    
+    <div className="container mx-auto px-6 relative z-10">
+      <div className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-16 lg:gap-32 items-center`}>
+        
+        {/* Image Content */}
+        <motion.div 
+          className="w-full lg:w-1/2 relative group"
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+          <div className="relative aspect-video overflow-hidden bg-lu-gray/20">
+            <img 
+              src={index % 2 === 0 ? "/assets/images/image-2.jpg" : "/assets/images/image 1.jpg"} 
+              alt={event.title}
+              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
+            />
+            <div className="absolute inset-0 border border-white/10 pointer-events-none"></div>
+          </div>
+          
+          {/* Floating Date Badge */}
+          <div className="absolute -top-6 -left-6 bg-lu-dark border border-lu-gold/30 p-6 backdrop-blur-md">
+             <span className="block font-serif text-3xl text-lu-gold">{event.date.split(' ')[0]}</span>
+             <span className="block text-xs uppercase tracking-widest text-gray-400 mt-1">{event.date.split(' ').slice(1).join(' ')}</span>
+          </div>
+        </motion.div>
 
-      <div className="md:col-span-1"></div>
+        {/* Text Content */}
+        <motion.div 
+          className="w-full lg:w-1/2 space-y-8"
+          initial={{ opacity: 0, x: isReversed ? -50 : 50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 1 }}
+        >
+           <div className="flex items-center gap-4 text-lu-gold/60 text-xs uppercase tracking-[0.2em]">
+              <span className="w-8 h-[1px] bg-lu-gold/60"></span>
+              <span>Event {index + 1}</span>
+           </div>
+           
+           <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight text-white group-hover:text-lu-gold transition-colors duration-300">
+             {event.title}
+           </h2>
 
-      <div className="md:col-span-6 space-y-8">
-        <h2 className="font-cormorant text-5xl md:text-6xl text-lu-gold italic">
-          {t.about.title}
-        </h2>
-        <div className="space-y-6 font-light text-lg leading-relaxed text-lu-text/90">
-          {t.about.text.map((paragraph, idx) => (
-            <p key={idx}>{paragraph}</p>
-          ))}
-        </div>
-        <div className="pt-8">
-           <div className="h-px w-24 bg-lu-gold"></div>
-        </div>
+           <div className="flex items-start gap-3 text-sm text-gray-400 font-light tracking-wider">
+              <MapPin size={16} className="mt-1 shrink-0 text-lu-gold" />
+              <span>{event.location}</span>
+           </div>
+
+           <p className="text-lg font-light text-gray-300 leading-relaxed max-w-md">
+             {event.desc}
+           </p>
+
+           <div className="pt-4">
+             <a 
+                href={event.link}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-4 text-sm uppercase tracking-[0.2em] text-white hover:text-lu-gold transition-colors group"
+             >
+                Check Details
+                <span className="w-12 h-[1px] bg-white/30 group-hover:bg-lu-gold transition-colors"></span>
+             </a>
+           </div>
+        </motion.div>
+
       </div>
     </div>
   </section>
 );
 
 const Events = ({ t }) => (
-  <section id="events" className="py-24 px-6 bg-lu-gray/10">
-    <div className="max-w-7xl mx-auto">
-      <h2 className="font-cormorant text-5xl md:text-6xl mb-16 text-center">{t.events.title}</h2>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        {t.events.list.map((event, index) => (
-          <motion.div 
-            whileHover={{ y: -5 }}
-            key={index} 
-            className="group relative border border-lu-gold/10 bg-lu-dark/40 p-8 hover:border-lu-gold/40 transition-colors"
-          >
-            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
-              <ExternalLink className="text-lu-gold" size={20} />
-            </div>
-            
-            <div className="flex flex-col h-full justify-between gap-6">
-              <div>
-                <div className="flex items-center gap-3 text-lu-gold text-sm tracking-widest mb-3 uppercase">
-                  <Calendar size={14} />
-                  <span>{event.date}</span>
-                </div>
-                <h3 className="font-cormorant text-3xl md:text-4xl mb-4 leading-tight group-hover:text-lu-gold transition-colors">
-                  {event.title}
-                </h3>
-                <div className="flex items-start gap-2 text-sm text-gray-400 mb-4">
-                  <MapPin size={14} className="mt-1 shrink-0" />
-                  <span>{event.location}</span>
-                </div>
-                <p className="text-gray-400 font-light leading-relaxed">
-                  {event.desc}
-                </p>
-              </div>
-              
-              <a 
-                href={event.link} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-block text-sm uppercase tracking-widest border-b border-lu-gold/30 pb-1 hover:border-lu-gold hover:text-lu-gold transition-all w-max"
-              >
-                Подробнее
-              </a>
-            </div>
-          </motion.div>
-        ))}
-      </div>
-    </div>
-  </section>
+  <div id="events" className="bg-lu-dark">
+    {t.events.list.map((event, index) => (
+      <EventSection 
+        key={index} 
+        event={event} 
+        index={index} 
+        isReversed={index % 2 !== 0} 
+      />
+    ))}
+  </div>
 );
 
-const ParticipantCard = ({ p }) => (
+const ParticipantCard = ({ p, index }) => (
   <motion.div 
-    initial={{ opacity: 0 }}
-    whileInView={{ opacity: 1 }}
+    initial={{ opacity: 0, y: 50 }}
+    whileInView={{ opacity: 1, y: 0 }}
     viewport={{ once: true }}
-    className="group relative"
+    transition={{ duration: 0.8, delay: index * 0.1 }}
+    className="group relative flex flex-col gap-6"
   >
-    <div className="aspect-[3/4] overflow-hidden bg-lu-gray/20 mb-4 relative">
-      <div className="absolute inset-0 bg-lu-gold/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 mix-blend-overlay"></div>
+    <div className="aspect-[4/5] overflow-hidden bg-lu-gray/10 relative grayscale group-hover:grayscale-0 transition-all duration-700">
       <img 
         src={p.img} 
         alt={p.name} 
-        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 grayscale group-hover:grayscale-0"
+        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
       />
+      <div className="absolute inset-0 bg-gradient-to-t from-lu-dark via-transparent to-transparent opacity-60"></div>
+      
+      {/* Hover Overlay with Name */}
+      <div className="absolute inset-0 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+        <p className="text-xs uppercase tracking-widest text-lu-gold/80">{p.role}</p>
+      </div>
     </div>
-    <div className="space-y-2">
-      <h3 className="font-cormorant text-2xl text-lu-text group-hover:text-lu-gold transition-colors">{p.name}</h3>
-      <p className="text-xs uppercase tracking-widest text-lu-gold/80">{p.role}</p>
-      <p className="text-xs text-gray-500">{p.country}</p>
-      <p className="text-sm text-gray-400 font-light mt-2 line-clamp-3 group-hover:line-clamp-none transition-all">
+
+    <div className="space-y-3 border-t border-white/10 pt-6 group-hover:border-lu-gold/50 transition-colors">
+      <h3 className="font-serif text-2xl text-white group-hover:text-lu-gold transition-colors">{p.name}</h3>
+      <p className="text-xs text-gray-500 uppercase tracking-widest">{p.country}</p>
+      <p className="text-sm text-gray-400 font-light leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all">
         {p.desc}
       </p>
     </div>
@@ -212,18 +301,17 @@ const ParticipantCard = ({ p }) => (
 );
 
 const Participants = ({ t }) => (
-  <section id="participants" className="py-24 px-6">
+  <section id="participants" className="py-32 px-6 bg-[#020202] relative">
     <div className="max-w-7xl mx-auto">
-      <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-        <h2 className="font-cormorant text-5xl md:text-6xl">{t.participants.title}</h2>
-        <p className="max-w-md text-right text-sm font-light text-gray-400 hidden md:block">
-          Художники из разных стран, объединенные идеей универсального языка искусства.
-        </p>
+      <div className="flex flex-col items-center mb-24 text-center space-y-6">
+        <span className="text-lu-gold text-xs tracking-[0.4em] uppercase">Collective</span>
+        <h2 className="font-serif text-5xl md:text-7xl text-white">{t.participants.title}</h2>
+        <div className="w-px h-24 bg-gradient-to-b from-lu-gold to-transparent"></div>
       </div>
       
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-16">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
         {t.participants.list.map((p, index) => (
-          <ParticipantCard key={index} p={p} />
+          <ParticipantCard key={index} p={p} index={index} />
         ))}
       </div>
     </div>
@@ -231,12 +319,16 @@ const Participants = ({ t }) => (
 );
 
 const Footer = ({ t }) => (
-  <footer className="bg-black py-12 px-6 border-t border-white/10">
-    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
-      <div className="font-cormorant text-2xl text-lu-gold">Lingua Universalis</div>
-      <div className="text-sm text-gray-500 font-light text-center md:text-right">
-        <p>{t.footer.contacts}</p>
-        <p className="mt-2">{t.footer.text}</p>
+  <footer className="bg-black py-24 px-6 border-t border-white/5 relative overflow-hidden">
+    <div className="absolute inset-0 bg-noise opacity-5"></div>
+    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-12 relative z-10">
+      <div>
+        <div className="font-serif text-4xl text-lu-gold mb-4">Lingua Universalis</div>
+        <p className="text-xs uppercase tracking-[0.2em] text-gray-600">The Art of Creation</p>
+      </div>
+      <div className="text-sm text-gray-500 font-light text-left md:text-right space-y-2">
+        <p className="hover:text-white transition-colors">{t.footer.contacts}</p>
+        <p className="text-gray-700">{t.footer.text}</p>
       </div>
     </div>
   </footer>
@@ -247,10 +339,10 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const t = content[lang];
 
-  // Simple noise overlay component
+  // Noise overlay
   const NoiseOverlay = () => (
-    <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.03] mix-blend-overlay"
-      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
+    <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.04] mix-blend-overlay"
+      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
     />
   );
 

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@200;300;400;600&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -10,20 +10,20 @@
 
 body {
   @apply bg-lu-dark text-lu-text font-sans overflow-x-hidden;
-  background-color: #050505;
+  background-color: #020202; /* Even darker */
 }
 
 /* Custom Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 4px; /* Thinner */
 }
 
 ::-webkit-scrollbar-track {
-  @apply bg-lu-dark;
+  @apply bg-black;
 }
 
 ::-webkit-scrollbar-thumb {
-  @apply bg-lu-gray rounded-full;
+  @apply bg-lu-gold/50 rounded-full;
 }
 
 ::-webkit-scrollbar-thumb:hover {
@@ -35,13 +35,13 @@ html {
   scroll-behavior: smooth;
 }
 
-.font-cormorant {
-  font-family: 'Cormorant Garamond', serif;
+.font-cinzel {
+  font-family: 'Cinzel', serif;
 }
 
 /* Text selection */
 ::selection {
-  @apply bg-lu-gold text-lu-dark;
+  @apply bg-lu-gold text-black;
 }
 
 /* Animations */
@@ -52,5 +52,34 @@ html {
 }
 
 .animate-float {
-  animation: float 6s ease-in-out infinite;
+  animation: float 8s ease-in-out infinite;
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.3; filter: blur(20px); }
+  50% { opacity: 0.6; filter: blur(25px); }
+}
+
+.animate-pulse-glow {
+  animation: pulse-glow 4s ease-in-out infinite;
+}
+
+@keyframes scanline {
+  0% {
+    transform: translateY(-100%);
+  }
+  100% {
+    transform: translateY(100%);
+  }
+}
+
+.scanline::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 50%, rgba(197, 160, 89, 0.1) 51%, transparent 52%);
+  background-size: 100% 8px;
+  animation: scanline 10s linear infinite;
+  pointer-events: none;
+  opacity: 0.3;
 }
