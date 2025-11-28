@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useSpring, useMotionValue, AnimatePresence } from 'framer-motion';
+import { motion, useSpring, useMotionValue, AnimatePresence, useInView } from 'framer-motion';
 import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { content } from './data/content';
 
@@ -11,26 +11,30 @@ import image1 from '../assets/images/image 1.jpg';
 import image2 from '../assets/images/image-2.jpg';
 
 // --- Loading Screen Component ---
-const LoadingScreen = ({ onLoadComplete }) => {
+const LoadingScreen = ({ onLoadComplete, isBgLoaded }) => {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const interval = setInterval(() => {
       setProgress(prev => {
+        // If background isn't loaded, stall at 90%
+        if (prev >= 90 && !isBgLoaded) {
+          return 90;
+        }
         if (prev >= 100) {
           clearInterval(interval);
           return 100;
         }
-        return prev + 2; // Smooth increment
+        return prev + 2;
       });
     }, 30);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [isBgLoaded]);
 
   useEffect(() => {
     if (progress === 100) {
-      setTimeout(onLoadComplete, 500); // Small delay before unmounting
+      setTimeout(onLoadComplete, 500);
     }
   }, [progress, onLoadComplete]);
 
@@ -63,43 +67,68 @@ const LoadingScreen = ({ onLoadComplete }) => {
 };
 
 // --- Optimized Background Component ---
-const FlashlightBackground = ({ mouseX, mouseY }) => {
+const FlashlightBackground = ({ mouseX, mouseY, onBgLoad }) => {
   const canvasRef = useRef(null);
   const [image, setImage] = useState(null);
-  const containerRef = useRef(null);
 
   useEffect(() => {
     const img = new Image();
     img.src = heroBg;
-    img.onload = () => setImage(img);
-  }, []);
+    img.onload = () => {
+      setImage(img);
+      onBgLoad(true);
+    };
+  }, [onBgLoad]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !image) return;
-    const ctx = canvas.getContext('2d', { alpha: false });
+    const ctx = canvas.getContext('2d', { alpha: false }); // Optimize for opacity
 
     let animationFrameId;
 
-    // Android WebView Bug Fix: Use visual viewport height if available to avoid resize jumps
-    const getViewportHeight = () => {
-      return window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    // Android WebView Fix:
+    // Instead of relying on window.innerHeight which changes on scroll due to address bar,
+    // we use a fixed height stored in a ref or calculate purely based on visualViewport if available,
+    // BUT we only update canvas size if the change is significant (orientation change) to avoid jitter.
+    // OR we use 100vh/100dvh CSS and match canvas resolution to clientWidth/clientHeight.
+    
+    const updateSize = () => {
+      // Match canvas resolution to display size
+      // We use clientWidth/Height of documentElement to avoid scrollbar issues
+      const width = window.innerWidth; 
+      // Use largest available height to cover "hidden" address bar area
+      const height = Math.max(window.innerHeight, document.documentElement.clientHeight);
+      
+      if (canvas.width !== width || Math.abs(canvas.height - height) > 50) {
+         canvas.width = width;
+         canvas.height = height;
+      }
     };
+    
+    // Initial size
+    updateSize();
+    
+    // Debounced resize listener for orientation changes
+    let resizeTimeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(updateSize, 100);
+    };
+    window.addEventListener('resize', handleResize);
 
     const render = () => {
-      // 1. Handle Resize - Fixed to avoid jumps on Android address bar toggle
-      // We fix the canvas to the container size, not window innerHeight directly every frame
-      const width = window.innerWidth;
-      const height = getViewportHeight(); 
-      
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-      }
-
+      const width = canvas.width;
+      const height = canvas.height;
       const scrollY = window.scrollY;
 
-      // 2. Draw Background Image (Cover mode - Simplified)
+      // 1. Draw FULL BLACK Background first (Base)
+      // This ensures 100% GPU usage isn't from overdraw? No, canvas is single layer.
+      // We draw black, then we will add the image "light" on top.
+      ctx.fillStyle = 'black';
+      ctx.fillRect(0, 0, width, height);
+
+      // 2. Calculate Image Cover Dimensions
       const imgRatio = image.width / image.height;
       const canvasRatio = width / height;
       let drawWidth, drawHeight, offsetX, offsetY;
@@ -116,61 +145,97 @@ const FlashlightBackground = ({ mouseX, mouseY }) => {
         offsetY = (height - drawHeight) / 2;
       }
 
-      // Draw base image
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-
-      // 3. Calculate Darkness Overlay
-      // Smooth linear darken: Hero (40%) -> Body (85%)
-      // Using 85% because we want flashlight to LIGHT it up (reveal), so base must be dark.
-      let darkness = 0.4;
-      if (scrollY > height) {
-        darkness = 0.85;
+      // 3. Draw Base Ambient Light (The "Dark" version of the image)
+      // Hero: 40% darkness -> 60% opacity (1 - 0.4)
+      // Body: 85% darkness -> 15% opacity (1 - 0.85)
+      
+      let baseOpacity = 0.6; // Hero opacity
+      if (scrollY > window.innerHeight) {
+        baseOpacity = 0.15;
       } else if (scrollY > 0) {
-        const progress = scrollY / height;
-        darkness = 0.4 + (0.45 * progress);
+        const progress = scrollY / window.innerHeight;
+        baseOpacity = 0.6 - (0.45 * progress);
       }
 
-      // 4. Flashlight Effect (Lighten)
-      // We draw a full dark overlay, then 'cut out' the flashlight hole using destination-out
-      // This reveals the original bright image underneath.
-      
-      ctx.fillStyle = `rgba(0, 0, 0, ${darkness})`;
-      ctx.fillRect(0, 0, width, height);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.globalAlpha = baseOpacity;
+      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
+      // 4. Draw Flashlight (Lighten/Add Mode)
+      // We want to ADD the full brightness image where the mouse is.
+      // Instead of masking, we can use 'lighter' or just draw the image again with a radial gradient alpha mask.
+      
+      // Step A: Save state
+      ctx.save();
+      
+      // Step B: Create path for flashlight
+      ctx.beginPath();
       const mx = mouseX.get();
-      const my = mouseY.get();
-
-      ctx.globalCompositeOperation = 'destination-out';
+      const my = mouseY.get(); // Mouse is relative to viewport
+      // We need to offset mouse Y by scrollY if the canvas is fixed? 
+      // No, canvas is fixed position (0,0), so mouse clientX/Y aligns with canvas x/y perfectly.
       
-      // Flashlight Radius increased by 50% (300px * 1.5 = 450px)
-      const radius = 450;
+      // Radius increased
+      const radius = 450; 
+      
+      // Step C: Create Gradient for "Light"
+      // We want the image to be drawn at full opacity at center, fading to 0 at edge.
+      // We can't easily "mask" just one draw call in 2D context without clipping or temp canvas.
+      // Clipping is easiest.
+      
+      // Optimization: Instead of clipping an image draw (expensive), 
+      // we can use 'destination-in' or 'lighter' blend mode with a gradient.
+      // Better: Draw the full brightness image on top, but restrict it with a radial gradient alpha.
+      
+      // New approach for performance:
+      // 1. Set globalAlpha to 1.
+      // 2. Create radial gradient (White -> Transparent)
+      // 3. Use 'destination-in' to keep only the part of the image we are about to draw? No.
+      
+      // Correct approach:
+      // 1. Draw full image again? Expensive.
+      // 2. Clipping is standard.
+      // ctx.arc(mx, my, radius, 0, Math.PI * 2);
+      // ctx.clip();
+      // ctx.globalAlpha = 1; // Full brightness
+      // ctx.drawImage(image, ...); 
+      // This produces a hard edge clip unless we feather it. Canvas clipping doesn't feather easily.
+      
+      // Soft Light Approach:
+      // Draw a radial gradient of "White" using 'overlay' or 'soft-light' blend mode? 
+      // That lights up the existing dark image. Very fast.
+      ctx.globalCompositeOperation = 'overlay'; // or 'screen' or 'lighter'
+      ctx.globalAlpha = 1;
       const gradient = ctx.createRadialGradient(mx, my, 0, mx, my, radius);
-      // Center: Transparent (Alpha 1 removes darkness) -> Edge: Opaque (Alpha 0 keeps darkness)
-      // Note: destination-out uses source alpha to determine how much destination to remove.
-      // Alpha 1 = Remove completely (Show Image). Alpha 0 = Remove nothing (Show Black).
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); // Bright center
+      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
       
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)'); 
-      gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.5)'); 
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); 
-
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(mx, my, radius, 0, Math.PI * 2);
       ctx.fill();
+      
+      // Restore
+      ctx.restore();
 
+      // Reset for next frame
+      ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
+      
       animationFrameId = requestAnimationFrame(render);
     };
 
     render();
-    return () => cancelAnimationFrame(animationFrameId);
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', handleResize);
+    };
   }, [image, mouseX, mouseY]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none h-[100dvh]" // h-dvh helps on mobile too
+      className="fixed inset-0 z-0 pointer-events-none h-[100dvh] w-screen"
     />
   );
 };
@@ -357,25 +422,19 @@ const EventSection = ({ event, index, isReversed }) => (
   </section>
 );
 
-const Events = ({ t }) => (
-  <div id="events">
-    {t.events.list.map((event, index) => (
-      <EventSection 
-        key={index} 
-        event={event} 
-        index={index} 
-        isReversed={index % 2 !== 0} 
-      />
-    ))}
-  </div>
-);
-
 const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
   const ref = useRef(null);
   const [isActive, setIsActive] = useState(false);
+  const isInView = useInView(ref, { margin: "-20%" }); // Viewport detection for mobile
 
   useEffect(() => {
-    // Immediate proximity check without delays
+    // Mobile Scroll Logic: Activate when in view
+    if (window.matchMedia("(max-width: 768px)").matches) {
+      setIsActive(isInView);
+      return;
+    }
+
+    // Desktop Hover Logic: Immediate proximity check
     const checkProximity = (x, y) => {
       if (!ref.current) return;
       const rect = ref.current.getBoundingClientRect();
@@ -383,11 +442,14 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
       const centerY = rect.top + rect.height / 2;
       
       const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-      const threshold = 200;
+      // Increased radius to 200px beyond center (effectively making hit area much larger)
+      // Actually user said 200px *around* image. 
+      // Center distance threshold = Width/2 + 200px roughly.
+      const threshold = Math.max(rect.width, rect.height) / 2 + 200;
+      
       setIsActive(dist < threshold);
     };
 
-    // Subscribe to raw motion values for max performance
     const unsubscribeX = mouseX.on("change", (latestX) => {
       checkProximity(latestX, mouseY.get());
     });
@@ -399,7 +461,7 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
       unsubscribeX();
       unsubscribeY();
     };
-  }, []);
+  }, [isInView, mouseX, mouseY]);
 
   return (
     <div 
@@ -470,13 +532,10 @@ function App() {
   const [lang, setLang] = useState('ru');
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isBgLoaded, setIsBgLoaded] = useState(false);
   const t = content[lang];
 
   // --- Flashlight Physics Logic ---
-  // Removing delays: using raw motion values for instant response or very tight spring
-  // User requested "Remove delays on hover, including delays in flashlight movement"
-  // So we use tighter stiffness/damping or just raw values.
-  // A slight spring is still good for smoothness, but we'll make it very fast.
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   
@@ -512,34 +571,41 @@ function App() {
   return (
     <div className="bg-black min-h-screen text-lu-text selection:bg-lu-gold selection:text-black overflow-x-hidden">
       <AnimatePresence>
-        {isLoading && <LoadingScreen onLoadComplete={() => setIsLoading(false)} />}
+        {isLoading && (
+          <LoadingScreen 
+            isBgLoaded={isBgLoaded} 
+            onLoadComplete={() => setIsLoading(false)} 
+          />
+        )}
       </AnimatePresence>
 
-      {!isLoading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1 }}
-        >
-          <NoiseOverlay />
-          
-          {/* Optimized Canvas Background */}
-          <FlashlightBackground mouseX={smoothMouseX} mouseY={smoothMouseY} />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 1 }}
+      >
+        <NoiseOverlay />
+        
+        {/* Optimized Canvas Background */}
+        <FlashlightBackground 
+          mouseX={smoothMouseX} 
+          mouseY={smoothMouseY} 
+          onBgLoad={setIsBgLoaded}
+        />
 
-          <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
-          
-          <main className="relative z-10">
-            <Hero t={t} />
-            <div className="relative"> 
-               <About t={t} />
-               <Events t={t} />
-               <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
-            </div>
-          </main>
+        <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
+        
+        <main className="relative z-10">
+          <Hero t={t} />
+          <div className="relative"> 
+             <About t={t} />
+             <Events t={t} />
+             <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
+          </div>
+        </main>
 
-          <Footer t={t} />
-        </motion.div>
-      )}
+        <Footer t={t} />
+      </motion.div>
     </div>
   );
 }
