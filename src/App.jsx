@@ -4,7 +4,7 @@ import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown
 import { content } from './data/content';
 
 // Use the requested background image
-import heroBg from '../assets/images/background.png';
+import heroBg from '../assets/images/background.jpg';
 
 // --- Components ---
 
@@ -57,40 +57,39 @@ const Navbar = ({ lang, setLang, t, isOpen, setIsOpen }) => (
 const Hero = ({ t }) => {
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 200]);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      setMousePos({ x: e.clientX, y: e.clientY });
+    };
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
   
   return (
     <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-lu-dark">
-      {/* Darkened Background Image with Parallax */}
+      {/* Background Image with Parallax */}
       <motion.div style={{ y }} className="absolute inset-0 z-0">
         <img 
           src={heroBg} 
           alt="Background" 
-          className="w-full h-full object-cover opacity-20 scale-110 filter contrast-125 brightness-50"
+          className="w-full h-full object-cover scale-105"
         />
-        {/* Extra overlay for darkness */}
-        <div className="absolute inset-0 bg-black/60 mix-blend-multiply"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-lu-dark via-transparent to-lu-dark/80"></div>
+        {/* Mouse Follow Glow Effect - Flashlight style */}
+        <div 
+          className="absolute inset-0 pointer-events-none z-10 mix-blend-overlay"
+          style={{
+            background: `radial-gradient(circle 400px at ${mousePos.x}px ${mousePos.y}px, rgba(255, 215, 0, 0.2), transparent 60%)`
+          }}
+        />
+         <div 
+          className="absolute inset-0 pointer-events-none z-10 mix-blend-screen"
+          style={{
+            background: `radial-gradient(circle 200px at ${mousePos.x}px ${mousePos.y}px, rgba(255, 255, 255, 0.1), transparent 70%)`
+          }}
+        />
       </motion.div>
-
-      {/* Glowing Lines Effect */}
-      <div className="absolute inset-0 z-10 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-[500px] h-[500px] bg-lu-gold/5 rounded-full blur-[120px] animate-pulse-glow"></div>
-        <div className="absolute bottom-1/3 right-1/4 w-[400px] h-[400px] bg-purple-900/10 rounded-full blur-[100px] animate-pulse-glow" style={{ animationDelay: '2s' }}></div>
-        
-        {/* Thin sacred geometry lines */}
-        <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
-          <line x1="50%" y1="0" x2="50%" y2="100%" stroke="url(#grad1)" strokeWidth="0.5" />
-          <line x1="0" y1="50%" x2="100%" y2="50%" stroke="url(#grad1)" strokeWidth="0.5" />
-          <circle cx="50%" cy="50%" r="20%" fill="none" stroke="url(#grad1)" strokeWidth="0.5" />
-          <defs>
-            <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="transparent" />
-              <stop offset="50%" stopColor="#C5A059" />
-              <stop offset="100%" stopColor="transparent" />
-            </linearGradient>
-          </defs>
-        </svg>
-      </div>
 
       {/* Content */}
       <div className="relative z-20 text-center px-6 max-w-6xl mx-auto flex flex-col items-center">
@@ -100,7 +99,7 @@ const Hero = ({ t }) => {
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="relative mb-12"
         >
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl font-normal tracking-widest leading-none text-transparent bg-clip-text bg-gradient-to-b from-lu-gold-light via-lu-gold to-lu-gold-dim drop-shadow-2xl">
+          <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl font-normal tracking-widest leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-lu-gold to-lu-gold-dim drop-shadow-2xl">
             LINGUA<br />UNIVERSALIS
           </h1>
           <div className="absolute -right-8 -top-8 w-24 h-24 border-t border-r border-lu-gold/30 hidden md:block"></div>
@@ -111,7 +110,7 @@ const Hero = ({ t }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5, delay: 0.5 }}
-          className="font-sans text-xs md:text-sm tracking-[0.3em] text-lu-text/70 uppercase mb-16 max-w-xl leading-loose"
+          className="font-sans text-xs md:text-sm tracking-[0.3em] text-lu-text uppercase mb-16 max-w-xl leading-loose shadow-black drop-shadow-md"
         >
           {t.hero.subtitle}
         </motion.p>
@@ -121,7 +120,7 @@ const Hero = ({ t }) => {
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 1 }}
         >
-          <ChevronDown className="text-lu-gold/50 animate-bounce w-8 h-8" />
+          <ChevronDown className="text-lu-gold/80 animate-bounce w-8 h-8" />
         </motion.div>
       </div>
     </section>
