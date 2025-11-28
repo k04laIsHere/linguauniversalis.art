@@ -1,14 +1,128 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'framer-motion';
 import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { content } from './data/content';
 
 // Import hero background
 import heroBg from '../assets/images/background.jpg';
 
-// Import event images to avoid 404s
+// Import event images
 import image1 from '../assets/images/image 1.jpg';
 import image2 from '../assets/images/image-2.jpg';
+
+// --- Optimized Background Component ---
+const FlashlightBackground = ({ mouseX, mouseY }) => {
+  const canvasRef = useRef(null);
+  const [image, setImage] = useState(null);
+
+  useEffect(() => {
+    const img = new Image();
+    img.src = heroBg;
+    img.onload = () => setImage(img);
+  }, []);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas || !image) return;
+    const ctx = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency on base
+
+    let animationFrameId;
+
+    const render = () => {
+      // 1. Handle Resize
+      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      }
+
+      const width = canvas.width;
+      const height = canvas.height;
+      const scrollY = window.scrollY;
+
+      // 2. Draw Background Image (Cover mode)
+      // Calculate aspect ratio to cover screen
+      const imgRatio = image.width / image.height;
+      const canvasRatio = width / height;
+      let drawWidth, drawHeight, offsetX, offsetY;
+
+      if (imgRatio > canvasRatio) {
+        drawHeight = height;
+        drawWidth = height * imgRatio;
+        offsetX = (width - drawWidth) / 2;
+        offsetY = 0;
+      } else {
+        drawWidth = width;
+        drawHeight = width / imgRatio;
+        offsetX = 0;
+        offsetY = (height - drawHeight) / 2;
+      }
+
+      // Draw base image
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
+
+      // 3. Calculate Darkness Overlay
+      // Hero section is 0-window.innerHeight. Darkness: 0.4
+      // After that, transition to 0.7
+      let darkness = 0.4;
+      if (scrollY > window.innerHeight) {
+        darkness = 0.7;
+      } else if (scrollY > 0) {
+        // Linear interpolation between 0.4 and 0.7 based on scroll through hero
+        const progress = scrollY / window.innerHeight;
+        darkness = 0.4 + (0.3 * progress);
+      }
+
+      // 4. Draw Dark Overlay with Flashlight "Hole"
+      // We want a dark layer EVERYWHERE, except a soft circle at mouse pos.
+      
+      // Step A: Draw full dark rectangle
+      ctx.fillStyle = `rgba(0, 0, 0, ${darkness})`;
+      ctx.fillRect(0, 0, width, height);
+
+      // Step B: Cut out the flashlight hole using 'destination-out'
+      // This removes the dark overlay, revealing the image below.
+      // We use a radial gradient for soft edges.
+      const mx = mouseX.get();
+      const my = mouseY.get(); // We need relative to screen, mouseX/Y from Framer are viewport relative usually
+
+      // Create gradient for flashlight
+      // Center is transparent (removed darkness), Edge is black (keeps darkness? No, destination-out works on alpha)
+      // destination-out: Existing content is kept where new content doesn't overlap. 
+      // Where new content overlaps, existing content is removed based on new content's alpha.
+      // So we need to draw a shape where Alpha=1 means "Remove fully" (Light), Alpha=0 means "Keep fully" (Dark).
+      
+      ctx.globalCompositeOperation = 'destination-out';
+      
+      const radius = 300;
+      const gradient = ctx.createRadialGradient(mx, my, 0, mx, my, radius);
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');   // Remove darkness fully at center
+      gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.5)'); 
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');   // Keep darkness at edges
+
+      ctx.fillStyle = gradient;
+      ctx.beginPath();
+      ctx.arc(mx, my, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Reset composite for next frame (though we redraw everything anyway)
+      ctx.globalCompositeOperation = 'source-over';
+
+      animationFrameId = requestAnimationFrame(render);
+    };
+
+    render();
+
+    return () => cancelAnimationFrame(animationFrameId);
+  }, [image, mouseX, mouseY]);
+
+  return (
+    <canvas
+      ref={canvasRef}
+      className="fixed inset-0 z-0 pointer-events-none"
+    />
+  );
+};
 
 // --- Components ---
 
@@ -59,23 +173,9 @@ const Navbar = ({ lang, setLang, t, isOpen, setIsOpen }) => (
 );
 
 const Hero = ({ t }) => {
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 500], [0, 200]);
-
   return (
     <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-      {/* Static Background for Hero - Visible without flashlight */}
-      <motion.div style={{ y }} className="absolute inset-0 z-0">
-        <img 
-          src={heroBg} 
-          alt="Hero Background" 
-          className="w-full h-full object-cover opacity-40 filter brightness-50"
-        />
-        {/* Gradient to blend into black content below */}
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black"></div>
-      </motion.div>
-
-      {/* Content */}
+      {/* Content - No background image here, handled globally by Canvas */}
       <div className="relative z-20 text-center px-6 max-w-6xl mx-auto flex flex-col items-center mix-blend-screen">
         <motion.div
           initial={{ opacity: 0, y: 100 }}
@@ -251,6 +351,13 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
   const ref = useRef(null);
   const [isActive, setIsActive] = useState(false);
 
+  // Optimized proximity check using useAnimationFrame instead of heavy useEffect + MotionValue subscription
+  // Or we can just use the CSS Variable approach which is even cheaper?
+  // For now, let's stick to a simplified JS check that runs fewer times or is debounced, 
+  // OR keep the current one but note that 100% GPU was likely the huge SVG mask, not this.
+  // But to be safe, let's ensure we aren't re-rendering the whole tree.
+  // This component is small so it should be fine.
+
   useEffect(() => {
     const unsubscribeX = mouseX.on("change", (latestX) => {
       checkProximity(latestX, mouseY.get());
@@ -265,16 +372,9 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
       const centerX = rect.left + rect.width / 2;
       const centerY = rect.top + rect.height / 2;
       
-      // Calculate distance from center of card
       const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-      
-      // Activation radius reduced to 200px
       const threshold = 200;
-      if (dist < threshold) {
-        setIsActive(true);
-      } else {
-        setIsActive(false);
-      }
+      setIsActive(dist < threshold);
     };
 
     return () => {
@@ -361,10 +461,10 @@ function App() {
   // --- Flashlight Physics Logic ---
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
-
-  // Smooth spring physics for inertia - Simplified damping for performance
-  const smoothMouseX = useSpring(mouseX, { damping: 30, stiffness: 200, mass: 0.5 });
-  const smoothMouseY = useSpring(mouseY, { damping: 30, stiffness: 200, mass: 0.5 });
+  
+  // Smoother spring settings
+  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 120, mass: 0.5 });
+  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 120, mass: 0.5 });
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -385,12 +485,6 @@ function App() {
     };
   }, []);
 
-  // Simplified flashlight: No heavy masks or transforms.
-  // Just a radial gradient overlay that moves with the mouse.
-  
-  const lightX = useTransform(smoothMouseX, x => x - 400); // Centering the 800px light
-  const lightY = useTransform(smoothMouseY, y => y - 400);
-  
   const NoiseOverlay = () => (
     <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.04] mix-blend-overlay"
       style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
@@ -401,59 +495,19 @@ function App() {
     <div className="bg-black min-h-screen text-lu-text selection:bg-lu-gold selection:text-black overflow-x-hidden">
       <NoiseOverlay />
       
-      {/* --- GLOBAL BACKGROUND LAYERS --- */}
-      <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* 1. Base Dark Background (Always visible but very dark) */}
-        <img 
-          src={heroBg} 
-          alt="Background" 
-          className="absolute inset-0 w-full h-full object-cover opacity-5 filter brightness-50"
-        />
-        
-        {/* 2. Flashlight Reveal Layer - Optimized using a simple moving div with radial gradient mask-like behavior via mix-blend-mode or just opacity */}
-        {/* We'll use a 'spotlight' approach: A large dark overlay with a transparent hole is expensive to animate via clip-path. 
-            Instead, we'll just move a 'light' div that uses mix-blend-mode: overlay or soft-light to reveal the image below, 
-            OR we use the mask-image on a layer that is exactly the same size as viewport but moved.
-            Actually, moving a small 800x800 div with `background-attachment: fixed` is tricky.
-            
-            Best Performant way: A fixed full-screen layer with the image at opacity 0.
-            And a mask layer that follows mouse? No, mask-image is easiest but heavy.
-            
-            Let's stick to the moving radial gradient div that acts as a "light source" blending with the background.
-        */}
-        
-        <motion.div 
-           className="absolute inset-0 opacity-40"
-           style={{
-             background: useMotionTemplate`radial-gradient(circle 300px at ${smoothMouseX}px ${smoothMouseY}px, rgba(255,255,255,0.2) 0%, transparent 100%)`,
-           }}
-        >
-           {/* This layer just adds light to the dark background base */}
-        </motion.div>
-        
-        {/* 3. Optional: A second layer of the image that is revealed by mask, but cleaner. 
-            To optimize mask performance: use will-change.
-        */}
-        <motion.div 
-          className="absolute inset-0 will-change-transform"
-          style={{
-            maskImage: useMotionTemplate`radial-gradient(circle 300px at ${smoothMouseX}px ${smoothMouseY}px, black 0%, transparent 100%)`,
-            WebkitMaskImage: useMotionTemplate`radial-gradient(circle 300px at ${smoothMouseX}px ${smoothMouseY}px, black 0%, transparent 100%)`,
-          }}
-        >
-           <img 
-            src={heroBg} 
-            alt="Reveal" 
-            className="absolute inset-0 w-full h-full object-cover opacity-40" 
-           />
-        </motion.div>
-      </div>
+      {/* Optimized Canvas Background that handles flashlight & scroll darkness efficiently */}
+      <FlashlightBackground mouseX={smoothMouseX} mouseY={smoothMouseY} />
 
       <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
       
       <main className="relative z-10">
         <Hero t={t} />
-        <div className="relative bg-black/90 backdrop-blur-sm"> {/* Content sections darker to block background except for flashlight */}
+        {/* We removed the bg-black/90 here because the darkness is now handled by the Canvas itself.
+            This prevents "double darkening" and allows the flashlight to work everywhere seamlessly.
+            However, we might want slight backdrop blur or tint if text readability is low.
+            Let's test without it first as per "flashlight reveals background". 
+        */}
+        <div className="relative"> 
            <About t={t} />
            <Events t={t} />
            <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
