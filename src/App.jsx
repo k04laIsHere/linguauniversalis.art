@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate } from 'framer-motion';
 import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { content } from './data/content';
 
@@ -57,60 +57,31 @@ const Navbar = ({ lang, setLang, t, isOpen, setIsOpen }) => (
 const Hero = ({ t }) => {
   const { scrollY } = useScroll();
   const y = useTransform(scrollY, [0, 500], [0, 200]);
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
-  useEffect(() => {
-    const handleMouseMove = (e) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
-    };
-    window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
-  }, []);
-  
   return (
-    <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden bg-lu-dark">
-      {/* Background Image with Parallax */}
-      <motion.div style={{ y }} className="absolute inset-0 z-0">
-        <img 
-          src={heroBg} 
-          alt="Background" 
-          className="w-full h-full object-cover scale-105"
-        />
-        {/* Mouse Follow Glow Effect - Flashlight style */}
-        <div 
-          className="absolute inset-0 pointer-events-none z-10 mix-blend-overlay"
-          style={{
-            background: `radial-gradient(circle 400px at ${mousePos.x}px ${mousePos.y}px, rgba(255, 215, 0, 0.2), transparent 60%)`
-          }}
-        />
-         <div 
-          className="absolute inset-0 pointer-events-none z-10 mix-blend-screen"
-          style={{
-            background: `radial-gradient(circle 200px at ${mousePos.x}px ${mousePos.y}px, rgba(255, 255, 255, 0.1), transparent 70%)`
-          }}
-        />
-      </motion.div>
-
+    <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
+      {/* Initial Hero Flash is handled by global BG now, but we can add extra layering here if needed */}
+      
       {/* Content */}
-      <div className="relative z-20 text-center px-6 max-w-6xl mx-auto flex flex-col items-center">
+      <div className="relative z-20 text-center px-6 max-w-6xl mx-auto flex flex-col items-center mix-blend-screen">
         <motion.div
           initial={{ opacity: 0, y: 100 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 1.5, ease: "easeOut" }}
           className="relative mb-12"
         >
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl font-normal tracking-widest leading-none text-transparent bg-clip-text bg-gradient-to-b from-white via-lu-gold to-lu-gold-dim drop-shadow-2xl">
+          <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl font-normal tracking-widest leading-none text-white drop-shadow-2xl">
             LINGUA<br />UNIVERSALIS
           </h1>
-          <div className="absolute -right-8 -top-8 w-24 h-24 border-t border-r border-lu-gold/30 hidden md:block"></div>
-          <div className="absolute -left-8 -bottom-8 w-24 h-24 border-b border-l border-lu-gold/30 hidden md:block"></div>
+          <div className="absolute -right-8 -top-8 w-24 h-24 border-t border-r border-lu-gold/50 hidden md:block"></div>
+          <div className="absolute -left-8 -bottom-8 w-24 h-24 border-b border-l border-lu-gold/50 hidden md:block"></div>
         </motion.div>
         
         <motion.p 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1.5, delay: 0.5 }}
-          className="font-sans text-xs md:text-sm tracking-[0.3em] text-lu-text uppercase mb-16 max-w-xl leading-loose shadow-black drop-shadow-md"
+          className="font-sans text-xs md:text-sm tracking-[0.3em] text-lu-text/80 uppercase mb-16 max-w-xl leading-loose shadow-black drop-shadow-md"
         >
           {t.hero.subtitle}
         </motion.p>
@@ -128,21 +99,22 @@ const Hero = ({ t }) => {
 };
 
 const About = ({ t }) => (
-  <section id="about" className="min-h-screen py-32 px-6 relative bg-lu-dark flex items-center">
+  <section id="about" className="min-h-screen py-32 px-6 relative flex items-center">
     <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center w-full">
-      {/* Asymmetric Layout - Text First on Large Screens */}
-      <div className="lg:col-span-5 space-y-12 order-2 lg:order-1 relative z-10">
+      {/* Text Content */}
+      <div className="lg:col-span-5 space-y-12 order-2 lg:order-1 relative z-10 pointer-events-none">
         <motion.div
           initial={{ opacity: 0, x: -50 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 1 }}
+          className="pointer-events-auto"
         >
            <span className="text-lu-gold text-xs tracking-[0.3em] uppercase mb-4 block">Manifesto</span>
           <h2 className="font-serif text-4xl md:text-6xl text-white leading-tight mb-8">
             {t.about.title}
           </h2>
-          <div className="space-y-8 font-light text-lg leading-relaxed text-gray-400">
+          <div className="space-y-8 font-light text-lg leading-relaxed text-gray-300">
             {t.about.text.map((paragraph, idx) => (
               <p key={idx} className="first-letter:text-5xl first-letter:font-serif first-letter:text-lu-gold first-letter:mr-2 first-letter:float-left">
                 {paragraph}
@@ -152,8 +124,8 @@ const About = ({ t }) => (
         </motion.div>
       </div>
 
-      {/* Image Section with "Sacred" Geometry */}
-      <div className="lg:col-span-7 relative order-1 lg:order-2">
+      {/* Image Section */}
+      <div className="lg:col-span-7 relative order-1 lg:order-2 pointer-events-auto">
         <div className="relative z-10 w-full aspect-[4/5] lg:aspect-square max-w-xl mx-auto">
            <div className="absolute inset-0 border border-lu-gold/20 transform rotate-3 scale-105"></div>
            <div className="absolute inset-0 border border-lu-gold/10 transform -rotate-3 scale-95"></div>
@@ -171,8 +143,6 @@ const About = ({ t }) => (
               <div className="absolute inset-0 bg-gradient-to-t from-lu-dark/80 to-transparent opacity-50"></div>
            </motion.div>
         </div>
-        {/* Abstract Elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-lu-gold/5 blur-[80px] -z-10"></div>
       </div>
     </div>
   </section>
@@ -180,15 +150,12 @@ const About = ({ t }) => (
 
 const EventSection = ({ event, index, isReversed }) => (
   <section className="min-h-screen relative flex items-center justify-center py-24 overflow-hidden border-t border-white/5">
-    {/* Background Elements */}
-    <div className="absolute inset-0 bg-noise opacity-10 pointer-events-none"></div>
-    
-    <div className="container mx-auto px-6 relative z-10">
+    <div className="container mx-auto px-6 relative z-10 pointer-events-none">
       <div className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-16 lg:gap-32 items-center`}>
         
         {/* Image Content */}
         <motion.div 
-          className="w-full lg:w-1/2 relative group"
+          className="w-full lg:w-1/2 relative group pointer-events-auto"
           initial={{ opacity: 0, scale: 0.95 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
@@ -212,7 +179,7 @@ const EventSection = ({ event, index, isReversed }) => (
 
         {/* Text Content */}
         <motion.div 
-          className="w-full lg:w-1/2 space-y-8"
+          className="w-full lg:w-1/2 space-y-8 pointer-events-auto"
           initial={{ opacity: 0, x: isReversed ? -50 : 50 }}
           whileInView={{ opacity: 1, x: 0 }}
           viewport={{ once: true }}
@@ -255,7 +222,7 @@ const EventSection = ({ event, index, isReversed }) => (
 );
 
 const Events = ({ t }) => (
-  <div id="events" className="bg-lu-dark">
+  <div id="events">
     {t.events.list.map((event, index) => (
       <EventSection 
         key={index} 
@@ -267,40 +234,93 @@ const Events = ({ t }) => (
   </div>
 );
 
-const ParticipantCard = ({ p, index }) => (
-  <motion.div 
-    initial={{ opacity: 0, y: 50 }}
-    whileInView={{ opacity: 1, y: 0 }}
-    viewport={{ once: true }}
-    transition={{ duration: 0.8, delay: index * 0.1 }}
-    className="group relative flex flex-col gap-6"
-  >
-    <div className="aspect-[4/5] overflow-hidden bg-lu-gray/10 relative grayscale group-hover:grayscale-0 transition-all duration-700">
-      <img 
-        src={p.img} 
-        alt={p.name} 
-        className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
-      />
-      <div className="absolute inset-0 bg-gradient-to-t from-lu-dark via-transparent to-transparent opacity-60"></div>
+const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
+  const ref = useRef(null);
+  const [isActive, setIsActive] = useState(false);
+
+  useEffect(() => {
+    // Since we can't easily pass raw motion values into a calculation inside useEffect without subscribing,
+    // we'll use a ref-based approach for proximity in a requestAnimationFrame loop or simplify.
+    // A simpler way for 'proximity' in React without heavy perf cost is listening to mouse move globally and checking distance.
+    // BUT, since we already have global mouse listener in App, we can pass x/y.
+    
+    // However, passing x/y props that update every frame triggers re-renders. 
+    // Better to use useMotionValue and useTransform if possible, or a custom hook.
+    // Let's rely on CSS variables set on body or just standard hover for now + a larger invisible hit area?
+    // The user specifically asked for "touch screen near participant".
+    
+    // Let's implement a lightweight proximity check using the passed MotionValues if possible, 
+    // or just use a layout effect that subscribes to the motion values.
+    
+    const unsubscribeX = mouseX.on("change", (latestX) => {
+      checkProximity(latestX, mouseY.get());
+    });
+    const unsubscribeY = mouseY.on("change", (latestY) => {
+      checkProximity(mouseX.get(), latestY);
+    });
+
+    const checkProximity = (x, y) => {
+      if (!ref.current) return;
+      const rect = ref.current.getBoundingClientRect();
+      const centerX = rect.left + rect.width / 2;
+      const centerY = rect.top + rect.height / 2;
       
-      {/* Hover Overlay with Name */}
-      <div className="absolute inset-0 flex items-end p-6 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-        <p className="text-xs uppercase tracking-widest text-lu-gold/80">{p.role}</p>
+      // Calculate distance from center of card
+      const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
+      
+      // Activation radius (e.g., 300px)
+      const threshold = 400;
+      if (dist < threshold) {
+        setIsActive(true);
+      } else {
+        setIsActive(false);
+      }
+    };
+
+    return () => {
+      unsubscribeX();
+      unsubscribeY();
+    };
+  }, []);
+
+  return (
+    <motion.div 
+      ref={ref}
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8, delay: index * 0.1 }}
+      className="relative flex flex-col gap-6"
+    >
+      <div 
+        className={`aspect-[4/5] overflow-hidden bg-lu-gray/10 relative transition-all duration-1000 ${isActive ? 'grayscale-0 scale-105' : 'grayscale scale-100'}`}
+      >
+        <img 
+          src={p.img} 
+          alt={p.name} 
+          className={`w-full h-full object-cover transition-transform duration-1000 ${isActive ? 'scale-110' : 'scale-100'}`}
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-lu-dark via-transparent to-transparent opacity-60"></div>
+        
+        {/* Name Overlay */}
+        <div className={`absolute inset-0 flex items-end p-6 transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
+          <p className="text-xs uppercase tracking-widest text-lu-gold/80">{p.role}</p>
+        </div>
       </div>
-    </div>
 
-    <div className="space-y-3 border-t border-white/10 pt-6 group-hover:border-lu-gold/50 transition-colors">
-      <h3 className="font-serif text-2xl text-white group-hover:text-lu-gold transition-colors">{p.name}</h3>
-      <p className="text-xs text-gray-500 uppercase tracking-widest">{p.country}</p>
-      <p className="text-sm text-gray-400 font-light leading-relaxed line-clamp-3 group-hover:line-clamp-none transition-all">
-        {p.desc}
-      </p>
-    </div>
-  </motion.div>
-);
+      <div className={`space-y-3 border-t border-white/10 pt-6 transition-colors duration-500 ${isActive ? 'border-lu-gold/50' : ''}`}>
+        <h3 className={`font-serif text-2xl transition-colors duration-500 ${isActive ? 'text-lu-gold' : 'text-white'}`}>{p.name}</h3>
+        <p className="text-xs text-gray-500 uppercase tracking-widest">{p.country}</p>
+        <p className="text-sm text-gray-400 font-light leading-relaxed line-clamp-3">
+          {p.desc}
+        </p>
+      </div>
+    </motion.div>
+  );
+};
 
-const Participants = ({ t }) => (
-  <section id="participants" className="py-32 px-6 bg-[#020202] relative">
+const Participants = ({ t, mouseX, mouseY }) => (
+  <section id="participants" className="py-32 px-6 relative">
     <div className="max-w-7xl mx-auto">
       <div className="flex flex-col items-center mb-24 text-center space-y-6">
         <span className="text-lu-gold text-xs tracking-[0.4em] uppercase">Collective</span>
@@ -310,7 +330,7 @@ const Participants = ({ t }) => (
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
         {t.participants.list.map((p, index) => (
-          <ParticipantCard key={index} p={p} index={index} />
+          <ParticipantCard key={index} p={p} index={index} mouseX={mouseX} mouseY={mouseY} />
         ))}
       </div>
     </div>
@@ -338,6 +358,62 @@ function App() {
   const [isOpen, setIsOpen] = useState(false);
   const t = content[lang];
 
+  // --- Flashlight Physics Logic ---
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  // Smooth spring physics for inertia
+  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150, mass: 0.5 });
+  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150, mass: 0.5 });
+
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+    const handleTouchMove = (e) => {
+       if (e.touches.length > 0) {
+         mouseX.set(e.touches[0].clientX);
+         mouseY.set(e.touches[0].clientY);
+       }
+    }
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('touchmove', handleTouchMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchmove', handleTouchMove);
+    };
+  }, []);
+
+  // Dynamic Gradient Transformation
+  // We want to stretch the gradient based on distance from center to simulate perspective/distortion
+  const transform = useTransform([smoothMouseX, smoothMouseY], ([x, y]) => {
+     const centerX = window.innerWidth / 2;
+     const centerY = window.innerHeight / 2;
+     const offsetX = x - centerX;
+     const offsetY = y - centerY;
+     
+     // Calculate rotation angle based on position relative to center
+     const rotate = Math.atan2(offsetY, offsetX) * (180 / Math.PI);
+     
+     // Calculate stretch factor based on distance
+     const distance = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
+     const stretch = 1 + (distance / window.innerWidth) * 0.5; // Slight stretch at edges
+     
+     return `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${stretch}, 1)`;
+  });
+  
+  // Simpler gradient approach that works reliably without complex transforms:
+  // Just a radial gradient mask that moves. The "distortion" effect is subtle in CSS gradients unless we do heavy SVG.
+  // Let's use mask-image for the "discovery" effect.
+  // We will have:
+  // 1. A base layer that is mostly black/dark.
+  // 2. A "revealed" layer (the background image) that shows through the mask.
+  
+  // Update: User wants "highlight background around mouse", and "After first section... completely black but slightly visible".
+  
+  const maskImage = useMotionTemplate`radial-gradient(circle 350px at ${smoothMouseX}px ${smoothMouseY}px, black 20%, transparent 100%)`;
+  
   // Noise overlay
   const NoiseOverlay = () => (
     <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.04] mix-blend-overlay"
@@ -346,15 +422,58 @@ function App() {
   );
 
   return (
-    <div className="bg-lu-dark min-h-screen text-lu-text selection:bg-lu-gold selection:text-black">
+    <div className="bg-black min-h-screen text-lu-text selection:bg-lu-gold selection:text-black overflow-x-hidden">
       <NoiseOverlay />
+      
+      {/* --- GLOBAL BACKGROUND LAYER --- */}
+      <div className="fixed inset-0 z-0 pointer-events-none">
+        {/* 1. The Base Image (Dark/Hidden) */}
+        <img 
+          src={heroBg} 
+          alt="Background" 
+          className="absolute inset-0 w-full h-full object-cover opacity-10 mix-blend-luminosity"
+        />
+        
+        {/* 2. The "Flashlight" Reveal Layer */}
+        {/* This layer has the full brightness image, but is masked by the flashlight */}
+        <motion.div 
+           className="absolute inset-0 z-10"
+           style={{ 
+             maskImage: maskImage,
+             WebkitMaskImage: maskImage 
+           }}
+        >
+           <img 
+            src={heroBg} 
+            alt="Reveal" 
+            className="absolute inset-0 w-full h-full object-cover opacity-60 scale-105" 
+            // scale-105 to add slight depth diff from base
+           />
+           {/* Add a golden glow to the light itself */}
+           <div className="absolute inset-0 bg-lu-gold/20 mix-blend-overlay"></div>
+        </motion.div>
+
+        {/* 3. The "Distorted" Light Cone Overlay (Optional visual flare) */}
+         <motion.div 
+           className="absolute top-0 left-0 w-[600px] h-[600px] bg-radial-gradient from-lu-gold/10 to-transparent rounded-full blur-3xl mix-blend-screen pointer-events-none"
+           style={{
+             top: -300, // Center the div on the coordinates
+             left: -300,
+             x: smoothMouseX,
+             y: smoothMouseY,
+           }} 
+        />
+      </div>
+
       <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
       
-      <main>
+      <main className="relative z-10">
         <Hero t={t} />
-        <About t={t} />
-        <Events t={t} />
-        <Participants t={t} />
+        <div className="relative bg-black/80 backdrop-blur-[2px]"> {/* Darken content sections slightly */}
+           <About t={t} />
+           <Events t={t} />
+           <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
+        </div>
       </main>
 
       <Footer t={t} />
