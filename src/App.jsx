@@ -3,8 +3,12 @@ import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTe
 import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { content } from './data/content';
 
-// Use the requested background image
+// Import hero background
 import heroBg from '../assets/images/background.jpg';
+
+// Import event images to avoid 404s
+import image1 from '../assets/images/image 1.jpg';
+import image2 from '../assets/images/image-2.jpg';
 
 // --- Components ---
 
@@ -60,8 +64,17 @@ const Hero = ({ t }) => {
 
   return (
     <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-      {/* Initial Hero Flash is handled by global BG now, but we can add extra layering here if needed */}
-      
+      {/* Static Background for Hero - Visible without flashlight */}
+      <motion.div style={{ y }} className="absolute inset-0 z-0">
+        <img 
+          src={heroBg} 
+          alt="Hero Background" 
+          className="w-full h-full object-cover opacity-40 filter brightness-50"
+        />
+        {/* Gradient to blend into black content below */}
+        <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black"></div>
+      </motion.div>
+
       {/* Content */}
       <div className="relative z-20 text-center px-6 max-w-6xl mx-auto flex flex-col items-center mix-blend-screen">
         <motion.div
@@ -163,7 +176,7 @@ const EventSection = ({ event, index, isReversed }) => (
         >
           <div className="relative aspect-video overflow-hidden bg-lu-gray/20">
             <img 
-              src={index % 2 === 0 ? "/assets/images/image-2.jpg" : "/assets/images/image 1.jpg"} 
+              src={index % 2 === 0 ? image2 : image1} 
               alt={event.title}
               className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
             />
@@ -239,19 +252,6 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
   const [isActive, setIsActive] = useState(false);
 
   useEffect(() => {
-    // Since we can't easily pass raw motion values into a calculation inside useEffect without subscribing,
-    // we'll use a ref-based approach for proximity in a requestAnimationFrame loop or simplify.
-    // A simpler way for 'proximity' in React without heavy perf cost is listening to mouse move globally and checking distance.
-    // BUT, since we already have global mouse listener in App, we can pass x/y.
-    
-    // However, passing x/y props that update every frame triggers re-renders. 
-    // Better to use useMotionValue and useTransform if possible, or a custom hook.
-    // Let's rely on CSS variables set on body or just standard hover for now + a larger invisible hit area?
-    // The user specifically asked for "touch screen near participant".
-    
-    // Let's implement a lightweight proximity check using the passed MotionValues if possible, 
-    // or just use a layout effect that subscribes to the motion values.
-    
     const unsubscribeX = mouseX.on("change", (latestX) => {
       checkProximity(latestX, mouseY.get());
     });
@@ -268,8 +268,8 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
       // Calculate distance from center of card
       const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
       
-      // Activation radius (e.g., 300px)
-      const threshold = 400;
+      // Activation radius reduced to 200px
+      const threshold = 200;
       if (dist < threshold) {
         setIsActive(true);
       } else {
@@ -362,9 +362,9 @@ function App() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
 
-  // Smooth spring physics for inertia
-  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150, mass: 0.5 });
-  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150, mass: 0.5 });
+  // Smooth spring physics for inertia - Simplified damping for performance
+  const smoothMouseX = useSpring(mouseX, { damping: 30, stiffness: 200, mass: 0.5 });
+  const smoothMouseY = useSpring(mouseY, { damping: 30, stiffness: 200, mass: 0.5 });
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -385,36 +385,12 @@ function App() {
     };
   }, []);
 
-  // Dynamic Gradient Transformation
-  // We want to stretch the gradient based on distance from center to simulate perspective/distortion
-  const transform = useTransform([smoothMouseX, smoothMouseY], ([x, y]) => {
-     const centerX = window.innerWidth / 2;
-     const centerY = window.innerHeight / 2;
-     const offsetX = x - centerX;
-     const offsetY = y - centerY;
-     
-     // Calculate rotation angle based on position relative to center
-     const rotate = Math.atan2(offsetY, offsetX) * (180 / Math.PI);
-     
-     // Calculate stretch factor based on distance
-     const distance = Math.sqrt(offsetX * offsetX + offsetY * offsetY);
-     const stretch = 1 + (distance / window.innerWidth) * 0.5; // Slight stretch at edges
-     
-     return `translate(${x}px, ${y}px) rotate(${rotate}deg) scale(${stretch}, 1)`;
-  });
+  // Simplified flashlight: No heavy masks or transforms.
+  // Just a radial gradient overlay that moves with the mouse.
   
-  // Simpler gradient approach that works reliably without complex transforms:
-  // Just a radial gradient mask that moves. The "distortion" effect is subtle in CSS gradients unless we do heavy SVG.
-  // Let's use mask-image for the "discovery" effect.
-  // We will have:
-  // 1. A base layer that is mostly black/dark.
-  // 2. A "revealed" layer (the background image) that shows through the mask.
+  const lightX = useTransform(smoothMouseX, x => x - 400); // Centering the 800px light
+  const lightY = useTransform(smoothMouseY, y => y - 400);
   
-  // Update: User wants "highlight background around mouse", and "After first section... completely black but slightly visible".
-  
-  const maskImage = useMotionTemplate`radial-gradient(circle 350px at ${smoothMouseX}px ${smoothMouseY}px, black 20%, transparent 100%)`;
-  
-  // Noise overlay
   const NoiseOverlay = () => (
     <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.04] mix-blend-overlay"
       style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
@@ -425,51 +401,59 @@ function App() {
     <div className="bg-black min-h-screen text-lu-text selection:bg-lu-gold selection:text-black overflow-x-hidden">
       <NoiseOverlay />
       
-      {/* --- GLOBAL BACKGROUND LAYER --- */}
+      {/* --- GLOBAL BACKGROUND LAYERS --- */}
       <div className="fixed inset-0 z-0 pointer-events-none">
-        {/* 1. The Base Image (Dark/Hidden) */}
+        {/* 1. Base Dark Background (Always visible but very dark) */}
         <img 
           src={heroBg} 
           alt="Background" 
-          className="absolute inset-0 w-full h-full object-cover opacity-10 mix-blend-luminosity"
+          className="absolute inset-0 w-full h-full object-cover opacity-5 filter brightness-50"
         />
         
-        {/* 2. The "Flashlight" Reveal Layer */}
-        {/* This layer has the full brightness image, but is masked by the flashlight */}
+        {/* 2. Flashlight Reveal Layer - Optimized using a simple moving div with radial gradient mask-like behavior via mix-blend-mode or just opacity */}
+        {/* We'll use a 'spotlight' approach: A large dark overlay with a transparent hole is expensive to animate via clip-path. 
+            Instead, we'll just move a 'light' div that uses mix-blend-mode: overlay or soft-light to reveal the image below, 
+            OR we use the mask-image on a layer that is exactly the same size as viewport but moved.
+            Actually, moving a small 800x800 div with `background-attachment: fixed` is tricky.
+            
+            Best Performant way: A fixed full-screen layer with the image at opacity 0.
+            And a mask layer that follows mouse? No, mask-image is easiest but heavy.
+            
+            Let's stick to the moving radial gradient div that acts as a "light source" blending with the background.
+        */}
+        
         <motion.div 
-           className="absolute inset-0 z-10"
-           style={{ 
-             maskImage: maskImage,
-             WebkitMaskImage: maskImage 
+           className="absolute inset-0 opacity-40"
+           style={{
+             background: useMotionTemplate`radial-gradient(circle 300px at ${smoothMouseX}px ${smoothMouseY}px, rgba(255,255,255,0.2) 0%, transparent 100%)`,
            }}
+        >
+           {/* This layer just adds light to the dark background base */}
+        </motion.div>
+        
+        {/* 3. Optional: A second layer of the image that is revealed by mask, but cleaner. 
+            To optimize mask performance: use will-change.
+        */}
+        <motion.div 
+          className="absolute inset-0 will-change-transform"
+          style={{
+            maskImage: useMotionTemplate`radial-gradient(circle 300px at ${smoothMouseX}px ${smoothMouseY}px, black 0%, transparent 100%)`,
+            WebkitMaskImage: useMotionTemplate`radial-gradient(circle 300px at ${smoothMouseX}px ${smoothMouseY}px, black 0%, transparent 100%)`,
+          }}
         >
            <img 
             src={heroBg} 
             alt="Reveal" 
-            className="absolute inset-0 w-full h-full object-cover opacity-60 scale-105" 
-            // scale-105 to add slight depth diff from base
+            className="absolute inset-0 w-full h-full object-cover opacity-40" 
            />
-           {/* Add a golden glow to the light itself */}
-           <div className="absolute inset-0 bg-lu-gold/20 mix-blend-overlay"></div>
         </motion.div>
-
-        {/* 3. The "Distorted" Light Cone Overlay (Optional visual flare) */}
-         <motion.div 
-           className="absolute top-0 left-0 w-[600px] h-[600px] bg-radial-gradient from-lu-gold/10 to-transparent rounded-full blur-3xl mix-blend-screen pointer-events-none"
-           style={{
-             top: -300, // Center the div on the coordinates
-             left: -300,
-             x: smoothMouseX,
-             y: smoothMouseY,
-           }} 
-        />
       </div>
 
       <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
       
       <main className="relative z-10">
         <Hero t={t} />
-        <div className="relative bg-black/80 backdrop-blur-[2px]"> {/* Darken content sections slightly */}
+        <div className="relative bg-black/90 backdrop-blur-sm"> {/* Content sections darker to block background except for flashlight */}
            <About t={t} />
            <Events t={t} />
            <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
