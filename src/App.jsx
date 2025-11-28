@@ -83,21 +83,12 @@ const FlashlightBackground = ({ mouseX, mouseY, onBgLoad }) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !image) return;
-    const ctx = canvas.getContext('2d', { alpha: false }); // Optimize for opacity
+    const ctx = canvas.getContext('2d', { alpha: false });
 
     let animationFrameId;
 
-    // Android WebView Fix:
-    // Instead of relying on window.innerHeight which changes on scroll due to address bar,
-    // we use a fixed height stored in a ref or calculate purely based on visualViewport if available,
-    // BUT we only update canvas size if the change is significant (orientation change) to avoid jitter.
-    // OR we use 100vh/100dvh CSS and match canvas resolution to clientWidth/clientHeight.
-    
     const updateSize = () => {
-      // Match canvas resolution to display size
-      // We use clientWidth/Height of documentElement to avoid scrollbar issues
       const width = window.innerWidth; 
-      // Use largest available height to cover "hidden" address bar area
       const height = Math.max(window.innerHeight, document.documentElement.clientHeight);
       
       if (canvas.width !== width || Math.abs(canvas.height - height) > 50) {
@@ -106,10 +97,8 @@ const FlashlightBackground = ({ mouseX, mouseY, onBgLoad }) => {
       }
     };
     
-    // Initial size
     updateSize();
     
-    // Debounced resize listener for orientation changes
     let resizeTimeout;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
@@ -122,13 +111,9 @@ const FlashlightBackground = ({ mouseX, mouseY, onBgLoad }) => {
       const height = canvas.height;
       const scrollY = window.scrollY;
 
-      // 1. Draw FULL BLACK Background first (Base)
-      // This ensures 100% GPU usage isn't from overdraw? No, canvas is single layer.
-      // We draw black, then we will add the image "light" on top.
       ctx.fillStyle = 'black';
       ctx.fillRect(0, 0, width, height);
 
-      // 2. Calculate Image Cover Dimensions
       const imgRatio = image.width / image.height;
       const canvasRatio = width / height;
       let drawWidth, drawHeight, offsetX, offsetY;
@@ -145,11 +130,7 @@ const FlashlightBackground = ({ mouseX, mouseY, onBgLoad }) => {
         offsetY = (height - drawHeight) / 2;
       }
 
-      // 3. Draw Base Ambient Light (The "Dark" version of the image)
-      // Hero: 40% darkness -> 60% opacity (1 - 0.4)
-      // Body: 85% darkness -> 15% opacity (1 - 0.85)
-      
-      let baseOpacity = 0.6; // Hero opacity
+      let baseOpacity = 0.6;
       if (scrollY > window.innerHeight) {
         baseOpacity = 0.15;
       } else if (scrollY > 0) {
@@ -161,53 +142,16 @@ const FlashlightBackground = ({ mouseX, mouseY, onBgLoad }) => {
       ctx.globalAlpha = baseOpacity;
       ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
-      // 4. Draw Flashlight (Lighten/Add Mode)
-      // We want to ADD the full brightness image where the mouse is.
-      // Instead of masking, we can use 'lighter' or just draw the image again with a radial gradient alpha mask.
-      
-      // Step A: Save state
       ctx.save();
-      
-      // Step B: Create path for flashlight
       ctx.beginPath();
       const mx = mouseX.get();
-      const my = mouseY.get(); // Mouse is relative to viewport
-      // We need to offset mouse Y by scrollY if the canvas is fixed? 
-      // No, canvas is fixed position (0,0), so mouse clientX/Y aligns with canvas x/y perfectly.
-      
-      // Radius increased
+      const my = mouseY.get();
       const radius = 450; 
       
-      // Step C: Create Gradient for "Light"
-      // We want the image to be drawn at full opacity at center, fading to 0 at edge.
-      // We can't easily "mask" just one draw call in 2D context without clipping or temp canvas.
-      // Clipping is easiest.
-      
-      // Optimization: Instead of clipping an image draw (expensive), 
-      // we can use 'destination-in' or 'lighter' blend mode with a gradient.
-      // Better: Draw the full brightness image on top, but restrict it with a radial gradient alpha.
-      
-      // New approach for performance:
-      // 1. Set globalAlpha to 1.
-      // 2. Create radial gradient (White -> Transparent)
-      // 3. Use 'destination-in' to keep only the part of the image we are about to draw? No.
-      
-      // Correct approach:
-      // 1. Draw full image again? Expensive.
-      // 2. Clipping is standard.
-      // ctx.arc(mx, my, radius, 0, Math.PI * 2);
-      // ctx.clip();
-      // ctx.globalAlpha = 1; // Full brightness
-      // ctx.drawImage(image, ...); 
-      // This produces a hard edge clip unless we feather it. Canvas clipping doesn't feather easily.
-      
-      // Soft Light Approach:
-      // Draw a radial gradient of "White" using 'overlay' or 'soft-light' blend mode? 
-      // That lights up the existing dark image. Very fast.
-      ctx.globalCompositeOperation = 'overlay'; // or 'screen' or 'lighter'
+      ctx.globalCompositeOperation = 'overlay';
       ctx.globalAlpha = 1;
       const gradient = ctx.createRadialGradient(mx, my, 0, mx, my, radius);
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)'); // Bright center
+      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
       gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
       
       ctx.fillStyle = gradient;
@@ -215,10 +159,7 @@ const FlashlightBackground = ({ mouseX, mouseY, onBgLoad }) => {
       ctx.arc(mx, my, radius, 0, Math.PI * 2);
       ctx.fill();
       
-      // Restore
       ctx.restore();
-
-      // Reset for next frame
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
       
@@ -422,6 +363,19 @@ const EventSection = ({ event, index, isReversed }) => (
   </section>
 );
 
+const EventsList = ({ t }) => (
+  <div id="events">
+    {t.events.list.map((event, index) => (
+      <EventSection 
+        key={index} 
+        event={event} 
+        index={index} 
+        isReversed={index % 2 !== 0} 
+      />
+    ))}
+  </div>
+);
+
 const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
   const ref = useRef(null);
   const [isActive, setIsActive] = useState(false);
@@ -599,7 +553,7 @@ function App() {
           <Hero t={t} />
           <div className="relative"> 
              <About t={t} />
-             <Events t={t} />
+             <EventsList t={t} />
              <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
           </div>
         </main>
