@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useScroll, useTransform, useSpring, useMotionValue } from 'framer-motion';
+import { motion, useSpring, useMotionValue, AnimatePresence } from 'framer-motion';
 import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { content } from './data/content';
 
@@ -10,10 +10,63 @@ import heroBg from '../assets/images/background.jpg';
 import image1 from '../assets/images/image 1.jpg';
 import image2 from '../assets/images/image-2.jpg';
 
+// --- Loading Screen Component ---
+const LoadingScreen = ({ onLoadComplete }) => {
+  const [progress, setProgress] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return prev + 2; // Smooth increment
+      });
+    }, 30);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    if (progress === 100) {
+      setTimeout(onLoadComplete, 500); // Small delay before unmounting
+    }
+  }, [progress, onLoadComplete]);
+
+  return (
+    <motion.div 
+      className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center"
+      initial={{ opacity: 1 }}
+      exit={{ opacity: 0, transition: { duration: 1, ease: "easeInOut" } }}
+    >
+      <div className="w-64 space-y-4">
+        <h1 className="font-serif text-2xl text-center tracking-[0.2em] text-lu-gold uppercase">
+          Lingua Universalis
+        </h1>
+        <div className="h-[1px] w-full bg-lu-gray relative overflow-hidden">
+          <motion.div 
+            className="absolute inset-y-0 left-0 bg-lu-gold"
+            style={{ width: `${progress}%` }}
+            initial={{ width: "0%" }}
+            animate={{ width: `${progress}%` }}
+            transition={{ ease: "linear" }}
+          />
+        </div>
+        <div className="flex justify-between text-[10px] tracking-widest text-gray-500 uppercase">
+          <span>Loading</span>
+          <span>{progress}%</span>
+        </div>
+      </div>
+    </motion.div>
+  );
+};
+
 // --- Optimized Background Component ---
 const FlashlightBackground = ({ mouseX, mouseY }) => {
   const canvasRef = useRef(null);
   const [image, setImage] = useState(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
     const img = new Image();
@@ -24,23 +77,29 @@ const FlashlightBackground = ({ mouseX, mouseY }) => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !image) return;
-    const ctx = canvas.getContext('2d', { alpha: false }); // Optimize for no transparency on base
+    const ctx = canvas.getContext('2d', { alpha: false });
 
     let animationFrameId;
 
+    // Android WebView Bug Fix: Use visual viewport height if available to avoid resize jumps
+    const getViewportHeight = () => {
+      return window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    };
+
     const render = () => {
-      // 1. Handle Resize
-      if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
+      // 1. Handle Resize - Fixed to avoid jumps on Android address bar toggle
+      // We fix the canvas to the container size, not window innerHeight directly every frame
+      const width = window.innerWidth;
+      const height = getViewportHeight(); 
+      
+      if (canvas.width !== width || canvas.height !== height) {
+        canvas.width = width;
+        canvas.height = height;
       }
 
-      const width = canvas.width;
-      const height = canvas.height;
       const scrollY = window.scrollY;
 
-      // 2. Draw Background Image (Cover mode)
-      // Calculate aspect ratio to cover screen
+      // 2. Draw Background Image (Cover mode - Simplified)
       const imgRatio = image.width / image.height;
       const canvasRatio = width / height;
       let drawWidth, drawHeight, offsetX, offsetY;
@@ -62,64 +121,56 @@ const FlashlightBackground = ({ mouseX, mouseY }) => {
       ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
 
       // 3. Calculate Darkness Overlay
-      // Hero section is 0-window.innerHeight. Darkness: 0.4
-      // After that, transition to 0.7
+      // Smooth linear darken: Hero (40%) -> Body (85%)
+      // Using 85% because we want flashlight to LIGHT it up (reveal), so base must be dark.
       let darkness = 0.4;
-      if (scrollY > window.innerHeight) {
-        darkness = 0.7;
+      if (scrollY > height) {
+        darkness = 0.85;
       } else if (scrollY > 0) {
-        // Linear interpolation between 0.4 and 0.7 based on scroll through hero
-        const progress = scrollY / window.innerHeight;
-        darkness = 0.4 + (0.3 * progress);
+        const progress = scrollY / height;
+        darkness = 0.4 + (0.45 * progress);
       }
 
-      // 4. Draw Dark Overlay with Flashlight "Hole"
-      // We want a dark layer EVERYWHERE, except a soft circle at mouse pos.
+      // 4. Flashlight Effect (Lighten)
+      // We draw a full dark overlay, then 'cut out' the flashlight hole using destination-out
+      // This reveals the original bright image underneath.
       
-      // Step A: Draw full dark rectangle
       ctx.fillStyle = `rgba(0, 0, 0, ${darkness})`;
       ctx.fillRect(0, 0, width, height);
 
-      // Step B: Cut out the flashlight hole using 'destination-out'
-      // This removes the dark overlay, revealing the image below.
-      // We use a radial gradient for soft edges.
       const mx = mouseX.get();
-      const my = mouseY.get(); // We need relative to screen, mouseX/Y from Framer are viewport relative usually
+      const my = mouseY.get();
 
-      // Create gradient for flashlight
-      // Center is transparent (removed darkness), Edge is black (keeps darkness? No, destination-out works on alpha)
-      // destination-out: Existing content is kept where new content doesn't overlap. 
-      // Where new content overlaps, existing content is removed based on new content's alpha.
-      // So we need to draw a shape where Alpha=1 means "Remove fully" (Light), Alpha=0 means "Keep fully" (Dark).
-      
       ctx.globalCompositeOperation = 'destination-out';
       
-      const radius = 300;
+      // Flashlight Radius increased by 50% (300px * 1.5 = 450px)
+      const radius = 450;
       const gradient = ctx.createRadialGradient(mx, my, 0, mx, my, radius);
-      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');   // Remove darkness fully at center
-      gradient.addColorStop(0.5, 'rgba(0, 0, 0, 0.5)'); 
-      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');   // Keep darkness at edges
+      // Center: Transparent (Alpha 1 removes darkness) -> Edge: Opaque (Alpha 0 keeps darkness)
+      // Note: destination-out uses source alpha to determine how much destination to remove.
+      // Alpha 1 = Remove completely (Show Image). Alpha 0 = Remove nothing (Show Black).
+      
+      gradient.addColorStop(0, 'rgba(0, 0, 0, 1)'); 
+      gradient.addColorStop(0.6, 'rgba(0, 0, 0, 0.5)'); 
+      gradient.addColorStop(1, 'rgba(0, 0, 0, 0)'); 
 
       ctx.fillStyle = gradient;
       ctx.beginPath();
       ctx.arc(mx, my, radius, 0, Math.PI * 2);
       ctx.fill();
 
-      // Reset composite for next frame (though we redraw everything anyway)
       ctx.globalCompositeOperation = 'source-over';
-
       animationFrameId = requestAnimationFrame(render);
     };
 
     render();
-
     return () => cancelAnimationFrame(animationFrameId);
   }, [image, mouseX, mouseY]);
 
   return (
     <canvas
       ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none"
+      className="fixed inset-0 z-0 pointer-events-none h-[100dvh]" // h-dvh helps on mobile too
     />
   );
 };
@@ -175,12 +226,12 @@ const Navbar = ({ lang, setLang, t, isOpen, setIsOpen }) => (
 const Hero = ({ t }) => {
   return (
     <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-      {/* Content - No background image here, handled globally by Canvas */}
+      {/* Content */}
       <div className="relative z-20 text-center px-6 max-w-6xl mx-auto flex flex-col items-center mix-blend-screen">
         <motion.div
-          initial={{ opacity: 0, y: 100 }}
+          initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1.5, ease: "easeOut" }}
+          transition={{ duration: 1, ease: "easeOut" }}
           className="relative mb-12"
         >
           <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl font-normal tracking-widest leading-none text-white drop-shadow-2xl">
@@ -193,7 +244,7 @@ const Hero = ({ t }) => {
         <motion.p 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1.5, delay: 0.5 }}
+          transition={{ duration: 1, delay: 0.2 }}
           className="font-sans text-xs md:text-sm tracking-[0.3em] text-lu-text/80 uppercase mb-16 max-w-xl leading-loose shadow-black drop-shadow-md"
         >
           {t.hero.subtitle}
@@ -202,7 +253,7 @@ const Hero = ({ t }) => {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 1 }}
+          transition={{ duration: 1, delay: 0.5 }}
         >
           <ChevronDown className="text-lu-gold/80 animate-bounce w-8 h-8" />
         </motion.div>
@@ -214,15 +265,8 @@ const Hero = ({ t }) => {
 const About = ({ t }) => (
   <section id="about" className="min-h-screen py-32 px-6 relative flex items-center">
     <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center w-full">
-      {/* Text Content */}
       <div className="lg:col-span-5 space-y-12 order-2 lg:order-1 relative z-10 pointer-events-none">
-        <motion.div
-          initial={{ opacity: 0, x: -50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-          className="pointer-events-auto"
-        >
+        <div className="pointer-events-auto">
            <span className="text-lu-gold text-xs tracking-[0.3em] uppercase mb-4 block">Manifesto</span>
           <h2 className="font-serif text-4xl md:text-6xl text-white leading-tight mb-8">
             {t.about.title}
@@ -234,27 +278,21 @@ const About = ({ t }) => (
               </p>
             ))}
           </div>
-        </motion.div>
+        </div>
       </div>
 
-      {/* Image Section */}
       <div className="lg:col-span-7 relative order-1 lg:order-2 pointer-events-auto">
         <div className="relative z-10 w-full aspect-[4/5] lg:aspect-square max-w-xl mx-auto">
            <div className="absolute inset-0 border border-lu-gold/20 transform rotate-3 scale-105"></div>
            <div className="absolute inset-0 border border-lu-gold/10 transform -rotate-3 scale-95"></div>
-           <motion.div 
-             className="w-full h-full overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-1000"
-             initial={{ clipPath: 'inset(10% 10% 10% 10%)' }}
-             whileInView={{ clipPath: 'inset(0% 0% 0% 0%)' }}
-             transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-           >
+           <div className="w-full h-full overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-700">
               <img 
                 src={t.about.image} 
                 alt="Art" 
                 className="w-full h-full object-cover"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-lu-dark/80 to-transparent opacity-50"></div>
-           </motion.div>
+           </div>
         </div>
       </div>
     </div>
@@ -266,14 +304,7 @@ const EventSection = ({ event, index, isReversed }) => (
     <div className="container mx-auto px-6 relative z-10 pointer-events-none">
       <div className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-16 lg:gap-32 items-center`}>
         
-        {/* Image Content */}
-        <motion.div 
-          className="w-full lg:w-1/2 relative group pointer-events-auto"
-          initial={{ opacity: 0, scale: 0.95 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-        >
+        <div className="w-full lg:w-1/2 relative group pointer-events-auto">
           <div className="relative aspect-video overflow-hidden bg-lu-gray/20">
             <img 
               src={index % 2 === 0 ? image2 : image1} 
@@ -283,21 +314,13 @@ const EventSection = ({ event, index, isReversed }) => (
             <div className="absolute inset-0 border border-white/10 pointer-events-none"></div>
           </div>
           
-          {/* Floating Date Badge */}
           <div className="absolute -top-6 -left-6 bg-lu-dark border border-lu-gold/30 p-6 backdrop-blur-md">
              <span className="block font-serif text-3xl text-lu-gold">{event.date.split(' ')[0]}</span>
              <span className="block text-xs uppercase tracking-widest text-gray-400 mt-1">{event.date.split(' ').slice(1).join(' ')}</span>
           </div>
-        </motion.div>
+        </div>
 
-        {/* Text Content */}
-        <motion.div 
-          className="w-full lg:w-1/2 space-y-8 pointer-events-auto"
-          initial={{ opacity: 0, x: isReversed ? -50 : 50 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 1 }}
-        >
+        <div className="w-full lg:w-1/2 space-y-8 pointer-events-auto">
            <div className="flex items-center gap-4 text-lu-gold/60 text-xs uppercase tracking-[0.2em]">
               <span className="w-8 h-[1px] bg-lu-gold/60"></span>
               <span>Event {index + 1}</span>
@@ -327,7 +350,7 @@ const EventSection = ({ event, index, isReversed }) => (
                 <span className="w-12 h-[1px] bg-white/30 group-hover:bg-lu-gold transition-colors"></span>
              </a>
            </div>
-        </motion.div>
+        </div>
 
       </div>
     </div>
@@ -351,21 +374,8 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
   const ref = useRef(null);
   const [isActive, setIsActive] = useState(false);
 
-  // Optimized proximity check using useAnimationFrame instead of heavy useEffect + MotionValue subscription
-  // Or we can just use the CSS Variable approach which is even cheaper?
-  // For now, let's stick to a simplified JS check that runs fewer times or is debounced, 
-  // OR keep the current one but note that 100% GPU was likely the huge SVG mask, not this.
-  // But to be safe, let's ensure we aren't re-rendering the whole tree.
-  // This component is small so it should be fine.
-
   useEffect(() => {
-    const unsubscribeX = mouseX.on("change", (latestX) => {
-      checkProximity(latestX, mouseY.get());
-    });
-    const unsubscribeY = mouseY.on("change", (latestY) => {
-      checkProximity(mouseX.get(), latestY);
-    });
-
+    // Immediate proximity check without delays
     const checkProximity = (x, y) => {
       if (!ref.current) return;
       const rect = ref.current.getBoundingClientRect();
@@ -377,6 +387,14 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
       setIsActive(dist < threshold);
     };
 
+    // Subscribe to raw motion values for max performance
+    const unsubscribeX = mouseX.on("change", (latestX) => {
+      checkProximity(latestX, mouseY.get());
+    });
+    const unsubscribeY = mouseY.on("change", (latestY) => {
+      checkProximity(mouseX.get(), latestY);
+    });
+
     return () => {
       unsubscribeX();
       unsubscribeY();
@@ -384,25 +402,20 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
   }, []);
 
   return (
-    <motion.div 
+    <div 
       ref={ref}
-      initial={{ opacity: 0, y: 50 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.8, delay: index * 0.1 }}
       className="relative flex flex-col gap-6"
     >
       <div 
-        className={`aspect-[4/5] overflow-hidden bg-lu-gray/10 relative transition-all duration-1000 ${isActive ? 'grayscale-0 scale-105' : 'grayscale scale-100'}`}
+        className={`aspect-[4/5] overflow-hidden bg-lu-gray/10 relative transition-all duration-700 ${isActive ? 'grayscale-0 scale-105' : 'grayscale scale-100'}`}
       >
         <img 
           src={p.img} 
           alt={p.name} 
-          className={`w-full h-full object-cover transition-transform duration-1000 ${isActive ? 'scale-110' : 'scale-100'}`}
+          className={`w-full h-full object-cover transition-transform duration-700 ${isActive ? 'scale-110' : 'scale-100'}`}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-lu-dark via-transparent to-transparent opacity-60"></div>
         
-        {/* Name Overlay */}
         <div className={`absolute inset-0 flex items-end p-6 transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
           <p className="text-xs uppercase tracking-widest text-lu-gold/80">{p.role}</p>
         </div>
@@ -415,7 +428,7 @@ const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
           {p.desc}
         </p>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -456,15 +469,20 @@ const Footer = ({ t }) => (
 function App() {
   const [lang, setLang] = useState('ru');
   const [isOpen, setIsOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const t = content[lang];
 
   // --- Flashlight Physics Logic ---
+  // Removing delays: using raw motion values for instant response or very tight spring
+  // User requested "Remove delays on hover, including delays in flashlight movement"
+  // So we use tighter stiffness/damping or just raw values.
+  // A slight spring is still good for smoothness, but we'll make it very fast.
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   
-  // Smoother spring settings
-  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 120, mass: 0.5 });
-  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 120, mass: 0.5 });
+  // Very fast spring for instant-feel smoothness
+  const smoothMouseX = useSpring(mouseX, { damping: 20, stiffness: 300, mass: 0.5 });
+  const smoothMouseY = useSpring(mouseY, { damping: 20, stiffness: 300, mass: 0.5 });
 
   useEffect(() => {
     const handleMouseMove = (e) => {
@@ -493,28 +511,35 @@ function App() {
 
   return (
     <div className="bg-black min-h-screen text-lu-text selection:bg-lu-gold selection:text-black overflow-x-hidden">
-      <NoiseOverlay />
-      
-      {/* Optimized Canvas Background that handles flashlight & scroll darkness efficiently */}
-      <FlashlightBackground mouseX={smoothMouseX} mouseY={smoothMouseY} />
+      <AnimatePresence>
+        {isLoading && <LoadingScreen onLoadComplete={() => setIsLoading(false)} />}
+      </AnimatePresence>
 
-      <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
-      
-      <main className="relative z-10">
-        <Hero t={t} />
-        {/* We removed the bg-black/90 here because the darkness is now handled by the Canvas itself.
-            This prevents "double darkening" and allows the flashlight to work everywhere seamlessly.
-            However, we might want slight backdrop blur or tint if text readability is low.
-            Let's test without it first as per "flashlight reveals background". 
-        */}
-        <div className="relative"> 
-           <About t={t} />
-           <Events t={t} />
-           <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
-        </div>
-      </main>
+      {!isLoading && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 1 }}
+        >
+          <NoiseOverlay />
+          
+          {/* Optimized Canvas Background */}
+          <FlashlightBackground mouseX={smoothMouseX} mouseY={smoothMouseY} />
 
-      <Footer t={t} />
+          <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
+          
+          <main className="relative z-10">
+            <Hero t={t} />
+            <div className="relative"> 
+               <About t={t} />
+               <Events t={t} />
+               <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
+            </div>
+          </main>
+
+          <Footer t={t} />
+        </motion.div>
+      )}
     </div>
   );
 }
