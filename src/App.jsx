@@ -89,7 +89,8 @@ const FlashlightBackground = ({ opacity, onBgLoad }) => {
         className="fixed inset-0 bg-cover bg-center -z-10"
         style={{ 
           backgroundImage: `url(${heroBg})`,
-          opacity: opacity 
+          opacity: opacity,
+          filter: 'brightness(0.6)' // Darken base layer to ensure contrast with flashlight
         }} 
       />
 
@@ -99,6 +100,7 @@ const FlashlightBackground = ({ opacity, onBgLoad }) => {
         style={{
           backgroundImage: `url(${heroBg})`,
           opacity: 1,
+          filter: 'brightness(1.2)', // Make flashlight slightly brighter than original
           // Using CSS custom properties updated via JS for max performance
           maskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
           WebkitMaskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
