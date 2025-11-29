@@ -67,7 +67,7 @@ const LoadingScreen = ({ onLoadComplete, isBgLoaded }) => {
 };
 
 // --- Optimized Background Component ---
-const FlashlightBackground = ({ opacity, onBgLoad }) => {
+const FlashlightBackground = ({ baseOpacity, onBgLoad }) => {
   useEffect(() => {
     const img = new Image();
     img.src = heroBg;
@@ -80,23 +80,23 @@ const FlashlightBackground = ({ opacity, onBgLoad }) => {
   }, [onBgLoad]);
 
   return (
-    <>
+    <div className="fixed inset-0 z-0 pointer-events-none">
       {/* Base black layer */}
-      <div className="fixed inset-0 bg-black -z-20" />
+      <div className="absolute inset-0 bg-black" />
       
       {/* Ambient Layer - controlled by scroll opacity (60% -> 30%) */}
       <motion.div 
-        className="fixed inset-0 bg-cover bg-center -z-10"
+        className="absolute inset-0 bg-cover bg-center"
         style={{ 
           backgroundImage: `url(${heroBg})`,
-          opacity: opacity,
+          opacity: baseOpacity,
           filter: 'brightness(0.6)' // Darken base layer to ensure contrast with flashlight
         }} 
       />
 
       {/* Flashlight Layer - Always full opacity, revealed by mask */}
       <div 
-        className="fixed inset-0 z-0 pointer-events-none bg-cover bg-center"
+        className="absolute inset-0 bg-cover bg-center"
         style={{
           backgroundImage: `url(${heroBg})`,
           opacity: 1,
@@ -107,7 +107,7 @@ const FlashlightBackground = ({ opacity, onBgLoad }) => {
           willChange: 'mask-image' // Hint to browser for optimization
         }}
       />
-    </>
+    </div>
   );
 };
 
@@ -523,19 +523,25 @@ function App() {
         )}
       </AnimatePresence>
 
+      {/* Background - Animates separately to avoid stacking context issues */}
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: isLoading ? 0 : 1 }}
+        transition={{ duration: 1.5 }} // Slightly slower than content for cinematic effect
+      >
+        <FlashlightBackground 
+          baseOpacity={bgOpacity}
+          onBgLoad={setIsBgLoaded}
+        />
+        <NoiseOverlay />
+      </motion.div>
+
+      {/* Main Content */}
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: isLoading ? 0 : 1 }}
         transition={{ duration: 1 }}
       >
-        <NoiseOverlay />
-        
-        {/* Optimized CSS Background */}
-        <FlashlightBackground 
-          opacity={bgOpacity}
-          onBgLoad={setIsBgLoaded}
-        />
-
         <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
         
         <main className="relative z-10">
