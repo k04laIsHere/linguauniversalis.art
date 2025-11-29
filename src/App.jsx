@@ -68,16 +68,49 @@ const LoadingScreen = ({ onLoadComplete, isBgLoaded }) => {
 
 // --- Optimized Background Component ---
 const FlashlightBackground = ({ baseOpacity, onBgLoad }) => {
+  // Use a resize listener that ignores vertical-only changes (address bar)
+  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
+
+  useEffect(() => {
+    const handleResize = () => {
+      const newWidth = window.innerWidth;
+      const newHeight = window.innerHeight;
+      
+      // Only update if width changes significantly (orientation change) 
+      // or height changes by a large amount (keyboard/orientation, not just address bar)
+      if (Math.abs(newWidth - windowSize.width) > 50 || Math.abs(newHeight - windowSize.height) > 150) {
+        setWindowSize({ width: newWidth, height: newHeight });
+      }
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [windowSize]);
+
   useEffect(() => {
     const img = new Image();
     img.src = heroBg;
+    // Preload other critical images here if needed to prevent pop-in
+    const img1 = new Image(); img1.src = image1;
+    const img2 = new Image(); img2.src = image2;
+
+    // Wait for hero background primarily
     img.onload = () => {
       // Small delay to ensure image is actually rendered to DOM before fading in
       requestAnimationFrame(() => {
           onBgLoad(true);
       });
     };
+    // Also support cached images resolving immediately
+    if (img.complete) {
+      requestAnimationFrame(() => onBgLoad(true));
+    }
   }, [onBgLoad]);
+
+  // Determine flashlight radius based on screen width
+  // Mobile (< 768px) = 225px, Desktop = 450px
+  const isMobile = windowSize.width < 768;
+  const radius = isMobile ? 225 : 450;
 
   return (
     <div className="fixed inset-0 z-0 pointer-events-none">
@@ -90,7 +123,9 @@ const FlashlightBackground = ({ baseOpacity, onBgLoad }) => {
         style={{ 
           backgroundImage: `url(${heroBg})`,
           opacity: baseOpacity,
-          filter: 'brightness(0.6)' // Darken base layer to ensure contrast with flashlight
+          filter: 'brightness(0.6)', // Darken base layer to ensure contrast with flashlight
+          height: '100vh', // Use vh instead of 100% to avoid resize jumps
+          height: '100dvh' // Use dynamic viewport height if supported
         }} 
       />
 
@@ -101,9 +136,11 @@ const FlashlightBackground = ({ baseOpacity, onBgLoad }) => {
           backgroundImage: `url(${heroBg})`,
           opacity: 1,
           filter: 'brightness(1.2)', // Make flashlight slightly brighter than original
+          height: '100vh',
+          height: '100dvh',
           // Using CSS custom properties updated via JS for max performance
-          maskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
+          maskImage: `radial-gradient(circle ${radius}px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(circle ${radius}px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
           willChange: 'mask-image' // Hint to browser for optimization
         }}
       />
