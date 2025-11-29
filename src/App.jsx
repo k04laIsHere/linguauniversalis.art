@@ -72,15 +72,19 @@ const FlashlightBackground = ({ opacity, onBgLoad }) => {
     const img = new Image();
     img.src = heroBg;
     img.onload = () => {
-      onBgLoad(true);
+      // Small delay to ensure image is actually rendered to DOM before fading in
+      requestAnimationFrame(() => {
+          onBgLoad(true);
+      });
     };
   }, [onBgLoad]);
 
   return (
     <>
+      {/* Base black layer */}
       <div className="fixed inset-0 bg-black -z-20" />
       
-      {/* Ambient Layer - controlled by scroll opacity */}
+      {/* Ambient Layer - controlled by scroll opacity (60% -> 30%) */}
       <motion.div 
         className="fixed inset-0 bg-cover bg-center -z-10"
         style={{ 
@@ -95,8 +99,10 @@ const FlashlightBackground = ({ opacity, onBgLoad }) => {
         style={{
           backgroundImage: `url(${heroBg})`,
           opacity: 1,
+          // Using CSS custom properties updated via JS for max performance
           maskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`
+          WebkitMaskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
+          willChange: 'mask-image' // Hint to browser for optimization
         }}
       />
     </>
@@ -415,52 +421,88 @@ function App() {
   const mouseX = useMotionValue(0);
   const mouseY = useMotionValue(0);
   
-  // Very fast spring for instant-feel smoothness
-  const smoothMouseX = useSpring(mouseX, { damping: 20, stiffness: 300, mass: 0.5 });
-  const smoothMouseY = useSpring(mouseY, { damping: 20, stiffness: 300, mass: 0.5 });
+  // Slower, smoother spring physics (increased mass/damping, reduced stiffness)
+  const smoothMouseX = useSpring(mouseX, { damping: 40, stiffness: 200, mass: 1.5 });
+  const smoothMouseY = useSpring(mouseY, { damping: 40, stiffness: 200, mass: 1.5 });
 
-  // Sync springs to CSS variables for performant rendering
+  // Sync springs to CSS variables using requestAnimationFrame for performance
   useEffect(() => {
     // Set initial position
     document.documentElement.style.setProperty('--mouse-x', '50%');
     document.documentElement.style.setProperty('--mouse-y', '50%');
 
+    // Use requestAnimationFrame to throttle CSS updates
+    let rafId;
+    let latestX = 0;
+    let latestY = 0;
+    let needsUpdate = false;
+
+    const updateCSS = () => {
+      if (needsUpdate) {
+        document.documentElement.style.setProperty('--mouse-x', `${latestX}px`);
+        document.documentElement.style.setProperty('--mouse-y', `${latestY}px`);
+        needsUpdate = false;
+      }
+      rafId = requestAnimationFrame(updateCSS);
+    };
+    
+    // Start the loop
+    rafId = requestAnimationFrame(updateCSS);
+
     const unsubscribeX = smoothMouseX.on("change", (latest) => {
-      document.documentElement.style.setProperty('--mouse-x', `${latest}px`);
+      latestX = latest;
+      needsUpdate = true;
     });
     
     const unsubscribeY = smoothMouseY.on("change", (latest) => {
-      document.documentElement.style.setProperty('--mouse-y', `${latest}px`);
+      latestY = latest;
+      needsUpdate = true;
     });
 
     return () => {
+      cancelAnimationFrame(rafId);
       unsubscribeX();
       unsubscribeY();
     };
   }, [smoothMouseX, smoothMouseY]);
 
-  // Scroll opacity logic using Framer Motion (replaces Canvas logic)
+  // Scroll opacity logic
   const { scrollY } = useScroll();
+  // 60% opacity (40% darker) at top -> 30% opacity (70% darker) at scroll
   const bgOpacity = useTransform(scrollY, [0, window.innerHeight], [0.6, 0.3]);
 
   useEffect(() => {
+    // Throttled event listener for mouse move
+    let ticking = false;
     const handleMouseMove = (e) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          mouseX.set(e.clientX);
+          mouseY.set(e.clientY);
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
+    
     const handleTouchMove = (e) => {
-       if (e.touches.length > 0) {
-         mouseX.set(e.touches[0].clientX);
-         mouseY.set(e.touches[0].clientY);
+       if (!ticking && e.touches.length > 0) {
+         window.requestAnimationFrame(() => {
+           mouseX.set(e.touches[0].clientX);
+           mouseY.set(e.touches[0].clientY);
+           ticking = false;
+         });
+         ticking = true;
        }
     }
+
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true }); // Add passive for better scroll perf
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
     };
-  }, []);
+  }, [mouseX, mouseY]);
 
   const NoiseOverlay = () => (
     <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.04] mix-blend-overlay"
