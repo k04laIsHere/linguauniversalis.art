@@ -79,6 +79,8 @@ const FlashlightBackground = ({ opacity, onBgLoad }) => {
   return (
     <>
       <div className="fixed inset-0 bg-black -z-20" />
+      
+      {/* Ambient Layer - controlled by scroll opacity */}
       <motion.div 
         className="fixed inset-0 bg-cover bg-center -z-10"
         style={{ 
@@ -86,10 +88,15 @@ const FlashlightBackground = ({ opacity, onBgLoad }) => {
           opacity: opacity 
         }} 
       />
+
+      {/* Flashlight Layer - Always full opacity, revealed by mask */}
       <div 
-        className="fixed inset-0 z-0 pointer-events-none mix-blend-overlay"
+        className="fixed inset-0 z-0 pointer-events-none bg-cover bg-center"
         style={{
-          background: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.4), transparent 100%)`
+          backgroundImage: `url(${heroBg})`,
+          opacity: 1,
+          maskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
+          WebkitMaskImage: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`
         }}
       />
     </>
@@ -434,7 +441,7 @@ function App() {
 
   // Scroll opacity logic using Framer Motion (replaces Canvas logic)
   const { scrollY } = useScroll();
-  const bgOpacity = useTransform(scrollY, [0, window.innerHeight], [0.6, 0.15]);
+  const bgOpacity = useTransform(scrollY, [0, window.innerHeight], [0.6, 0.3]);
 
   useEffect(() => {
     const handleMouseMove = (e) => {
