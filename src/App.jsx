@@ -158,20 +158,19 @@ const App = () => {
   const mobilePanX = useMotionValue(0);
   const mobilePanY = useMotionValue(0);
   const resetTimer = useRef(null);
+  const stationaryTimer = useRef(null);
   const isInteracting = useRef(false);
 
   // Reset to center animation loop
   const resetToCenterMobile = useCallback(() => {
-    // Animate back to center state (zoom in, center pan)
     const animateReset = () => {
-        if (isInteracting.current) return; // Stop if user interrupts
+        if (isInteracting.current) return; 
         
         let needsUpdate = false;
         const currentP = progress.get();
         const currentX = mobilePanX.get();
         const currentY = mobilePanY.get();
 
-        // Smoothly return to 0
         if (currentP > 0.001) {
             progress.set(currentP * 0.95);
             needsUpdate = true;
@@ -206,36 +205,12 @@ const App = () => {
     const handleTouchStart = (e) => {
       isInteracting.current = true;
       if (resetTimer.current) clearTimeout(resetTimer.current);
+      if (stationaryTimer.current) clearTimeout(stationaryTimer.current);
       
       touchStart.current = { 
         x: e.touches[0].clientX, 
         y: e.touches[0].clientY
       };
-
-      // Check if holding in place (Zoom In)
-      // Use a recursive check that cancels if moved too much
-      const startPos = { ...touchStart.current };
-      
-      const checkHold = setTimeout(() => {
-        if (isInteracting.current) {
-             // If still touching and haven't moved much, zoom in
-             // This logic is handled in move, if delta is small, we don't zoom out. 
-             // But to explicitly zoom in we need a loop.
-             const animateZoomIn = () => {
-                if (!isInteracting.current) return;
-                // Check if still roughly in same spot (simple check done via flag in move)
-                const currentP = progress.get();
-                if (currentP > 0) {
-                    progress.set(Math.max(0, currentP - 0.02));
-                    requestAnimationFrame(animateZoomIn);
-                }
-             };
-             animateZoomIn();
-        }
-      }, 200);
-      
-      // Store timer to cancel if moved
-      touchStart.current.holdTimer = checkHold;
     };
 
     const handleTouchMove = (e) => {
@@ -245,35 +220,47 @@ const App = () => {
       
       const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
       
-      if (movement > 5) {
-        // If moved > 5px, cancel hold zoom
-        if (touchStart.current.holdTimer) clearTimeout(touchStart.current.holdTimer);
+      // Reset stationary timer on every move
+      if (stationaryTimer.current) clearTimeout(stationaryTimer.current);
+      
+      // If we stop moving for 100ms while touching, trigger zoom in
+      stationaryTimer.current = setTimeout(() => {
+         const animateZoomIn = () => {
+            if (!isInteracting.current) return; // Stop if ended
+            // We assume we are "holding" now
+            const currentP = progress.get();
+            if (currentP > 0) {
+                progress.set(Math.max(0, currentP - 0.02));
+                requestAnimationFrame(animateZoomIn);
+            }
+         };
+         animateZoomIn();
+      }, 150);
 
-        // Zoom Out
+      if (movement > 2) {
+        // Zoom Out on movement
         const currentP = progress.get();
-        progress.set(Math.min(1, currentP + 0.015)); // Faster response
+        progress.set(Math.min(1, currentP + 0.015)); 
 
-        // Pan in direction of swipe
-        // Swipe Up (Drag Up) -> Camera moves Up (Revealing Bottom)
-        // Standard Drag: Content moves with finger.
-        // If I drag Up (Finger goes Up, DeltaY < 0), Content should go Up. 
-        // Camera Y must go Down (-Y) to make Content go Up? No.
-        // Camera +Y moves view "down" the map.
-        // If I want to see Top content (-Y), I drag Down (Finger goes Down).
-        // Let's stick to "Drag Map" logic. 
-        // Finger Down (+Y) -> Map moves Down (+Y) -> Camera moves Up (-Y)? 
-        // Correct: Camera = -Translation.
-        // To move map DOWN, Camera must move UP (-Y).
+        // Pan in direction of swipe (Inverted/Flight Sim?)
+        // User: "slide finger up... pan to top"
+        // Slide Up = DeltaY < 0.
+        // Pan to Top = Go North = -Y? Or +Y?
+        // North is at (0, -OFFSET). South is (0, +OFFSET).
+        // To see North, we need to translate +Y (shift world down).
+        // So Slide Up (-Delta) -> Translate +Y.
+        // So we subtract Delta.
+        // mobilePanY = current - Delta.
+        // Ex: current 0. Delta -10. New = 10. Translate(10). World moves Down. North comes in view.
+        // Correct.
         
         const currentPanX = mobilePanX.get();
         const currentPanY = mobilePanY.get();
         const panFactor = 1.5;
 
-        // Inverse delta for "Drag" feel
         mobilePanX.set(currentPanX - deltaX * panFactor); 
         mobilePanY.set(currentPanY - deltaY * panFactor);
         
-        // Update start pos
         touchStart.current.x = touch.clientX;
         touchStart.current.y = touch.clientY;
       }
@@ -281,12 +268,11 @@ const App = () => {
 
     const handleTouchEnd = () => {
       isInteracting.current = false;
-      if (touchStart.current.holdTimer) clearTimeout(touchStart.current.holdTimer);
+      if (stationaryTimer.current) clearTimeout(stationaryTimer.current);
       
-      // Start idle reset timer
       resetTimer.current = setTimeout(() => {
         resetToCenterMobile();
-      }, 3000); // 3s idle
+      }, 3000); 
     };
 
     window.addEventListener('touchstart', handleTouchStart, { passive: false });
@@ -301,13 +287,15 @@ const App = () => {
   }, [isMobile, progress, mobilePanX, mobilePanY, resetToCenterMobile]);
 
   // --- Calculated Values ---
-  const startScale = isMobile ? 0.5 : 1; 
+  // Mobile start zoomed in more (0.5 -> 0.75)
+  const startScale = isMobile ? 0.75 : 1; 
   const scale = useTransform(smoothProgress, [0, 1], [startScale, 0.15]);
   const contentOpacity = useTransform(smoothProgress, [0.05, 0.2], [0, 1]);
   
   // --- Mouse / Torch Logic ---
-  const mouseX = useMotionValue(winSize.w / 2);
-  const mouseY = useMotionValue(winSize.h / 2);
+  // Initialize to center to avoid jump on load
+  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
+  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
   const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150 });
   const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150 });
 
@@ -335,60 +323,52 @@ const App = () => {
 
   // --- Camera Logic ---
   
-  // Desktop: "Zoom in to mouse pointer location"
-  // When we scale up (Zoom In), CSS TransformOrigin handles the "towards mouse" effect.
-  // We set TransformOrigin to the mouse position.
-  // ISSUE FIX: When zooming OUT (Scale < 1), we want to see the whole map (Center).
-  // If TransformOrigin is Mouse, zooming out shrinks it towards the mouse, leaving the rest of the screen blank.
-  // We want: Zoom In -> Focus on Mouse. Zoom Out -> Focus on Center.
-  // Solution: Interpolate TransformOrigin from "Mouse" (at Progress 0) to "Center" (at Progress 1).
+  // Desktop Zoom & Pan Fix:
+  // 1. Zoom Out must be from Center.
+  // 2. Zoom In must be to Mouse Cursor.
+  // 3. Pan must be in direction of Mouse Move.
   
-  const centerOriginX = "50%";
-  const centerOriginY = "50%";
+  // Solution: Use TransformOrigin = Center (Fixed).
+  // Use Translation to handle the "Focus" shift.
   
-  // We can't easily interpolate string "50%" to pixel value in Framer Motion templates directly without complex transforms.
-  // Instead, we'll compute the pixel value of center.
+  // When Progress = 0 (Zoomed In):
+  // We want the content to be shifted such that the Center of Content aligns with Mouse? 
+  // No, we want the point under Mouse to be fixed. 
+  // Effectively, we translate AWAY from the mouse deviation to keep it centered?
+  // Let's try:
+  // X = (Center - Mouse) * (1 - Progress).
+  // If Mouse is at Right Edge (W). Center is W/2. X = (W/2 - W) = -W/2.
+  // Content Shifts Left. Right Edge of Content comes to Center. 
+  // This reveals Right Side. This is "Pan in direction of Mouse". CORRECT.
+  // At Progress 1 (Zoomed Out): Factor is 0. X = 0. Centered. CORRECT.
   
-  const originX = useTransform(() => {
-     if (isMobile) return "50%";
-     const mX = smoothMouseX.get();
-     const cX = winSize.w / 2;
-     // Interpolate: 0 (ZoomIn) -> mX, 1 (ZoomOut) -> cX
-     const p = smoothProgress.get();
-     const currentOrigin = mX + (cX - mX) * p; 
-     return `${currentOrigin}px`;
+  const desktopCameraX = useTransform(() => {
+    if (isMobile) return 0;
+    const mX = smoothMouseX.get();
+    const p = smoothProgress.get();
+    const center = winSize.w / 2;
+    // (Center - Mouse) * (1 - p)
+    return (center - mX) * (1 - p);
   });
 
-  const originY = useTransform(() => {
-     if (isMobile) return "50%";
-     const mY = smoothMouseY.get();
-     const cY = winSize.h / 2;
-     const p = smoothProgress.get();
-     const currentOrigin = mY + (cY - mY) * p;
-     return `${currentOrigin}px`;
+  const desktopCameraY = useTransform(() => {
+    if (isMobile) return 0;
+    const mY = smoothMouseY.get();
+    const p = smoothProgress.get();
+    const center = winSize.h / 2;
+    return (center - mY) * (1 - p);
   });
 
-  // Desktop Panning Fix: 
-  // "On desktop the camera zooms out and pans in the top left direction."
-  // This was caused by the previous `desktopCameraX` logic which pushed away from center.
-  // With the new `origin` logic, we might not strictly need extra panning, 
-  // OR we need to ensure panning is centered.
-  // Let's REMOVE the extra `panIntensity` logic for Desktop and rely purely on TransformOrigin 
-  // to handle the "Zoom to" effect. If we want to "Look around" while zoomed in, that's different.
-  // But the request says "Zoom in to mouse pointer".
-  // If we remove `panIntensity`, the camera stays at 0,0. 
-  // Zooming out with Origin -> Center means it shrinks to center. Correct.
-  // Zooming in with Origin -> Mouse means it expands from mouse. Correct.
-
-  const finalCameraX = useTransform(() => isMobile ? mobilePanX.get() : 0);
-  const finalCameraY = useTransform(() => isMobile ? mobilePanY.get() : 0);
+  const finalCameraX = useTransform(() => isMobile ? mobilePanX.get() : desktopCameraX.get());
+  const finalCameraY = useTransform(() => isMobile ? mobilePanY.get() : desktopCameraY.get());
 
   // Compass
   const compassRotation = useTransform(() => {
     const x = finalCameraX.get();
     const y = finalCameraY.get();
-    // Default North if 0,0
     if (x === 0 && y === 0) return 0;
+    // Panning X negative means looking Right.
+    // Compass should point to North relative to view?
     return Math.atan2(y, x) * (180 / Math.PI) + 90;
   });
 
@@ -432,7 +412,7 @@ const App = () => {
             scale,
             x: finalCameraX,
             y: finalCameraY,
-            transformOrigin: useMotionTemplate`${originX} ${originY}`
+            transformOrigin: '50% 50%'
           }}
         >
           {/* Center: Title (Always Visible) */}
