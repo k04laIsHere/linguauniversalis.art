@@ -1,599 +1,344 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { motion, useSpring, useMotionValue, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
-import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
+import { Globe, ExternalLink, MapPin } from 'lucide-react';
 import { content } from './data/content';
 
-// Import hero background
+// Import assets
 import heroBg from '../assets/images/background.jpg';
 
-// Import event images
-import image1 from '../assets/images/image 1.jpg';
-import image2 from '../assets/images/image-2.jpg';
+// --- Constants ---
+const SECTION_OFFSET = 1500; // Distance of sections from center (0,0)
 
-// --- Loading Screen Component ---
-const LoadingScreen = ({ onLoadComplete, isBgLoaded }) => {
-  const [progress, setProgress] = useState(0);
+// --- Components ---
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setProgress(prev => {
-        // If background isn't loaded, stall at 90%
-        if (prev >= 90 && !isBgLoaded) {
-          return 90;
-        }
-        if (prev >= 100) {
-          clearInterval(interval);
-          return 100;
-        }
-        return prev + 2;
-      });
-    }, 30);
-
-    return () => clearInterval(interval);
-  }, [isBgLoaded]);
-
-  useEffect(() => {
-    if (progress === 100) {
-      setTimeout(onLoadComplete, 500);
-    }
-  }, [progress, onLoadComplete]);
-
+const NoiseLayer = ({ mouseX, mouseY, isTouch }) => {
+  // Desktop: 450px, Mobile: 250px
+  const radius = isTouch ? 250 : 450;
+  
+  // Use motion template for performant mask updates
+  const maskImage = useMotionTemplate`radial-gradient(circle ${radius}px at ${mouseX}px ${mouseY}px, transparent 0%, black 100%)`;
+  
   return (
     <motion.div 
-      className="fixed inset-0 z-[100] bg-black flex flex-col items-center justify-center"
-      initial={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 1, ease: "easeInOut" } }}
+      className="fixed inset-0 z-[100] pointer-events-none"
+      style={{ 
+        maskImage,
+        WebkitMaskImage: maskImage,
+        backdropFilter: 'blur(5px)' 
+      }}
     >
-      <div className="w-64 space-y-4">
-        <h1 className="font-serif text-2xl text-center tracking-[0.2em] text-lu-gold uppercase">
-          Lingua Universalis
-        </h1>
-        <div className="h-[1px] w-full bg-lu-gray relative overflow-hidden">
-          <motion.div 
-            className="absolute inset-y-0 left-0 bg-lu-gold"
-            style={{ width: `${progress}%` }}
-            initial={{ width: "0%" }}
-            animate={{ width: `${progress}%` }}
-            transition={{ ease: "linear" }}
-          />
-        </div>
-        <div className="flex justify-between text-[10px] tracking-widest text-gray-500 uppercase">
-          <span>Loading</span>
-          <span>{progress}%</span>
-        </div>
-      </div>
+        <div className="absolute inset-0 bg-noise opacity-[0.2] animate-grain mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-black/90"></div>
     </motion.div>
   );
 };
 
-// --- Optimized Background Component ---
-const FlashlightBackground = ({ baseOpacity, onBgLoad }) => {
-  // Use a resize listener that ignores vertical-only changes (address bar)
-  const [windowSize, setWindowSize] = useState({ width: window.innerWidth, height: window.innerHeight });
-
-  useEffect(() => {
-    const handleResize = () => {
-      const newWidth = window.innerWidth;
-      const newHeight = window.innerHeight;
-      
-      // Only update if width changes significantly (orientation change) 
-      // or height changes by a large amount (keyboard/orientation, not just address bar)
-      if (Math.abs(newWidth - windowSize.width) > 50 || Math.abs(newHeight - windowSize.height) > 150) {
-        setWindowSize({ width: newWidth, height: newHeight });
-      }
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, [windowSize]);
-
-  useEffect(() => {
-    const img = new Image();
-    img.src = heroBg;
-    // Preload other critical images here if needed to prevent pop-in
-    const img1 = new Image(); img1.src = image1;
-    const img2 = new Image(); img2.src = image2;
-
-    // Wait for hero background primarily
-    img.onload = () => {
-      // Small delay to ensure image is actually rendered to DOM before fading in
-      requestAnimationFrame(() => {
-          onBgLoad(true);
-      });
-    };
-    // Also support cached images resolving immediately
-    if (img.complete) {
-      requestAnimationFrame(() => onBgLoad(true));
-    }
-  }, [onBgLoad]);
-
-  // Determine flashlight radius based on screen width
-  // Mobile (< 768px) = 225px, Desktop = 450px
-  const isMobile = windowSize.width < 768;
-  const radius = isMobile ? 225 : 450;
-
-  return (
-    <div className="fixed inset-0 z-0 pointer-events-none">
-      {/* Base black layer */}
-      <div className="absolute inset-0 bg-black" />
-      
-      {/* Ambient Layer - controlled by scroll opacity (60% -> 30%) */}
-      <motion.div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{ 
-          backgroundImage: `url(${heroBg})`,
-          opacity: baseOpacity,
-          filter: 'brightness(0.6)', // Darken base layer to ensure contrast with flashlight
-          height: '100vh', // Use vh instead of 100% to avoid resize jumps
-          height: '100dvh' // Use dynamic viewport height if supported
-        }} 
-      />
-
-      {/* Flashlight Layer - Always full opacity, revealed by mask */}
-      <div 
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: `url(${heroBg})`,
-          opacity: 1,
-          filter: 'brightness(1.2)', // Make flashlight slightly brighter than original
-          height: '100vh',
-          height: '100dvh',
-          // Using CSS custom properties updated via JS for max performance
-          maskImage: `radial-gradient(circle ${radius}px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
-          WebkitMaskImage: `radial-gradient(circle ${radius}px at var(--mouse-x, 50%) var(--mouse-y, 50%), black 0%, transparent 100%)`,
-          willChange: 'mask-image' // Hint to browser for optimization
-        }}
-      />
-    </div>
-  );
-};
-
-// --- Components ---
-
-const Navbar = ({ lang, setLang, t, isOpen, setIsOpen }) => (
-  <nav className="fixed top-0 left-0 w-full z-50 px-8 py-8 flex justify-between items-center mix-blend-difference text-white">
-    <div className="font-serif text-2xl tracking-[0.2em] uppercase font-bold relative group cursor-pointer">
-      <span className="relative z-10">Lingua Universalis</span>
-      <span className="absolute -bottom-2 left-0 w-0 h-[1px] bg-lu-gold group-hover:w-full transition-all duration-500"></span>
-    </div>
-    
-    <div className="flex items-center gap-12">
-      <button 
-        onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-        className="flex items-center gap-2 text-xs tracking-[0.2em] hover:text-lu-gold transition-colors uppercase font-light"
-      >
-        <Globe size={14} />
-        {lang}
-      </button>
-      
-      <button 
-        className="md:hidden z-50"
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        {isOpen ? <X /> : <Menu />}
-      </button>
-
-      <ul className="hidden md:flex gap-12 text-xs tracking-[0.2em] uppercase font-light">
-        <li><a href="#about" className="hover:text-lu-gold transition-colors duration-300">{t.nav.about}</a></li>
-        <li><a href="#events" className="hover:text-lu-gold transition-colors duration-300">{t.nav.events}</a></li>
-        <li><a href="#participants" className="hover:text-lu-gold transition-colors duration-300">{t.nav.participants}</a></li>
-      </ul>
-    </div>
-
-    {/* Mobile Menu Overlay */}
-    {isOpen && (
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/95 backdrop-blur-xl flex flex-col items-center justify-center gap-12 md:hidden z-40"
-      >
-        <a href="#about" onClick={() => setIsOpen(false)} className="text-3xl font-serif text-lu-gold">{t.nav.about}</a>
-        <a href="#events" onClick={() => setIsOpen(false)} className="text-3xl font-serif text-lu-gold">{t.nav.events}</a>
-        <a href="#participants" onClick={() => setIsOpen(false)} className="text-3xl font-serif text-lu-gold">{t.nav.participants}</a>
-      </motion.div>
-    )}
-  </nav>
-);
-
-const Hero = ({ t }) => {
-  return (
-    <section className="relative h-screen w-full flex flex-col items-center justify-center overflow-hidden">
-      {/* Content */}
-      <div className="relative z-20 text-center px-6 max-w-6xl mx-auto flex flex-col items-center mix-blend-screen">
-        <motion.div
-          initial={{ opacity: 0, y: 50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: "easeOut" }}
-          className="relative mb-12"
-        >
-          <h1 className="font-serif text-5xl md:text-7xl lg:text-9xl font-normal tracking-widest leading-none text-white drop-shadow-2xl">
-            LINGUA<br />UNIVERSALIS
-          </h1>
-          <div className="absolute -right-8 -top-8 w-24 h-24 border-t border-r border-lu-gold/50 hidden md:block"></div>
-          <div className="absolute -left-8 -bottom-8 w-24 h-24 border-b border-l border-lu-gold/50 hidden md:block"></div>
-        </motion.div>
-        
-        <motion.p 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.2 }}
-          className="font-sans text-xs md:text-sm tracking-[0.3em] text-lu-text/80 uppercase mb-16 max-w-xl leading-loose shadow-black drop-shadow-md"
-        >
-          {t.hero.subtitle}
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 1, delay: 0.5 }}
-        >
-          <ChevronDown className="text-lu-gold/80 animate-bounce w-8 h-8" />
-        </motion.div>
-      </div>
-    </section>
-  );
-};
-
-const About = ({ t }) => (
-  <section id="about" className="min-h-screen py-32 px-6 relative flex items-center">
-    <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-20 items-center w-full">
-      <div className="lg:col-span-5 space-y-12 order-2 lg:order-1 relative z-10 pointer-events-none">
-        <div className="pointer-events-auto">
-           <span className="text-lu-gold text-xs tracking-[0.3em] uppercase mb-4 block">Manifesto</span>
-          <h2 className="font-serif text-4xl md:text-6xl text-white leading-tight mb-8">
-            {t.about.title}
-          </h2>
-          <div className="space-y-8 font-light text-lg leading-relaxed text-gray-300">
-            {t.about.text.map((paragraph, idx) => (
-              <p key={idx} className="first-letter:text-5xl first-letter:font-serif first-letter:text-lu-gold first-letter:mr-2 first-letter:float-left">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div className="lg:col-span-7 relative order-1 lg:order-2 pointer-events-auto">
-        <div className="relative z-10 w-full aspect-[4/5] lg:aspect-square max-w-xl mx-auto">
-           <div className="absolute inset-0 border border-lu-gold/20 transform rotate-3 scale-105"></div>
-           <div className="absolute inset-0 border border-lu-gold/10 transform -rotate-3 scale-95"></div>
-           <div className="w-full h-full overflow-hidden relative grayscale hover:grayscale-0 transition-all duration-700">
-              <img 
-                src={t.about.image} 
-                alt="Art" 
-                className="w-full h-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-lu-dark/80 to-transparent opacity-50"></div>
-           </div>
-        </div>
-      </div>
-    </div>
-  </section>
-);
-
-const EventSection = ({ event, index, isReversed }) => (
-  <section className="min-h-screen relative flex items-center justify-center py-24 overflow-hidden border-t border-white/5">
-    <div className="container mx-auto px-6 relative z-10 pointer-events-none">
-      <div className={`flex flex-col ${isReversed ? 'lg:flex-row-reverse' : 'lg:flex-row'} gap-16 lg:gap-32 items-center`}>
-        
-        <div className="w-full lg:w-1/2 relative group pointer-events-auto">
-          <div className="relative aspect-video overflow-hidden bg-lu-gray/20">
-            <img 
-              src={index % 2 === 0 ? image2 : image1} 
-              alt={event.title}
-              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700"
-            />
-            <div className="absolute inset-0 border border-white/10 pointer-events-none"></div>
-          </div>
-          
-          <div className="absolute -top-6 -left-6 bg-lu-dark border border-lu-gold/30 p-6 backdrop-blur-md">
-             <span className="block font-serif text-3xl text-lu-gold">{event.date.split(' ')[0]}</span>
-             <span className="block text-xs uppercase tracking-widest text-gray-400 mt-1">{event.date.split(' ').slice(1).join(' ')}</span>
-          </div>
-        </div>
-
-        <div className="w-full lg:w-1/2 space-y-8 pointer-events-auto">
-           <div className="flex items-center gap-4 text-lu-gold/60 text-xs uppercase tracking-[0.2em]">
-              <span className="w-8 h-[1px] bg-lu-gold/60"></span>
-              <span>Event {index + 1}</span>
-           </div>
-           
-           <h2 className="font-serif text-4xl md:text-5xl lg:text-6xl leading-tight text-white group-hover:text-lu-gold transition-colors duration-300">
-             {event.title}
-           </h2>
-
-           <div className="flex items-start gap-3 text-sm text-gray-400 font-light tracking-wider">
-              <MapPin size={16} className="mt-1 shrink-0 text-lu-gold" />
-              <span>{event.location}</span>
-           </div>
-
-           <p className="text-lg font-light text-gray-300 leading-relaxed max-w-md">
-             {event.desc}
-           </p>
-
-           <div className="pt-4">
-             <a 
-                href={event.link}
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-4 text-sm uppercase tracking-[0.2em] text-white hover:text-lu-gold transition-colors group"
-             >
-                Check Details
-                <span className="w-12 h-[1px] bg-white/30 group-hover:bg-lu-gold transition-colors"></span>
-             </a>
-           </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-);
-
-const EventsList = ({ t }) => (
-  <div id="events">
-    {t.events.list.map((event, index) => (
-      <EventSection 
-        key={index} 
-        event={event} 
-        index={index} 
-        isReversed={index % 2 !== 0} 
-      />
-    ))}
+const BackgroundLayer = () => (
+  <div className="fixed inset-0 z-0 pointer-events-none">
+    <div 
+      className="absolute inset-0 bg-cover bg-center opacity-40"
+      style={{ backgroundImage: `url(${heroBg})` }}
+    />
+    <div className="absolute inset-0 bg-black/60" />
   </div>
 );
 
-const ParticipantCard = ({ p, index, mouseX, mouseY }) => {
-  const ref = useRef(null);
-  const [isActive, setIsActive] = useState(false);
-  const isInView = useInView(ref, { margin: "-20%" }); // Viewport detection for mobile
+// Reusing existing content components with minimal tweaks for spatial layout
+const Manifesto = ({ t }) => (
+  <div className="max-w-2xl mx-auto text-center p-8 bg-black/80 border border-lu-gold/20 backdrop-blur-md">
+    <h2 className="font-serif text-4xl text-lu-gold mb-8">{t.about.title}</h2>
+    <div className="space-y-6 font-light text-lg text-gray-300">
+      {t.about.text.map((p, i) => <p key={i}>{p}</p>)}
+    </div>
+  </div>
+);
 
-  useEffect(() => {
-    // Mobile Scroll Logic: Activate when in view
-    if (window.matchMedia("(max-width: 768px)").matches) {
-      setIsActive(isInView);
-      return;
-    }
-
-    // Desktop Hover Logic: Immediate proximity check
-    const checkProximity = (x, y) => {
-      if (!ref.current) return;
-      const rect = ref.current.getBoundingClientRect();
-      const centerX = rect.left + rect.width / 2;
-      const centerY = rect.top + rect.height / 2;
-      
-      const dist = Math.sqrt(Math.pow(x - centerX, 2) + Math.pow(y - centerY, 2));
-      // Increased radius to 200px beyond center (effectively making hit area much larger)
-      // Actually user said 200px *around* image. 
-      // Center distance threshold = Width/2 + 200px roughly.
-      const threshold = Math.max(rect.width, rect.height) / 2 + 200;
-      
-      setIsActive(dist < threshold);
-    };
-
-    const unsubscribeX = mouseX.on("change", (latestX) => {
-      checkProximity(latestX, mouseY.get());
-    });
-    const unsubscribeY = mouseY.on("change", (latestY) => {
-      checkProximity(mouseX.get(), latestY);
-    });
-
-    return () => {
-      unsubscribeX();
-      unsubscribeY();
-    };
-  }, [isInView, mouseX, mouseY]);
-
-  return (
-    <div 
-      ref={ref}
-      className="relative flex flex-col gap-6"
-    >
-      <div 
-        className={`aspect-[4/5] overflow-hidden bg-lu-gray/10 relative transition-all duration-700 ${isActive ? 'grayscale-0 scale-105' : 'grayscale scale-100'}`}
-      >
-        <img 
-          src={p.img} 
-          alt={p.name} 
-          className={`w-full h-full object-cover transition-transform duration-700 ${isActive ? 'scale-110' : 'scale-100'}`}
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-lu-dark via-transparent to-transparent opacity-60"></div>
-        
-        <div className={`absolute inset-0 flex items-end p-6 transition-opacity duration-500 ${isActive ? 'opacity-100' : 'opacity-0'}`}>
-          <p className="text-xs uppercase tracking-widest text-lu-gold/80">{p.role}</p>
+const Participants = ({ t }) => (
+  <div className="max-w-4xl mx-auto p-8">
+    <h2 className="font-serif text-4xl text-lu-gold mb-12 text-center">{t.participants.title}</h2>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      {t.participants.list.map((p, i) => (
+        <div key={i} className="bg-black/80 border border-white/10 p-6 hover:border-lu-gold/50 transition-colors">
+          <div className="aspect-[4/5] mb-4 overflow-hidden">
+            <img src={p.img} alt={p.name} className="w-full h-full object-cover opacity-80 hover:scale-105 transition-transform duration-700" />
+          </div>
+          <h3 className="font-serif text-xl text-white">{p.name}</h3>
+          <p className="text-xs text-lu-gold uppercase tracking-wider mt-1">{p.role}</p>
         </div>
-      </div>
-
-      <div className={`space-y-3 border-t border-white/10 pt-6 transition-colors duration-500 ${isActive ? 'border-lu-gold/50' : ''}`}>
-        <h3 className={`font-serif text-2xl transition-colors duration-500 ${isActive ? 'text-lu-gold' : 'text-white'}`}>{p.name}</h3>
-        <p className="text-xs text-gray-500 uppercase tracking-widest">{p.country}</p>
-        <p className="text-sm text-gray-400 font-light leading-relaxed line-clamp-3">
-          {p.desc}
-        </p>
-      </div>
+      ))}
     </div>
-  );
-};
-
-const Participants = ({ t, mouseX, mouseY }) => (
-  <section id="participants" className="py-32 px-6 relative">
-    <div className="max-w-7xl mx-auto">
-      <div className="flex flex-col items-center mb-24 text-center space-y-6">
-        <span className="text-lu-gold text-xs tracking-[0.4em] uppercase">Collective</span>
-        <h2 className="font-serif text-5xl md:text-7xl text-white">{t.participants.title}</h2>
-        <div className="w-px h-24 bg-gradient-to-b from-lu-gold to-transparent"></div>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 gap-y-24">
-        {t.participants.list.map((p, index) => (
-          <ParticipantCard key={index} p={p} index={index} mouseX={mouseX} mouseY={mouseY} />
-        ))}
-      </div>
-    </div>
-  </section>
+  </div>
 );
 
-const Footer = ({ t }) => (
-  <footer className="bg-black py-24 px-6 border-t border-white/5 relative overflow-hidden">
-    <div className="absolute inset-0 bg-noise opacity-5"></div>
-    <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center gap-12 relative z-10">
-      <div>
-        <div className="font-serif text-4xl text-lu-gold mb-4">Lingua Universalis</div>
-        <p className="text-xs uppercase tracking-[0.2em] text-gray-600">The Art of Creation</p>
-      </div>
-      <div className="text-sm text-gray-500 font-light text-left md:text-right space-y-2">
-        <p className="hover:text-white transition-colors">{t.footer.contacts}</p>
-        <p className="text-gray-700">{t.footer.text}</p>
-      </div>
+const Events = ({ t }) => (
+  <div className="max-w-2xl mx-auto p-8 bg-black/80 border border-lu-gold/20 backdrop-blur-md">
+    <h2 className="font-serif text-4xl text-lu-gold mb-8 text-center">{t.events.title}</h2>
+    <div className="space-y-8">
+      {t.events.list.map((e, i) => (
+        <div key={i} className="border-b border-white/10 pb-8 last:border-0">
+          <h3 className="font-serif text-2xl text-white mb-2">{e.title}</h3>
+          <div className="flex items-center gap-2 text-sm text-lu-gold mb-4">
+            <MapPin size={14} />
+            <span>{e.location}</span>
+          </div>
+          <p className="text-gray-400 font-light mb-4">{e.desc}</p>
+          <a href={e.link} target="_blank" rel="noreferrer" className="text-xs uppercase tracking-widest hover:text-lu-gold transition-colors flex items-center gap-2">
+            Details <ExternalLink size={12} />
+          </a>
+        </div>
+      ))}
     </div>
-  </footer>
+  </div>
 );
 
-function App() {
+const Contact = ({ t }) => (
+  <div className="max-w-xl mx-auto p-8 bg-black/80 border border-lu-gold/20 backdrop-blur-md text-center">
+    <h2 className="font-serif text-4xl text-lu-gold mb-8">{t.nav.contacts}</h2>
+    <div className="space-y-4 text-gray-300 font-light">
+      <p className="text-xl">{t.footer.contacts}</p>
+      <p className="text-sm opacity-60">{t.footer.text}</p>
+      <div className="pt-8">
+        <a href="mailto:info@linguauniversalis.art" className="inline-block border border-lu-gold px-8 py-3 text-xs uppercase tracking-widest hover:bg-lu-gold hover:text-black transition-colors">
+          Email Us
+        </a>
+      </div>
+    </div>
+  </div>
+);
+
+const Compass = ({ rotation }) => (
+  <motion.div 
+    className="fixed bottom-8 right-8 w-16 h-16 border border-white/10 rounded-full z-50 flex items-center justify-center backdrop-blur-sm pointer-events-none hidden md:flex"
+    style={{ rotate: rotation }}
+  >
+    <div className="w-full h-[1px] bg-white/20 absolute" />
+    <div className="h-full w-[1px] bg-white/20 absolute" />
+    <div className="w-2 h-2 bg-lu-gold rounded-full" />
+    <div className="absolute top-1 text-[8px] text-lu-gold">N</div>
+  </motion.div>
+);
+
+const App = () => {
   const [lang, setLang] = useState('ru');
-  const [isOpen, setIsOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isBgLoaded, setIsBgLoaded] = useState(false);
   const t = content[lang];
-
-  // --- Flashlight Physics Logic ---
-  const mouseX = useMotionValue(0);
-  const mouseY = useMotionValue(0);
   
-  // Slower, smoother spring physics (increased mass/damping, reduced stiffness)
-  const smoothMouseX = useSpring(mouseX, { damping: 40, stiffness: 200, mass: 1.5 });
-  const smoothMouseY = useSpring(mouseY, { damping: 40, stiffness: 200, mass: 1.5 });
-
-  // Sync springs to CSS variables using requestAnimationFrame for performance
-  useEffect(() => {
-    // Set initial position
-    document.documentElement.style.setProperty('--mouse-x', '50%');
-    document.documentElement.style.setProperty('--mouse-y', '50%');
-
-    // Use requestAnimationFrame to throttle CSS updates
-    let rafId;
-    let latestX = 0;
-    let latestY = 0;
-    let needsUpdate = false;
-
-    const updateCSS = () => {
-      if (needsUpdate) {
-        document.documentElement.style.setProperty('--mouse-x', `${latestX}px`);
-        document.documentElement.style.setProperty('--mouse-y', `${latestY}px`);
-        needsUpdate = false;
-      }
-      rafId = requestAnimationFrame(updateCSS);
-    };
-    
-    // Start the loop
-    rafId = requestAnimationFrame(updateCSS);
-
-    const unsubscribeX = smoothMouseX.on("change", (latest) => {
-      latestX = latest;
-      needsUpdate = true;
-    });
-    
-    const unsubscribeY = smoothMouseY.on("change", (latest) => {
-      latestY = latest;
-      needsUpdate = true;
-    });
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      unsubscribeX();
-      unsubscribeY();
-    };
-  }, [smoothMouseX, smoothMouseY]);
-
-  // Scroll opacity logic
+  // --- Spatial State ---
+  // We use a very tall scroll container to drive the zoom
   const { scrollY } = useScroll();
-  // 60% opacity (40% darker) at top -> 30% opacity (70% darker) at scroll
-  const bgOpacity = useTransform(scrollY, [0, window.innerHeight], [0.6, 0.3]);
+  
+  // Window dimensions for calculations
+  const [winSize, setWinSize] = useState({ w: typeof window !== 'undefined' ? window.innerWidth : 1000, h: typeof window !== 'undefined' ? window.innerHeight : 800 });
 
   useEffect(() => {
-    // Throttled event listener for mouse move
-    let ticking = false;
+    const handleResize = () => setWinSize({ w: window.innerWidth, h: window.innerHeight });
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // --- Zoom Logic ---
+  // 0 scroll = Zoom 1 (Center)
+  // Scroll down -> Zoom out
+  // Two levels: 1 -> 0.6 (mid) -> 0.15 (far)
+  const scale = useTransform(scrollY, [0, 500, 1500], [1, 0.6, 0.15]);
+  const smoothScale = useSpring(scale, { stiffness: 100, damping: 30, mass: 1 });
+
+  // --- Torch & Pan Logic ---
+  const mouseX = useMotionValue(winSize.w / 2);
+  const mouseY = useMotionValue(winSize.h / 2);
+  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150 });
+  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150 });
+
+  const [isTouch, setIsTouch] = useState(false);
+  const idleTimer = useRef(null);
+
+  // Reset to center logic
+  const resetToCenter = useCallback(() => {
+    // On mobile, we might want to programmatically scroll back to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    mouseX.set(winSize.w / 2);
+    mouseY.set(winSize.h / 2);
+  }, [mouseX, mouseY, winSize]);
+
+  // Interaction Handlers
+  useEffect(() => {
     const handleMouseMove = (e) => {
-      if (!ticking) {
-        window.requestAnimationFrame(() => {
-          mouseX.set(e.clientX);
-          mouseY.set(e.clientY);
-          ticking = false;
-        });
-        ticking = true;
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+    };
+
+    const handleTouchStart = () => {
+      setIsTouch(true);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+
+    const handleTouchMove = (e) => {
+      if (e.touches[0]) {
+        mouseX.set(e.touches[0].clientX);
+        mouseY.set(e.touches[0].clientY);
       }
     };
-    
-    const handleTouchMove = (e) => {
-       if (!ticking && e.touches.length > 0) {
-         window.requestAnimationFrame(() => {
-           mouseX.set(e.touches[0].clientX);
-           mouseY.set(e.touches[0].clientY);
-           ticking = false;
-         });
-         ticking = true;
-       }
-    }
+
+    const handleTouchEnd = () => {
+      // Start idle timer
+      idleTimer.current = setTimeout(() => {
+        resetToCenter();
+      }, 5000);
+    };
 
     window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove, { passive: true }); // Add passive for better scroll perf
+    window.addEventListener('touchstart', handleTouchStart);
+    window.addEventListener('touchmove', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd);
+
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('touchstart', handleTouchStart);
       window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
     };
-  }, [mouseX, mouseY]);
+  }, [mouseX, mouseY, resetToCenter]);
 
-  const NoiseOverlay = () => (
-    <div className="fixed inset-0 z-[9999] pointer-events-none opacity-[0.04] mix-blend-overlay"
-      style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")` }}
-    />
-  );
+  // --- Camera Panning ---
+  // When zoomed out (scale < 1), camera moves opposite to mouse to reveal content
+  // Pan Intensity increases as Scale decreases
+  const panIntensity = useTransform(smoothScale, [1, 0.15], [0, -1.5]); 
+  
+  const cameraX = useTransform(() => {
+    const currentMouseX = smoothMouseX.get();
+    const center = winSize.w / 2;
+    const delta = currentMouseX - center;
+    return delta * panIntensity.get();
+  });
+
+  const cameraY = useTransform(() => {
+    const currentMouseY = smoothMouseY.get();
+    const center = winSize.h / 2;
+    const delta = currentMouseY - center;
+    return delta * panIntensity.get();
+  });
+
+  // --- Compass Rotation ---
+  // Calculated based on camera position to show orientation
+  const compassRotation = useTransform(() => {
+    const x = cameraX.get();
+    const y = cameraY.get();
+    return Math.atan2(y, x) * (180 / Math.PI) + 90;
+  });
 
   return (
-    <div className="bg-black min-h-screen text-lu-text selection:bg-lu-gold selection:text-black overflow-x-hidden">
-      <AnimatePresence>
-        {isLoading && (
-          <LoadingScreen 
-            isBgLoaded={isBgLoaded} 
-            onLoadComplete={() => setIsLoading(false)} 
-          />
-        )}
-      </AnimatePresence>
+    <>
+      {/* Virtual Scroll Container - Drives the Zoom */}
+      <div style={{ height: '250vh' }} className="relative w-full pointer-events-none z-[-1]" />
 
-      {/* Background - Animates separately to avoid stacking context issues */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoading ? 0 : 1 }}
-        transition={{ duration: 1.5 }} // Slightly slower than content for cinematic effect
+      <div className="fixed inset-0 bg-black text-lu-text selection:bg-lu-gold selection:text-black overflow-hidden select-none">
+      
+      {/* Language Switcher (Fixed) */}
+      <div className="fixed top-8 right-8 z-[200] mix-blend-difference">
+         <button 
+            onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
+            className="flex items-center gap-2 text-xs tracking-[0.2em] text-white hover:text-lu-gold transition-colors uppercase font-light"
+          >
+            <Globe size={14} />
+            {lang}
+          </button>
+      </div>
+
+      {/* Hint (Fixed) */}
+      <motion.div 
+        className="fixed bottom-8 left-0 w-full text-center z-[50] text-white/30 text-[10px] uppercase tracking-[0.3em] pointer-events-none"
+        style={{ opacity: useTransform(scrollY, [0, 100], [1, 0]) }}
       >
-        <FlashlightBackground 
-          baseOpacity={bgOpacity}
-          onBgLoad={setIsBgLoaded}
-        />
-        <NoiseOverlay />
+        Scroll to Explore • Follow the Light
       </motion.div>
 
-      {/* Main Content */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: isLoading ? 0 : 1 }}
-        transition={{ duration: 1 }}
-      >
-        <Navbar lang={lang} setLang={setLang} t={t} isOpen={isOpen} setIsOpen={setIsOpen} />
-        
-        <main className="relative z-10">
-          <Hero t={t} />
-          <div className="relative"> 
-             <About t={t} />
-             <EventsList t={t} />
-             <Participants t={t} mouseX={smoothMouseX} mouseY={smoothMouseY} />
+      {/* Visual Layers */}
+      <BackgroundLayer />
+      
+      <NoiseLayer mouseX={smoothMouseX} mouseY={smoothMouseY} isTouch={isTouch} />
+
+      {/* Spatial Canvas */}
+      <div className="fixed inset-0 overflow-hidden flex items-center justify-center pointer-events-none">
+        <motion.div
+          className="relative w-0 h-0 flex items-center justify-center"
+          style={{ 
+            scale: smoothScale,
+            x: cameraX,
+            y: cameraY,
+            transformOrigin: 'center center'
+          }}
+        >
+          {/* Center: Title */}
+          <div className="absolute inset-0 flex items-center justify-center w-[100vw] h-[100vh] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
+             <div className="text-center">
+                <motion.h1 
+                  className="font-serif text-6xl md:text-9xl tracking-widest text-white drop-shadow-2xl whitespace-nowrap"
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 1.5 }}
+                >
+                  LINGUA<br />UNIVERSALIS
+                </motion.h1>
+                <motion.p
+                  className="font-sans text-sm tracking-[0.5em] text-lu-gold uppercase mt-8"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1, duration: 1 }}
+                >
+                  {t.hero.subtitle}
+                </motion.p>
+             </div>
           </div>
-        </main>
 
-        <Footer t={t} />
-      </motion.div>
-    </div>
+          {/* North: Manifesto */}
+          <div 
+            className="absolute w-[80vw] md:w-[600px] pointer-events-auto flex flex-col items-center"
+            style={{ transform: `translate(-50%, -${SECTION_OFFSET}px)` }}
+          >
+             <Manifesto t={t} />
+             <div className="h-32 w-[1px] bg-gradient-to-b from-transparent to-lu-gold/50 mt-8"></div>
+          </div>
+
+          {/* East: Participants */}
+          <div 
+            className="absolute w-[80vw] md:w-[900px] pointer-events-auto"
+            style={{ transform: `translate(${SECTION_OFFSET * 0.8}px, -50%)` }}
+          >
+            <Participants t={t} />
+          </div>
+
+          {/* South: Events */}
+          <div 
+            className="absolute w-[80vw] md:w-[600px] pointer-events-auto flex flex-col-reverse items-center"
+            style={{ transform: `translate(-50%, ${SECTION_OFFSET * 0.8}px)` }}
+          >
+             <Events t={t} />
+             <div className="h-32 w-[1px] bg-gradient-to-t from-transparent to-lu-gold/50 mb-8"></div>
+          </div>
+
+           {/* West: Contact */}
+           <div 
+            className="absolute w-[80vw] md:w-[500px] pointer-events-auto"
+            style={{ transform: `translate(-${SECTION_OFFSET}px, -50%)` }}
+          >
+            <Contact t={t} />
+          </div>
+
+          {/* Connection Lines (Decor) */}
+          <svg className="absolute top-0 left-0 overflow-visible opacity-20 pointer-events-none" style={{ width: 1, height: 1 }}>
+             <circle cx="0" cy="0" r={SECTION_OFFSET} fill="none" stroke="white" strokeWidth="2" strokeDasharray="4 4" />
+             <line x1="0" y1="0" x2="0" y2={`-${SECTION_OFFSET}`} stroke="white" />
+             <line x1="0" y1="0" x2={`-${SECTION_OFFSET}`} y2="0" stroke="white" />
+             <line x1="0" y1="0" x2="0" y2={`${SECTION_OFFSET}`} stroke="white" />
+             <line x1="0" y1="0" x2={`${SECTION_OFFSET}`} y2="0" stroke="white" />
+          </svg>
+
+        </motion.div>
+      </div>
+
+      <Compass rotation={compassRotation} />
+      </div>
+    </>
   );
-}
+};
 
 export default App;
