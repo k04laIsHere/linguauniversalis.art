@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, useSpring, useMotionValue, AnimatePresence, useInView } from 'framer-motion';
+import { motion, useSpring, useMotionValue, AnimatePresence, useInView, useScroll, useTransform } from 'framer-motion';
 import { Menu, X, Globe, ArrowRight, ExternalLink, Calendar, MapPin, ChevronDown } from 'lucide-react';
 import { content } from './data/content';
 
@@ -67,117 +67,32 @@ const LoadingScreen = ({ onLoadComplete, isBgLoaded }) => {
 };
 
 // --- Optimized Background Component ---
-const FlashlightBackground = ({ mouseX, mouseY, onBgLoad }) => {
-  const canvasRef = useRef(null);
-  const [image, setImage] = useState(null);
-
+const FlashlightBackground = ({ opacity, onBgLoad }) => {
   useEffect(() => {
     const img = new Image();
     img.src = heroBg;
     img.onload = () => {
-      setImage(img);
       onBgLoad(true);
     };
   }, [onBgLoad]);
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas || !image) return;
-    const ctx = canvas.getContext('2d', { alpha: false });
-
-    let animationFrameId;
-
-    const updateSize = () => {
-      const width = window.innerWidth; 
-      const height = Math.max(window.innerHeight, document.documentElement.clientHeight);
-      
-      if (canvas.width !== width || Math.abs(canvas.height - height) > 50) {
-         canvas.width = width;
-         canvas.height = height;
-      }
-    };
-    
-    updateSize();
-    
-    let resizeTimeout;
-    const handleResize = () => {
-      clearTimeout(resizeTimeout);
-      resizeTimeout = setTimeout(updateSize, 100);
-    };
-    window.addEventListener('resize', handleResize);
-
-    const render = () => {
-      const width = canvas.width;
-      const height = canvas.height;
-      const scrollY = window.scrollY;
-
-      ctx.fillStyle = 'black';
-      ctx.fillRect(0, 0, width, height);
-
-      const imgRatio = image.width / image.height;
-      const canvasRatio = width / height;
-      let drawWidth, drawHeight, offsetX, offsetY;
-
-      if (imgRatio > canvasRatio) {
-        drawHeight = height;
-        drawWidth = height * imgRatio;
-        offsetX = (width - drawWidth) / 2;
-        offsetY = 0;
-      } else {
-        drawWidth = width;
-        drawHeight = width / imgRatio;
-        offsetX = 0;
-        offsetY = (height - drawHeight) / 2;
-      }
-
-      let baseOpacity = 0.6;
-      if (scrollY > window.innerHeight) {
-        baseOpacity = 0.15;
-      } else if (scrollY > 0) {
-        const progress = scrollY / window.innerHeight;
-        baseOpacity = 0.6 - (0.45 * progress);
-      }
-
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.globalAlpha = baseOpacity;
-      ctx.drawImage(image, offsetX, offsetY, drawWidth, drawHeight);
-
-      ctx.save();
-      ctx.beginPath();
-      const mx = mouseX.get();
-      const my = mouseY.get();
-      const radius = 450; 
-      
-      ctx.globalCompositeOperation = 'overlay';
-      ctx.globalAlpha = 1;
-      const gradient = ctx.createRadialGradient(mx, my, 0, mx, my, radius);
-      gradient.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-      gradient.addColorStop(1, 'rgba(255, 255, 255, 0)');
-      
-      ctx.fillStyle = gradient;
-      ctx.beginPath();
-      ctx.arc(mx, my, radius, 0, Math.PI * 2);
-      ctx.fill();
-      
-      ctx.restore();
-      ctx.globalAlpha = 1;
-      ctx.globalCompositeOperation = 'source-over';
-      
-      animationFrameId = requestAnimationFrame(render);
-    };
-
-    render();
-    return () => {
-      cancelAnimationFrame(animationFrameId);
-      window.removeEventListener('resize', handleResize);
-    };
-  }, [image, mouseX, mouseY]);
-
   return (
-    <canvas
-      ref={canvasRef}
-      className="fixed inset-0 z-0 pointer-events-none h-[100dvh] w-screen"
-    />
+    <>
+      <div className="fixed inset-0 bg-black -z-20" />
+      <motion.div 
+        className="fixed inset-0 bg-cover bg-center -z-10"
+        style={{ 
+          backgroundImage: `url(${heroBg})`,
+          opacity: opacity 
+        }} 
+      />
+      <div 
+        className="fixed inset-0 z-0 pointer-events-none mix-blend-overlay"
+        style={{
+          background: `radial-gradient(circle 450px at var(--mouse-x, 50%) var(--mouse-y, 50%), rgba(255, 255, 255, 0.4), transparent 100%)`
+        }}
+      />
+    </>
   );
 };
 
@@ -497,6 +412,30 @@ function App() {
   const smoothMouseX = useSpring(mouseX, { damping: 20, stiffness: 300, mass: 0.5 });
   const smoothMouseY = useSpring(mouseY, { damping: 20, stiffness: 300, mass: 0.5 });
 
+  // Sync springs to CSS variables for performant rendering
+  useEffect(() => {
+    // Set initial position
+    document.documentElement.style.setProperty('--mouse-x', '50%');
+    document.documentElement.style.setProperty('--mouse-y', '50%');
+
+    const unsubscribeX = smoothMouseX.on("change", (latest) => {
+      document.documentElement.style.setProperty('--mouse-x', `${latest}px`);
+    });
+    
+    const unsubscribeY = smoothMouseY.on("change", (latest) => {
+      document.documentElement.style.setProperty('--mouse-y', `${latest}px`);
+    });
+
+    return () => {
+      unsubscribeX();
+      unsubscribeY();
+    };
+  }, [smoothMouseX, smoothMouseY]);
+
+  // Scroll opacity logic using Framer Motion (replaces Canvas logic)
+  const { scrollY } = useScroll();
+  const bgOpacity = useTransform(scrollY, [0, window.innerHeight], [0.6, 0.15]);
+
   useEffect(() => {
     const handleMouseMove = (e) => {
       mouseX.set(e.clientX);
@@ -540,10 +479,9 @@ function App() {
       >
         <NoiseOverlay />
         
-        {/* Optimized Canvas Background */}
+        {/* Optimized CSS Background */}
         <FlashlightBackground 
-          mouseX={smoothMouseX} 
-          mouseY={smoothMouseY} 
+          opacity={bgOpacity}
           onBgLoad={setIsBgLoaded}
         />
 
