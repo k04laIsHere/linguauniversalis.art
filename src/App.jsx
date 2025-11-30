@@ -140,6 +140,13 @@ const App = () => {
   const progress = useMotionValue(0); // 0 = Center (Zoom In), 1 = Zoom Out
   const smoothProgress = useSpring(progress, { stiffness: 100, damping: 30, mass: 1 });
   
+  // --- Mouse / Torch Logic ---
+  // Initialize to center to avoid jump on load
+  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
+  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
+  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150 });
+  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150 });
+
   // --- Desktop Scroll Logic ---
   const { scrollY } = useScroll();
 
@@ -242,18 +249,7 @@ const App = () => {
         const currentP = progress.get();
         progress.set(Math.min(1, currentP + 0.015)); 
 
-        // Pan in direction of swipe (Inverted/Flight Sim?)
-        // User: "slide finger up... pan to top"
-        // Slide Up = DeltaY < 0.
-        // Pan to Top = Go North = -Y? Or +Y?
-        // North is at (0, -OFFSET). South is (0, +OFFSET).
-        // To see North, we need to translate +Y (shift world down).
-        // So Slide Up (-Delta) -> Translate +Y.
-        // So we subtract Delta.
-        // mobilePanY = current - Delta.
-        // Ex: current 0. Delta -10. New = 10. Translate(10). World moves Down. North comes in view.
-        // Correct.
-        
+        // Pan in direction of swipe
         const currentPanX = mobilePanX.get();
         const currentPanY = mobilePanY.get();
         const panFactor = 1.5;
@@ -286,19 +282,6 @@ const App = () => {
     };
   }, [isMobile, progress, mobilePanX, mobilePanY, resetToCenterMobile]);
 
-  // --- Calculated Values ---
-  // Mobile start zoomed in more (0.5 -> 0.75)
-  const startScale = isMobile ? 0.75 : 1; 
-  const scale = useTransform(smoothProgress, [0, 1], [startScale, 0.15]);
-  const contentOpacity = useTransform(smoothProgress, [0.05, 0.2], [0, 1]);
-  
-  // --- Mouse / Torch Logic ---
-  // Initialize to center to avoid jump on load
-  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
-  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
-  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150 });
-  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150 });
-
   useEffect(() => {
     if (isMobile) return;
     const handleMouseMove = (e) => {
@@ -321,26 +304,21 @@ const App = () => {
      return () => window.removeEventListener('touchmove', handleTouchMove);
   }, [isMobile, mouseX, mouseY]);
 
+  // --- Calculated Values ---
+  const startScale = isMobile ? 0.75 : 1; 
+  const scale = useTransform(smoothProgress, [0, 1], [startScale, 0.15]);
+  const contentOpacity = useTransform(smoothProgress, [0.05, 0.2], [0, 1]);
+
   // --- Camera Logic ---
   
-  // Desktop Zoom & Pan Fix:
-  // 1. Zoom Out must be from Center.
-  // 2. Zoom In must be to Mouse Cursor.
-  // 3. Pan must be in direction of Mouse Move.
+  // Core Logic Change: Zoom to Flashlight Position
+  // We want the camera to be centered on the "Flashlight" (Mouse/Touch) when zoomed in.
+  // When zoomed out, we want the camera to be centered on (0,0) or to pan slightly.
   
-  // Solution: Use TransformOrigin = Center (Fixed).
-  // Use Translation to handle the "Focus" shift.
-  
-  // When Progress = 0 (Zoomed In):
-  // We want the content to be shifted such that the Center of Content aligns with Mouse? 
-  // No, we want the point under Mouse to be fixed. 
-  // Effectively, we translate AWAY from the mouse deviation to keep it centered?
-  // Let's try:
-  // X = (Center - Mouse) * (1 - Progress).
-  // If Mouse is at Right Edge (W). Center is W/2. X = (W/2 - W) = -W/2.
-  // Content Shifts Left. Right Edge of Content comes to Center. 
-  // This reveals Right Side. This is "Pan in direction of Mouse". CORRECT.
-  // At Progress 1 (Zoomed Out): Factor is 0. X = 0. Centered. CORRECT.
+  // The shift required to center the camera on the mouse is: CenterScreen - MousePos.
+  // Example: Mouse at 100, Center at 500. We need to shift World by +400 to bring Mouse point to Center.
+  // This shift should apply fully at Progress 0 (Zoom In).
+  // At Progress 1 (Zoom Out), we want 0 shift (Center Focus).
   
   const desktopCameraX = useTransform(() => {
     if (isMobile) return 0;
@@ -348,6 +326,8 @@ const App = () => {
     const p = smoothProgress.get();
     const center = winSize.w / 2;
     // (Center - Mouse) * (1 - p)
+    // At p=0 -> Center - Mouse (Full shift to center mouse)
+    // At p=1 -> 0 (No shift, center world)
     return (center - mX) * (1 - p);
   });
 
@@ -358,17 +338,62 @@ const App = () => {
     const center = winSize.h / 2;
     return (center - mY) * (1 - p);
   });
+  
+  // Mobile Logic: 
+  // We already have manual panning `mobilePanX`.
+  // But to support "Zoom to Flashlight" on mobile hold, we need to add the same offset logic?
+  // On mobile, "Flashlight" is just the touch position.
+  // If we use `mobilePanX` for dragging, that handles the map movement.
+  // But the zoom origin effect needs to be consistent. 
+  // However, mobile manual pan handles the "centering" naturally by dragging.
+  // So we might just stick to `mobilePanX` unless we want the "auto-center on hold" effect.
+  // Given "zoom into current flashlight position" request:
+  // If user holds finger at top-left, we zoom in. 
+  // If we just scale up, and `mobilePanX` stays same, does it zoom to finger?
+  // We use `transformOrigin: '50% 50%'`. 
+  // So scaling up zooms to center of screen.
+  // If finger is at top-left, zooming to center pushes that point further top-left (away).
+  // To zoom TO finger, we must translate the world such that finger moves towards center.
+  // OR we change transformOrigin to finger? No, we use translation.
+  
+  // Let's apply the same offset logic to mobile but combine it with pan?
+  // `mobilePanX` accumulates user drags.
+  // `flashlightOffset` would be the "Zoom to Finger" component.
+  // But `mobilePanX` is persistent map position.
+  // If we add an offset based on current touch, it might jump when touch starts/ends.
+  // Actually, standard "Pinch to Zoom" logic usually handles this via matrix transforms.
+  // Here we have a separated "Zoom Level" (Progress) and "Pan" (Position).
+  
+  // Desktop approach works because Mouse is always there (or tracked).
+  // On Mobile, "Flashlight" is last touch position.
+  // If we add `(Center - Touch) * (1-P)` to mobile:
+  // When dragging (P increases), (1-P) decreases. 
+  // When holding (P decreases), (1-P) increases -> Shifts map to center finger. 
+  // This sounds correct!
+  
+  const mobileCameraX = useTransform(() => {
+     const mX = smoothMouseX.get(); // This tracks touch on mobile too
+     const p = smoothProgress.get();
+     const center = winSize.w / 2;
+     // Base pan from drag + Zoom-to-finger offset
+     return mobilePanX.get() + (center - mX) * (1 - p);
+  });
 
-  const finalCameraX = useTransform(() => isMobile ? mobilePanX.get() : desktopCameraX.get());
-  const finalCameraY = useTransform(() => isMobile ? mobilePanY.get() : desktopCameraY.get());
+  const mobileCameraY = useTransform(() => {
+     const mY = smoothMouseY.get();
+     const p = smoothProgress.get();
+     const center = winSize.h / 2;
+     return mobilePanY.get() + (center - mY) * (1 - p);
+  });
+
+  const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
+  const finalCameraY = useTransform(() => isMobile ? mobileCameraY.get() : desktopCameraY.get());
 
   // Compass
   const compassRotation = useTransform(() => {
     const x = finalCameraX.get();
     const y = finalCameraY.get();
     if (x === 0 && y === 0) return 0;
-    // Panning X negative means looking Right.
-    // Compass should point to North relative to view?
     return Math.atan2(y, x) * (180 / Math.PI) + 90;
   });
 
