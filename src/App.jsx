@@ -311,23 +311,27 @@ const App = () => {
 
   // --- Camera Logic ---
   
-  // Core Logic Change: Zoom to Flashlight Position
-  // We want the camera to be centered on the "Flashlight" (Mouse/Touch) when zoomed in.
-  // When zoomed out, we want the camera to be centered on (0,0) or to pan slightly.
+  // We want to zoom to the "Flashlight" position.
+  // The concept is:
+  // When Scale = 1 (Progress 0), the point under the Flashlight should be centered.
+  // When Scale < 1 (Progress > 0), we drift back to centering the Title (0,0).
   
-  // The shift required to center the camera on the mouse is: CenterScreen - MousePos.
-  // Example: Mouse at 100, Center at 500. We need to shift World by +400 to bring Mouse point to Center.
-  // This shift should apply fully at Progress 0 (Zoom In).
-  // At Progress 1 (Zoom Out), we want 0 shift (Center Focus).
+  // The offset required to center a point (Mx, My) is: Center - M.
+  // This offset should be fully active at Scale 1 (Progress 0).
+  // This offset should be 0 at Scale < 1 (Progress 1).
+  
+  // Formula: (Center - Mouse) * (1 - Progress)
+  
+  // Use explicit spring values for mouse to ensure smooth updates
+  // Note: We use smoothMouseX/Y here, which are springs.
   
   const desktopCameraX = useTransform(() => {
     if (isMobile) return 0;
     const mX = smoothMouseX.get();
     const p = smoothProgress.get();
     const center = winSize.w / 2;
-    // (Center - Mouse) * (1 - p)
-    // At p=0 -> Center - Mouse (Full shift to center mouse)
-    // At p=1 -> 0 (No shift, center world)
+    // At p=0 (Zoom In), Offset = Center - Mouse. This shifts Mouse to Center.
+    // At p=1 (Zoom Out), Offset = 0. This shifts Center to Center.
     return (center - mX) * (1 - p);
   });
 
@@ -339,43 +343,11 @@ const App = () => {
     return (center - mY) * (1 - p);
   });
   
-  // Mobile Logic: 
-  // We already have manual panning `mobilePanX`.
-  // But to support "Zoom to Flashlight" on mobile hold, we need to add the same offset logic?
-  // On mobile, "Flashlight" is just the touch position.
-  // If we use `mobilePanX` for dragging, that handles the map movement.
-  // But the zoom origin effect needs to be consistent. 
-  // However, mobile manual pan handles the "centering" naturally by dragging.
-  // So we might just stick to `mobilePanX` unless we want the "auto-center on hold" effect.
-  // Given "zoom into current flashlight position" request:
-  // If user holds finger at top-left, we zoom in. 
-  // If we just scale up, and `mobilePanX` stays same, does it zoom to finger?
-  // We use `transformOrigin: '50% 50%'`. 
-  // So scaling up zooms to center of screen.
-  // If finger is at top-left, zooming to center pushes that point further top-left (away).
-  // To zoom TO finger, we must translate the world such that finger moves towards center.
-  // OR we change transformOrigin to finger? No, we use translation.
-  
-  // Let's apply the same offset logic to mobile but combine it with pan?
-  // `mobilePanX` accumulates user drags.
-  // `flashlightOffset` would be the "Zoom to Finger" component.
-  // But `mobilePanX` is persistent map position.
-  // If we add an offset based on current touch, it might jump when touch starts/ends.
-  // Actually, standard "Pinch to Zoom" logic usually handles this via matrix transforms.
-  // Here we have a separated "Zoom Level" (Progress) and "Pan" (Position).
-  
-  // Desktop approach works because Mouse is always there (or tracked).
-  // On Mobile, "Flashlight" is last touch position.
-  // If we add `(Center - Touch) * (1-P)` to mobile:
-  // When dragging (P increases), (1-P) decreases. 
-  // When holding (P decreases), (1-P) increases -> Shifts map to center finger. 
-  // This sounds correct!
-  
+  // Mobile logic follows same principle + manual panning
   const mobileCameraX = useTransform(() => {
-     const mX = smoothMouseX.get(); // This tracks touch on mobile too
+     const mX = smoothMouseX.get(); 
      const p = smoothProgress.get();
      const center = winSize.w / 2;
-     // Base pan from drag + Zoom-to-finger offset
      return mobilePanX.get() + (center - mX) * (1 - p);
   });
 
