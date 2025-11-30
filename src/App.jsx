@@ -318,18 +318,29 @@ const App = () => {
     const center = winSize.w / 2;
     
     // "Pin Point" Zoom with "Look At" Panning
-    // Formula: T = (Center - Mouse) * (Scale * (1 + k) - 1)
     
-    // Variable Panning Sensitivity (Bell Curve)
-    // Peak at 50% zoom (p=0.5), lowest at ends.
-    // Max speed was 6. Target 50% -> 3.
-    // Min speed -> 5% -> 0.3.
-    const k_min = 0.3;
-    const k_peak = 3;
-    const k = k_min + (k_peak - k_min) * 4 * p * (1 - p);
+    // Logic for Factor:
+    // 1. At Zoom In (p=0), we need High Factor to reach edges (e.g. 2.5). 
+    //    Low factor here causes "Jump to Center" because we can't pan far enough.
+    // 2. At Zoom Out (p=1), we need Low Positive Factor (e.g. 0.05) for gentle panning.
+    //    Negative factor causes "Inverted Panning".
+    // 3. At Mid Zoom (p=0.5), User wants "Fastest Speed".
     
-    const s = startScale - p * (startScale - 0.15);
-    const factor = s * (1 + k) - 1;
+    // Curve:
+    // p=0 (Zoom In)   -> Factor ~ 2.5 (High Reach)
+    // p=0.5 (Mid)     -> Factor ~ 3.5 (Peak Speed)
+    // p=1 (Zoom Out)  -> Factor ~ 0.05 (No Inversion)
+    
+    let factor;
+    if (p < 0.5) {
+        // Interpolate 2.5 -> 3.5
+        const t = p / 0.5; // 0 -> 1
+        factor = 2.5 + (3.5 - 2.5) * t;
+    } else {
+        // Interpolate 3.5 -> 0.05
+        const t = (p - 0.5) / 0.5; // 0 -> 1
+        factor = 3.5 + (0.05 - 3.5) * t;
+    }
     
     return (center - mX) * factor;
   });
@@ -340,26 +351,32 @@ const App = () => {
     const p = smoothProgress.get();
     const center = winSize.h / 2;
     
-    const k_min = 0.3;
-    const k_peak = 3;
-    const k = k_min + (k_peak - k_min) * 4 * p * (1 - p);
-    
-    const s = startScale - p * (startScale - 0.15);
-    const factor = s * (1 + k) - 1;
+    let factor;
+    if (p < 0.5) {
+        const t = p / 0.5;
+        factor = 2.5 + (3.5 - 2.5) * t;
+    } else {
+        const t = (p - 0.5) / 0.5;
+        factor = 3.5 + (0.05 - 3.5) * t;
+    }
     
     return (center - mY) * factor;
   });
   
-  // Mobile: Use same pinning logic but without "Look At" panning (k=0).
-  // We rely on drag (mobilePanX) for looking around.
+  // Mobile: Use pure pinning logic.
+  // Formula for Pinning: Translate = (Mouse - Center) * (1 - Scale)
+  // Or: (Center - Mouse) * (Scale - 1)
   const mobileCameraX = useTransform(() => {
      const mX = smoothMouseX.get(); 
      const p = smoothProgress.get();
      const center = winSize.w / 2;
      
-     const k = 0; // Pure pinning
      const s = startScale - p * (startScale - 0.15);
-     const factor = s * (1 + k) - 1;
+     // Pinning factor is strictly (s - 1). 
+     // Since s < 1, this is negative. 
+     // (Center - Mouse) * Negative = (Mouse - Center) * Positive.
+     // Moves world towards mouse to compensate shrinking.
+     const factor = s - 1; 
 
      return mobilePanX.get() + (center - mX) * factor;
   });
@@ -369,9 +386,8 @@ const App = () => {
      const p = smoothProgress.get();
      const center = winSize.h / 2;
      
-     const k = 0;
      const s = startScale - p * (startScale - 0.15);
-     const factor = s * (1 + k) - 1;
+     const factor = s - 1;
 
      return mobilePanY.get() + (center - mY) * factor;
   });
