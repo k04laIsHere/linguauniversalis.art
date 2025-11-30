@@ -382,6 +382,9 @@ const App = () => {
      return mobilePanY.get() + (center - mY) * factor;
   });
 
+  const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
+  const finalCameraY = useTransform(() => isMobile ? mobileCameraY.get() : desktopCameraY.get());
+  
   // Dynamic Origin for Desktop to ensure "Zoom to Point"
   const originX = useTransform(() => isMobile ? '50%' : smoothMouseX.get() + 'px');
   const originY = useTransform(() => isMobile ? '50%' : smoothMouseY.get() + 'px');
