@@ -317,30 +317,27 @@ const App = () => {
     const p = smoothProgress.get();
     const center = winSize.w / 2;
     
-    // "Pin Point" Zoom with "Look At" Panning
+    // Hybrid Approach: 
+    // 1. We use dynamic `transformOrigin` (set to Mouse) to handle the "Zoom to Point" physics perfectly.
+    // 2. We use `x` / `y` translation to handle "Look At" panning.
     
-    // Logic for Factor:
-    // 1. At Zoom In (p=0), we need High Factor to reach edges (e.g. 2.5). 
-    //    Low factor here causes "Jump to Center" because we can't pan far enough.
-    // 2. At Zoom Out (p=1), we need Low Positive Factor (e.g. 0.05) for gentle panning.
-    //    Negative factor causes "Inverted Panning".
-    // 3. At Mid Zoom (p=0.5), User wants "Fastest Speed".
+    // Problem: Moving the Origin (Mouse) shifts the view by (DeltaOrigin * (1 - Scale)).
+    // This creates a "Dragging" effect (Inverted Panning).
+    // We want "Look At" Panning (Non-Inverted).
+    // So we must Compensate the Origin Shift AND add our desired Panning Speed.
+    // Formula: x = (Center - Mouse) * (DesiredSpeed + (1 - Scale))
     
-    // Curve:
-    // p=0 (Zoom In)   -> Factor ~ 2.5 (High Reach)
-    // p=0.5 (Mid)     -> Factor ~ 3.5 (Peak Speed)
-    // p=1 (Zoom Out)  -> Factor ~ 0.05 (No Inversion)
+    // Desired Speed Curve (Bell Curve):
+    // Low speed at Zoom In (p=0) -> 0.05 for precision.
+    // Low speed at Zoom Out (p=1) -> 0.05.
+    // High speed at Mid Zoom -> 0.3.
     
-    let factor;
-    if (p < 0.5) {
-        // Interpolate 2.5 -> 3.5
-        const t = p / 0.5; // 0 -> 1
-        factor = 2.5 + (3.5 - 2.5) * t;
-    } else {
-        // Interpolate 3.5 -> 0.05
-        const t = (p - 0.5) / 0.5; // 0 -> 1
-        factor = 3.5 + (0.05 - 3.5) * t;
-    }
+    const speedMin = 0.05;
+    const speedMax = 0.3;
+    const speed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
+    
+    const s = startScale - p * (startScale - 0.15);
+    const factor = speed + (1 - s);
     
     return (center - mX) * factor;
   });
@@ -351,31 +348,24 @@ const App = () => {
     const p = smoothProgress.get();
     const center = winSize.h / 2;
     
-    let factor;
-    if (p < 0.5) {
-        const t = p / 0.5;
-        factor = 2.5 + (3.5 - 2.5) * t;
-    } else {
-        const t = (p - 0.5) / 0.5;
-        factor = 3.5 + (0.05 - 3.5) * t;
-    }
+    const speedMin = 0.05;
+    const speedMax = 0.3;
+    const speed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
+    
+    const s = startScale - p * (startScale - 0.15);
+    const factor = speed + (1 - s);
     
     return (center - mY) * factor;
   });
   
-  // Mobile: Use pure pinning logic.
-  // Formula for Pinning: Translate = (Mouse - Center) * (1 - Scale)
-  // Or: (Center - Mouse) * (Scale - 1)
+  // Mobile: Keep the working Pinning logic (k=0 equivalent).
+  // factor = s - 1.
   const mobileCameraX = useTransform(() => {
      const mX = smoothMouseX.get(); 
      const p = smoothProgress.get();
      const center = winSize.w / 2;
      
      const s = startScale - p * (startScale - 0.15);
-     // Pinning factor is strictly (s - 1). 
-     // Since s < 1, this is negative. 
-     // (Center - Mouse) * Negative = (Mouse - Center) * Positive.
-     // Moves world towards mouse to compensate shrinking.
      const factor = s - 1; 
 
      return mobilePanX.get() + (center - mX) * factor;
@@ -392,8 +382,9 @@ const App = () => {
      return mobilePanY.get() + (center - mY) * factor;
   });
 
-  const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
-  const finalCameraY = useTransform(() => isMobile ? mobileCameraY.get() : desktopCameraY.get());
+  // Dynamic Origin for Desktop to ensure "Zoom to Point"
+  const originX = useTransform(() => isMobile ? '50%' : smoothMouseX.get() + 'px');
+  const originY = useTransform(() => isMobile ? '50%' : smoothMouseY.get() + 'px');
 
   // Compass
   const compassRotation = useTransform(() => {
@@ -443,7 +434,7 @@ const App = () => {
             scale,
             x: finalCameraX,
             y: finalCameraY,
-            transformOrigin: '50% 50%'
+            transformOrigin: useMotionTemplate`${originX} ${originY}`
           }}
         >
           {/* Center: Title (Always Visible) */}
