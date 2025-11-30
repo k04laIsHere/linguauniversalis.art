@@ -311,33 +311,35 @@ const App = () => {
 
   // --- Camera Logic ---
   
+  // Fixed Center Origin Approach:
+  // - transformOrigin stays at 50% 50% (center)
+  // - All positioning handled via translation
+  // - Formula combines "Look At" panning + "Zoom to Point" compensation
+  
   const desktopCameraX = useTransform(() => {
     if (isMobile) return 0;
     const mX = smoothMouseX.get();
     const p = smoothProgress.get();
     const center = winSize.w / 2;
     
-    // Hybrid Approach: 
-    // 1. We use dynamic `transformOrigin` (set to Mouse) to handle the "Zoom to Point" physics perfectly.
-    // 2. We use `x` / `y` translation to handle "Look At" panning.
-    
-    // Problem: Moving the Origin (Mouse) shifts the view by (DeltaOrigin * (1 - Scale)).
-    // This creates a "Dragging" effect (Inverted Panning).
-    // We want "Look At" Panning (Non-Inverted).
-    // So we must Compensate the Origin Shift AND add our desired Panning Speed.
-    // Formula: x = (Center - Mouse) * (DesiredSpeed + (1 - Scale))
-    
-    // Desired Speed Curve (Bell Curve):
-    // Low speed at Zoom In (p=0) -> 0.05 for precision.
-    // Low speed at Zoom Out (p=1) -> 0.05.
-    // High speed at Mid Zoom -> 0.3.
-    
+    // Pan Speed Curve (Bell Curve):
+    // Low at Zoom In (p=0) -> 0.05 for precision
+    // Low at Zoom Out (p=1) -> 0.05
+    // High at Mid Zoom (p=0.5) -> 0.3
     const speedMin = 0.05;
     const speedMax = 0.3;
-    const speed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
+    const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
     
-    const s = startScale - p * (startScale - 0.15);
-    const factor = speed + (1 - s);
+    const s = startScale - p * (startScale - 0.15); // Current scale
+    
+    // Combined Formula:
+    // Pan Component: (Center - Mouse) * PanSpeed (Look At: mouse right → see right)
+    // Zoom Pin Component: (Mouse - Center) * (1 - Scale) (Keep point fixed during zoom)
+    // Combined: (Center - Mouse) * PanSpeed + (Mouse - Center) * (1 - Scale)
+    // Simplified: (Center - Mouse) * PanSpeed - (Center - Mouse) * (1 - Scale)
+    //           = (Center - Mouse) * (PanSpeed - (1 - Scale))
+    //           = (Center - Mouse) * (PanSpeed + Scale - 1)
+    const factor = panSpeed + s - 1;
     
     return (center - mX) * factor;
   });
@@ -350,23 +352,26 @@ const App = () => {
     
     const speedMin = 0.05;
     const speedMax = 0.3;
-    const speed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
+    const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
     
     const s = startScale - p * (startScale - 0.15);
-    const factor = speed + (1 - s);
+    const factor = panSpeed + s - 1;
     
     return (center - mY) * factor;
   });
   
-  // Mobile: Keep the working Pinning logic (k=0 equivalent).
-  // factor = s - 1.
+  // Mobile: Same logic but with drag offset
   const mobileCameraX = useTransform(() => {
      const mX = smoothMouseX.get(); 
      const p = smoothProgress.get();
      const center = winSize.w / 2;
      
+     const speedMin = 0.05;
+     const speedMax = 0.3;
+     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
+     
      const s = startScale - p * (startScale - 0.15);
-     const factor = s - 1; 
+     const factor = panSpeed + s - 1;
 
      return mobilePanX.get() + (center - mX) * factor;
   });
@@ -376,18 +381,18 @@ const App = () => {
      const p = smoothProgress.get();
      const center = winSize.h / 2;
      
+     const speedMin = 0.05;
+     const speedMax = 0.3;
+     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
+     
      const s = startScale - p * (startScale - 0.15);
-     const factor = s - 1;
+     const factor = panSpeed + s - 1;
 
      return mobilePanY.get() + (center - mY) * factor;
   });
 
   const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
   const finalCameraY = useTransform(() => isMobile ? mobileCameraY.get() : desktopCameraY.get());
-  
-  // Dynamic Origin for Desktop to ensure "Zoom to Point"
-  const originX = useTransform(() => isMobile ? '50%' : smoothMouseX.get() + 'px');
-  const originY = useTransform(() => isMobile ? '50%' : smoothMouseY.get() + 'px');
 
   // Compass
   const compassRotation = useTransform(() => {
@@ -437,7 +442,7 @@ const App = () => {
             scale,
             x: finalCameraX,
             y: finalCameraY,
-            transformOrigin: useMotionTemplate`${originX} ${originY}`
+            transformOrigin: '50% 50%'
           }}
         >
           {/* Center: Title (Always Visible) */}
