@@ -311,9 +311,9 @@ const App = () => {
 
   // --- Camera Logic ---
   
-  // Zoom-to-Point + Look At Panning
-  // - Dynamic transformOrigin for zoom-to-point (scales from cursor)
-  // - Translation handles panning (mouse right → see right)
+  // Google Maps-style Zoom-to-Point + Look At Panning
+  // - Fixed center origin (50% 50%)
+  // - Translation handles both panning AND zoom-to-point compensation
   
   const desktopCameraX = useTransform(() => {
     if (isMobile) return 0;
@@ -331,13 +331,20 @@ const App = () => {
     
     const s = startScale - p * (startScale - 0.15);
     
+    // Mouse position relative to center
+    const mouseOffset = mX - center;
+    
+    // Zoom-to-Point: To keep point at mouse fixed during zoom
+    // With fixed center origin, when we scale, translate by: mouseOffset * (1 - Scale)
+    // This ensures the point under cursor stays at cursor position
+    const zoomCompensation = mouseOffset * (1 - s);
+    
     // Panning: Mouse right → See right → Content moves LEFT
-    // Origin Compensation: When origin moves from center to mouse, content shifts
-    // We compensate: (Center - Mouse) * (1 - Scale) to undo the shift
-    // Then add panning: (Center - Mouse) * PanSpeed
-    // Combined: (Center - Mouse) * (PanSpeed + (1 - Scale))
-    const offsetFromCenter = center - mX;
-    return offsetFromCenter * (panSpeed + (1 - s));
+    // Translation: (Center - Mouse) * PanSpeed = -mouseOffset * PanSpeed
+    const panTranslation = -mouseOffset * panSpeed;
+    
+    // Combined: Pan + Zoom compensation
+    return panTranslation + zoomCompensation;
   });
 
   const desktopCameraY = useTransform(() => {
@@ -351,37 +358,50 @@ const App = () => {
     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
     
     const s = startScale - p * (startScale - 0.15);
-    const offsetFromCenter = center - mY;
-    return offsetFromCenter * (panSpeed + (1 - s));
+    const mouseOffset = mY - center;
+    const zoomCompensation = mouseOffset * (1 - s);
+    const panTranslation = -mouseOffset * panSpeed;
+    
+    return panTranslation + zoomCompensation;
   });
   
-  // Mobile: Pan via drag, zoom-to-point via dynamic origin
+  // Mobile: Same logic with drag offset
   const mobileCameraX = useTransform(() => {
-     return mobilePanX.get();
+     const mX = smoothMouseX.get(); 
+     const p = smoothProgress.get();
+     const center = winSize.w / 2;
+     
+     const speedMin = 0.05;
+     const speedMax = 0.3;
+     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
+     
+     const s = startScale - p * (startScale - 0.15);
+     const mouseOffset = mX - center;
+     const zoomCompensation = mouseOffset * (1 - s);
+     const panTranslation = -mouseOffset * panSpeed;
+     
+     return mobilePanX.get() + panTranslation + zoomCompensation;
   });
 
   const mobileCameraY = useTransform(() => {
-     return mobilePanY.get();
+     const mY = smoothMouseY.get();
+     const p = smoothProgress.get();
+     const center = winSize.h / 2;
+     
+     const speedMin = 0.05;
+     const speedMax = 0.3;
+     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
+     
+     const s = startScale - p * (startScale - 0.15);
+     const mouseOffset = mY - center;
+     const zoomCompensation = mouseOffset * (1 - s);
+     const panTranslation = -mouseOffset * panSpeed;
+     
+     return mobilePanY.get() + panTranslation + zoomCompensation;
   });
 
   const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
   const finalCameraY = useTransform(() => isMobile ? mobileCameraY.get() : desktopCameraY.get());
-  
-  // Dynamic Origin for Zoom-to-Point
-  // Element center is at viewport center (0,0 in element space)
-  // Mouse screen position (mX, mY) relative to viewport center (centerX, centerY)
-  // Origin should be: (mX - centerX, mY - centerY) relative to element center
-  const originX = useTransform(() => {
-    const mX = smoothMouseX.get();
-    const center = winSize.w / 2;
-    return (mX - center) + 'px';
-  });
-  
-  const originY = useTransform(() => {
-    const mY = smoothMouseY.get();
-    const center = winSize.h / 2;
-    return (mY - center) + 'px';
-  });
 
   // Compass
   const compassRotation = useTransform(() => {
@@ -431,7 +451,7 @@ const App = () => {
             scale,
             x: finalCameraX,
             y: finalCameraY,
-            transformOrigin: useMotionTemplate`${originX} ${originY}`
+            transformOrigin: '50% 50%'
           }}
         >
           {/* Center: Title (Always Visible) */}
