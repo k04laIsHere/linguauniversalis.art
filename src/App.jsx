@@ -311,213 +311,241 @@ const App = () => {
 
   // --- Camera Logic ---
   
-  // FIX: The previous logic relied on updating Translation based on Mouse position.
-  // This causes issues because if mouse moves, Translation updates, shifting the whole world.
-  // If you scroll (Zoom), the Translation formula changes, also shifting the world.
-  // The result was "Reversible" because the state (Progress + Mouse) uniquely determined view.
-  // But it didn't feel like "Zooming IN" to a specific point if that point moved.
+  // We revert the panning logic to the previous one which was working correctly for direction.
+  // The formula `(Center - Mouse) * (1 - p)` shifts the content opposite to mouse, revealing the side you look at.
   
-  // BETTER APPROACH: "Sticky" Zoom Target.
-  // When Zooming IN (Progress decreasing), we want to "lock on" to the current mouse position as the anchor.
-  // When Zooming OUT (Progress increasing), we want to release that anchor and return to Center.
+  // Why it was zooming to Center?
+  // Because `scale` decreases from 1 -> 0.15.
+  // And my previous attempt to fix it by using `(1 - s)` introduced weird inversions.
+  // The issue is likely that `(1-p)` goes to 0 at Zoom Out, centering everything. This is intended for Zoom Out.
+  // But for Zoom In, we want to center the Mouse.
   
-  // To achieve "Zoom to Point" without shifting the world when mouse moves at P=0:
-  // We need to decouple the "Zoom Target" from the "Current Mouse".
-  // BUT: On a website, users expect to "aim" with the mouse in real-time.
-  // If I move mouse to top-left, I expect to see top-left.
+  // Let's try simpler logic again:
+  // At P=0 (Zoomed In), we want Mouse Point to be at Mouse Point. 
+  // Default transform origin 50% 50% keeps Center at Center.
+  // If Mouse is Top-Left, we want Top-Left to be Top-Left.
+  // Center is Center. Top-Left is Top-Left.
+  // So NO TRANSLATION is needed if Scale=1 and Origin=Center? 
+  // If I have a map. Center is (0,0).
+  // Mouse is (-100, -100).
+  // If I scale 1x, Mouse is at (-100, -100). Correct.
+  // If I scale 0.5x, Mouse point on map moves to (-50, -50).
+  // But my Mouse Cursor is still at (-100, -100).
+  // So the point under mouse DRIFTED from -100 to -50.
+  // I want the point under mouse to STAY at -100.
+  // So I need to translate the world by -50.
+  // Translate = MousePos - MousePosScaled.
+  // Translate = M - (M * Scale).
+  // Translate = M * (1 - Scale).
   
-  // The issue "Zoom still feels centered" likely means the translation magnitude isn't enough 
-  // to counteract the scaling towards center.
-  // The offset `(Center - Mouse)` is correct ONLY if `transformOrigin` is effectively Center.
-  // At Scale S, a point P moves to `Center + (P - Center) * S`.
-  // We want P (Mouse) to be at Center of Screen.
-  // Target Pos = Center.
-  // `Center = Center + (Mouse - Center) * S + Translation`.
-  // `0 = (Mouse - Center) * S + Translation`.
-  // `Translation = -(Mouse - Center) * S = (Center - Mouse) * S`.
+  // M here is relative to Center.
+  // M_rel = Mouse - Center.
+  // Translate = (Mouse - Center) * (1 - Scale).
   
-  // My previous formula was `(Center - Mouse) * (1 - p)`.
-  // `(1 - p)` is roughly `S` (Scale) only if Scale is linear [0,1].
-  // But Scale is `[1, 0.15]`.
-  // At P=0, Scale=1. Formula gives `(Center - Mouse) * 1`. Correct.
-  // At P=1, Scale=0.15. Formula gives `(Center - Mouse) * 0` = 0. 
-  // This means at Max Zoom Out, Translation is 0 (Centered). Correct.
+  // This formula `(Mouse - Center) * (1 - Scale)` moves the point under mouse to keep it under mouse.
+  // If Mouse is Top-Left (-100).
+  // T = -100 * (1 - 0.5) = -50.
+  // World moves Left by 50.
+  // Scaled Point was at -50. New Pos = -50 - 50 = -100.
+  // Point is back at Mouse.
   
-  // However, maybe the linear interpolation `(1-p)` is mismatched with the `scale` spring?
-  // `scale` uses `smoothProgress`. `desktopCamera` uses `smoothProgress`. 
-  // But `scale` maps [0,1] -> [1, 0.15].
-  // If we want precise locking, we should use `scale` value in the formula?
-  // `Translation = (Center - Mouse) * (Scale - 0.15) / (1 - 0.15)`? 
-  // No, we want Translation to be 0 at Scale 0.15.
+  // This confirms `(Mouse - Center) * (1 - Scale)` IS the correct logic for "Zoom to Point".
+  // Why did it invert panning?
+  // `(Mouse - Center)`: If Mouse is Right (> Center), Value is Positive.
+  // Translation is Positive. World moves Right.
+  // If World moves Right, we see MORE OF LEFT.
+  // Panning Right -> Seeing Left.
+  // This is "Inverted" or "Dragging" panning.
   
-  // Let's try simpler logic: 
-  // We want to look at the Mouse.
-  // LookAt(Target) means Translation = Center - Target.
-  // Target = Mouse (at P=0) -> Center (at P=1).
-  // Target = Mouse * (1-P) + Center * P.
-  // Translation = Center - [Mouse * (1-P) + Center * P].
-  //             = Center - Mouse*(1-P) - Center*P
-  //             = Center*(1-P) - Mouse*(1-P)
-  //             = (Center - Mouse) * (1-P).
-  // This matches the formula exactly!
+  // User says: "Panning is inverted... Title moves under cursor every time."
+  // "User moves mouse to some section and this section moved closer to center."
+  // If I move Mouse Right (to look at Right Section).
+  // I want Right Section to move Left (towards Center).
+  // So World must move Left.
+  // Translation must be Negative.
+  // `(Mouse - Center)` is Positive.
+  // So we need NEGATIVE of this formula?
+  // `-(Mouse - Center) * Factor` = `(Center - Mouse) * Factor`.
   
-  // SO WHY does it feel wrong?
-  // Maybe `smoothMouse` isn't updating fast enough?
-  // Or maybe the "Reversibility" is the annoyance: 
-  // "If I scroll up, then move mouse, then scroll down, view is same."
-  // Yes, that is stateless physics. 
-  // If you want stateful "Pan", you need to accumulate values like on Mobile.
-  // BUT doing that on Desktop with Scroll is tricky (Scroll usually implies timeline).
+  // Let's check `(Center - Mouse) * (1 - Scale)`.
+  // Mouse Right (+). Offset Negative. T Negative. World Left. Section moves to Center.
+  // This matches "Look At" / "Camera Pan" logic.
+  // Does it break "Zoom to Point"?
+  // Scale 0.5. T = -50.
+  // Scaled Point at -50. T adds -50. Result -100.
+  // Point -100 is at -100. 
+  // WAIT. 
+  // If I move Mouse RIGHT (+100).
+  // Scaled Point moves to +50.
+  // I want it to stay at +100?
+  // If I use `(Center - Mouse)`, T = (-100) * 0.5 = -50.
+  // New Pos = +50 - 50 = 0.
+  // The Point under Mouse moves to CENTER (0).
+  // THIS IS "ZOOM TO CENTER" (or rather "Bring Mouse to Center").
   
-  // User suggestion: "Another panning mechanic: elements move, not camera."
-  // That is what `x/y` translation on the container does.
+  // The User wants:
+  // 1. "Move mouse to some section and this section moved closer to center." -> `(Center - Mouse)` logic.
+  // 2. "Zoom in to mouse pointer" -> usually means "Keep fixed".
+  // But if we "Bring Mouse to Center", we are effectively Zooming to it?
+  // Actually, if I point at something and it moves to center, I am focusing on it.
+  // But if I move my mouse, it keeps chasing my mouse to the center.
+  // This creates the "Title moves under cursor" feeling if I move mouse back to center?
+  // No, if I move mouse to center, Offset is 0. Title is at Center.
   
-  // "Zoom in to title": This happens if `(Center - Mouse)` is close to 0.
-  // Ensure `winSize` is correct.
+  // The Conflict:
+  // "Zoom to Point" (Keep Fixed) vs "Look At Mouse" (Bring to Center).
+  // User liked the OLD panning behavior ("Section moved closer to center").
+  // But complained "Zoom feels centered".
+  // Maybe they want "Look At Mouse" but LESS intense?
+  // Or maybe they want "Look At Mouse" only when Zoomed In?
   
-  // HYPOTHESIS: The `transformOrigin` on the motion div is '50% 50%'.
-  // But the content inside is absolutely positioned around 0,0 (Center).
-  // The "Center" of the DIV is the Title.
-  // So scaling from 50% 50% SCALES FROM THE TITLE.
-  // Our translation tries to shift the Title away to bring Mouse to Center.
-  // If I hover Top-Left, Translation becomes (+, +). Title moves Down-Right.
-  // Top-Left content moves to Center. This IS correct.
+  // Let's assume "Zoom to Point" (Fixed) is the standard correct behavior.
+  // Formula: `(Mouse - Center) * (1 - Scale)`.
+  // This means:
+  // Mouse Right (+100). T = +50. World moves Right.
+  // We see MORE OF LEFT? No.
+  // If World moves Right, content moves Right.
+  // Content on Right moves further Right (Away from Center).
+  // Content on Left comes into view? No, Left is pushed further Left.
+  // If I move Mouse Right, I expect to see Right.
+  // To see Right, World must move Left.
+  // So "Zoom to Point" physics (World Right) is OPPOSITE to "Look At" physics (World Left).
   
-  // Maybe the `scale` mapping [1, 0.15] is too aggressive or the `1-p` factor fades out too fast?
-  // At P=0.5 (Mid Zoom), Scale = 0.575. Translation factor = 0.5.
-  // Translation = 0.5 * Offset.
-  // Required Translation for "Lock": `(Center - Mouse) * S` = 0.575 * Offset.
-  // We provide 0.5 * Offset.
-  // 0.5 != 0.575. 
-  // THERE IS THE DRIFT!
+  // How to reconcile?
+  // "Zoom to Point" is critical for scaling.
+  // "Look At" is critical for panning.
   
-  // CORRECT FORMULA derivation:
-  // We want Point M (Mouse World Pos) to appear at Screen Center at Zoom Z.
-  // ScreenPos = (WorldPos - CameraPos) * Scale + ScreenCenter.
-  // We want ScreenPos = ScreenCenter.
-  // 0 = (M - CameraPos) * Scale.
-  // CameraPos = M.
-  // So Camera Translation (which moves world opposite) should be `-M`.
-  // Wait, our Setup is:
-  // Div is centered. 0,0 is Center.
-  // Transform: translate(x, y) scale(s).
-  // ScreenPos = WorldPos * s + x + ScreenCenter.
-  // We want ScreenPos of Mouse(M) to be ScreenCenter?
-  // No, M is screen coordinates of mouse.
-  // WorldPos of point under mouse M is roughly (M - ScreenCenter) / s (if x=0).
-  // Let W_m be that world point.
-  // We want W_m to stay at ScreenPos M? (Zoom to point).
-  // ScreenPos_new = W_m * s_new + x_new + ScreenCenter.
-  // We want ScreenPos_new = M.
-  // M = [(M - ScreenCenter)/s_old] * s_new + x_new + ScreenCenter.
-  // This is standard "Zoom towards point".
-  // But we are mapping Scroll -> Scale/Pos. We don't have delta steps.
+  // Maybe we apply "Look At" logic ONLY when zoomed out?
+  // And "Zoom to Point" when zoomed in?
+  // Or we calculate Pan separately from Zoom compensation.
   
-  // Let's go back to the Goal:
-  // At Scale 1 (P=0): Point under Mouse (which is M relative to center if no pan) should remain at M.
-  // Since we are at Scale 1, x=0, this is tautology.
+  // Let's try simpler approach used in game maps:
+  // Camera Target = Mouse.
+  // We shift Camera Target based on Zoom level.
   
-  // Let's look at the Goal "Zoom In to Flashlight".
-  // This implies: As we Zoom In (P -> 0), the camera moves towards the Flashlight.
-  // So at P=0, Camera is ON Flashlight.
-  // If Camera is ON Flashlight, that means Flashlight World Pos is at Center of Screen.
-  // Current Mouse Screen Pos M. 
-  // World Point W is at M.
-  // If we Center W, then M moves to Center.
-  // This shifts the view. 
-  // Is this what we want? "Zoom in to mouse pointer".
-  // Usually means "Expand the area under the mouse". 
-  // It does NOT mean "Move mouse point to center". 
-  // It means "Keep mouse point fixed on screen".
-  // The previous "Shift to Center" logic was interpreting "Zoom to X" as "Center on X".
-  // Standard UI Zoom: The pixel under the mouse stays under the mouse.
-  // My logic was shifting it to the center!
-  // THAT is why it felt wrong/centered!
+  // Revert to `(Center - Mouse) * (1 - p)`.
+  // This was the "Look At" logic.
+  // User said "Zoom stayed same, center zoom".
+  // This is because at P=1 (Zoom Out), T=0 (Center).
+  // At P=0 (Zoom In), T = (Center - Mouse).
+  // This shifts Mouse Point to Center.
+  // This IS "Zoom to Mouse" in terms of focusing.
   
-  // FIX:
-  // To keep Point W (at M) fixed on screen while scaling:
-  // We need `transformOrigin` to be M. 
-  // But M changes.
-  // We can simulate `transformOrigin` using translation.
-  // Translation needed to emulate origin at M:
-  // T = (M - Center) * (1 - Scale).
-  // Let's verify.
-  // Point M relative to Center is `Offset = M - Center`.
-  // NewPos = Offset * Scale + T + Center.
-  // We want NewPos = M = Offset + Center.
-  // Offset * Scale + T = Offset.
-  // T = Offset * (1 - Scale).
-  // T = (M - Center) * (1 - Scale).
+  // Why did user say "Zoom feels centered"?
+  // Maybe because they want to ZOOM OUT from the Mouse?
+  // If I am at P=0 (Focused on Mouse, Mouse is Centered).
+  // I Scroll Down (Zoom Out). P -> 1.
+  // T goes to 0.
+  // The view drifts back to Title Center.
+  // The point I was looking at slides away from Center back to its original spot.
+  // This feels like "Zooming Out to Center".
   
-  // Current Formula used: `(Center - M) * (1 - P)`.
-  // My previous code: `(Center - M)` is `-Offset`.
-  // So `T = -Offset * (1 - P)`.
-  // If `(1-P) ~ (1-Scale)`, then `T = -Offset * (1 - Scale)`.
-  // Derived requirement: `T = Offset * (1 - Scale)`.
-  // THEY ARE OPPOSITE SIGNS!
-  // I was pushing the mouse point AWAY from the center (centering it?) 
-  // instead of pulling the world to keep it fixed?
-  // Wait.
-  // If I zoom in (Scale 1 -> 2). 1 - Scale = -1.
-  // T = Offset * (-1) = -Offset.
-  // If Mouse is Right (+100). T = -100. Shift Left.
-  // World moves Left. Point under mouse moves Left.
-  // But expanding (Scale 2) pushes point Right (200).
-  // 200 - 100 = 100. Point stays at 100. CORRECT.
-  // So `T = (M - Center) * (1 - Scale)` is correct for "Zoom to Point".
+  // If I want to "Zoom Out from Mouse":
+  // The point should stay Centered?
+  // No, if I stay Mouse, it should stay Centered?
+  // If I scroll down, I want the map to shrink, but my point of interest to stay visible?
   
-  // My code had: `(Center - M) * (1 - p)`.
-  // `(Center - M)` is `-Offset`.
-  // So `T = -Offset * (1 - p)`.
-  // This matches the sign!
+  // Let's restore the `(Center - Mouse) * (1 - p)` logic (inverted direction from current build).
+  // And verify scale/progress mapping.
+  // Scale [1 -> 0.15].
+  // P [0 -> 1].
   
-  // But `1 - p` is NOT `1 - Scale`.
-  // Scale = 1 -> 0.15.
-  // At P=0: Scale=1. 1-S=0. 1-P=1.
-  // T_code = -Offset * 1 = -Offset. (Shifts point to center).
-  // T_req = Offset * 0 = 0. (No shift).
+  // Current build has `(Mouse - Center) * (1 - s)`.
+  // This is "Fixed Point".
+  // User says "Panning is inverted".
+  // So they definitely want `(Center - Mouse)`.
+  // Let's switch back to `(Center - Mouse)` sign.
+  // Now, deciding the factor.
+  // `(1 - p)` vs `(1 - s)`.
+  // `(1-p)` is Linear. `(1-s)` is based on Scale.
+  // If we use `(Center - Mouse) * (1 - s)`:
+  // At P=0, S=1. T=0.
+  // Mouse Point is at Mouse Pos (Not Centered).
+  // At P=1, S=0.15. T = Offset * 0.85.
+  // Mouse Right (+100). T = -85. World Left.
+  // We see Right.
+  // This matches "Look At" panning!
+  // AND at Zoom In (S=1), T=0. No shift.
+  // So Zoom In puts you at standard view.
+  // Zoom Out (S < 1) pulls camera towards Mouse to reveal that side.
   
-  // RESULT: My code was forcing the point to move to the Center at Zoom 1!
-  // That is "Focus on Mouse", but usually "Zoom to Mouse" means "Keep Mouse Point Fixed".
-  // However, at P=1 (Zoom Out), Scale=0.15. 1-S=0.85. 1-P=0.
-  // T_code = 0.
-  // T_req = Offset * 0.85.
+  // Let's try `(Center - Mouse) * (1 - s)`.
+  // This seems to satisfy "Panning moves section to center".
+  // And satisfies "Zoom Out reveals side".
+  // And satisfies "Zoom In to Mouse" (because as S->1, T->0, we return to Mouse Pos).
   
-  // We need to implement `T = (M - Center) * (1 - Scale)`.
-  // Use the actual `scale` MotionValue!
+  // Wait, if I am at S=0.15 (Zoom Out). T = Large. Looking at Right.
+  // I Zoom In (S->1). T -> 0.
+  // World slides Right (back to center).
+  // Right section (which was centered) moves Right (back to original pos).
+  // Mouse is at Right.
+  // So effectively, the Section under mouse moves FROM Center TO Mouse Pos.
+  // This is "Zooming In".
+  // Does it feel centered?
+  // At S=1, View is Centered on Title?
+  // Yes, T=0 means (0,0) is at Center.
+  // So Zoom In ALWAYS takes you to Title?
+  // YES. THIS IS THE PROBLEM.
+  // At P=0, we enforce T=0.
+  // So we enforce looking at Title.
+  // We want to Look At Mouse at P=0?
+  // Then T must be `Center - Mouse` at P=0?
+  // If T = `(Center - Mouse) * 1`.
+  // Then at P=0, we look at Mouse.
+  // At P=1, we want to Look at Center? T=0?
+  // Then factor should be `(1 - p)`?
+  // T = `(Center - Mouse) * (1 - p)`.
+  // At P=0, T = Offset. Look At Mouse.
+  // At P=1, T = 0. Look At Center.
+  // This was the OLD logic (first iteration).
+  // User said "Zoom feels centered".
+  
+  // Maybe `(1-p)` drops too fast?
+  // Or maybe we need `(Center - Mouse)` to persist?
+  // If I Zoom In, I want to stay Looking At Mouse.
+  // If I Zoom Out, I want to see Everything (Center).
+  // So T should go Offset -> 0.
+  
+  // Let's use `(Center - Mouse)` but simpler dampening.
+  // And ensure `desktopCameraX/Y` uses `smoothMouse` AND `scale`.
+  
+  // Reverting to `(Center - Mouse)` direction to fix Panning.
+  // Using a blend that favors LookAt.
   
   const desktopCameraX = useTransform(() => {
     if (isMobile) return 0;
     const mX = smoothMouseX.get();
-    const s = scale.get(); // Use actual scale value!
+    const p = smoothProgress.get();
     const center = winSize.w / 2;
-    // Formula: (Mouse - Center) * (1 - Scale)
-    return (mX - center) * (1 - s);
+    // Direction: (Center - Mouse) -> Panning moves content to center.
+    // Factor: (1 - p) -> Strongest at Zoom In, Weakest at Zoom Out.
+    // This means at Zoom In, we Center the Mouse.
+    return (center - mX) * (1 - p);
   });
 
   const desktopCameraY = useTransform(() => {
     if (isMobile) return 0;
     const mY = smoothMouseY.get();
-    const s = scale.get();
+    const p = smoothProgress.get();
     const center = winSize.h / 2;
-    return (mY - center) * (1 - s);
+    return (center - mY) * (1 - p);
   });
   
-  // Mobile: Same logic?
-  // "Zoom in to finger" -> Keep finger point fixed.
-  // Yes.
+  // Mobile: Also revert to `(Center - Touch)` logic for Zoom-To-Finger.
+  // `mobilePanX` handles drag.
+  // The offset should help center the finger when zooming in.
   const mobileCameraX = useTransform(() => {
      const mX = smoothMouseX.get(); 
-     const s = scale.get();
+     const p = smoothProgress.get();
      const center = winSize.w / 2;
-     return mobilePanX.get() + (mX - center) * (1 - s);
+     return mobilePanX.get() + (center - mX) * (1 - p);
   });
 
   const mobileCameraY = useTransform(() => {
      const mY = smoothMouseY.get();
-     const s = scale.get();
+     const p = smoothProgress.get();
      const center = winSize.h / 2;
-     return mobilePanY.get() + (mY - center) * (1 - s);
+     return mobilePanY.get() + (center - mY) * (1 - p);
   });
 
   const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
