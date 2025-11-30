@@ -140,13 +140,6 @@ const App = () => {
   const progress = useMotionValue(0); // 0 = Center (Zoom In), 1 = Zoom Out
   const smoothProgress = useSpring(progress, { stiffness: 100, damping: 30, mass: 1 });
   
-  // --- Mouse / Torch Logic ---
-  // Initialize to center to avoid jump on load
-  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
-  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
-  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150 });
-  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150 });
-
   // --- Desktop Scroll Logic ---
   const { scrollY } = useScroll();
 
@@ -249,7 +242,18 @@ const App = () => {
         const currentP = progress.get();
         progress.set(Math.min(1, currentP + 0.015)); 
 
-        // Pan in direction of swipe
+        // Pan in direction of swipe (Inverted/Flight Sim?)
+        // User: "slide finger up... pan to top"
+        // Slide Up = DeltaY < 0.
+        // Pan to Top = Go North = -Y? Or +Y?
+        // North is at (0, -OFFSET). South is (0, +OFFSET).
+        // To see North, we need to translate +Y (shift world down).
+        // So Slide Up (-Delta) -> Translate +Y.
+        // So we subtract Delta.
+        // mobilePanY = current - Delta.
+        // Ex: current 0. Delta -10. New = 10. Translate(10). World moves Down. North comes in view.
+        // Correct.
+        
         const currentPanX = mobilePanX.get();
         const currentPanY = mobilePanY.get();
         const panFactor = 1.5;
@@ -282,6 +286,19 @@ const App = () => {
     };
   }, [isMobile, progress, mobilePanX, mobilePanY, resetToCenterMobile]);
 
+  // --- Calculated Values ---
+  // Mobile start zoomed in more (0.5 -> 0.75)
+  const startScale = isMobile ? 0.75 : 1; 
+  const scale = useTransform(smoothProgress, [0, 1], [startScale, 0.15]);
+  const contentOpacity = useTransform(smoothProgress, [0.05, 0.2], [0, 1]);
+  
+  // --- Mouse / Torch Logic ---
+  // Initialize to center to avoid jump on load
+  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
+  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
+  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150 });
+  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150 });
+
   useEffect(() => {
     if (isMobile) return;
     const handleMouseMove = (e) => {
@@ -304,16 +321,11 @@ const App = () => {
      return () => window.removeEventListener('touchmove', handleTouchMove);
   }, [isMobile, mouseX, mouseY]);
 
-  // --- Calculated Values ---
-  const startScale = isMobile ? 0.75 : 0.85; 
-  const scale = useTransform(smoothProgress, [0, 1], [startScale, 0.15]);
-  const contentOpacity = useTransform(smoothProgress, [0.05, 0.2], [0, 1]);
-
   // --- Camera Logic ---
   
-  // Google Maps-style Zoom-to-Point + Look At Panning
-  // - Dynamic origin at mouse cursor (for zoom-to-point)
-  // - Translation compensates for origin shift + handles panning
+  // Google Maps-style Zoom-to-Point with Dynamic Origin
+  // Problem: Dynamic origin at mouse causes hero to follow cursor
+  // Solution: Compensate origin shift + handle panning correctly
   
   const desktopCameraX = useTransform(() => {
     if (isMobile) return 0;
@@ -321,20 +333,25 @@ const App = () => {
     const p = smoothProgress.get();
     const center = winSize.w / 2;
     
-    // Pan Speed Curve (Bell Curve):
-    // Low at Zoom In (p=0) -> 0.05 for precision
-    // Low at Zoom Out (p=1) -> 0.05  
-    // High at Mid Zoom (p=0.5) -> 0.3
+    // Pan Speed Curve (Bell Curve)
     const speedMin = 0.05;
     const speedMax = 0.3;
     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
     
     const s = startScale - p * (startScale - 0.15);
+    const mouseOffset = mX - center;
     
-    // Dynamic origin at mouse handles zoom-to-point automatically  
-    // For panning: Mouse right → See right → Content moves LEFT
-    // Formula: (Center - Mouse) * PanSpeed
-    return (center - mX) * panSpeed;
+    // When dynamic origin moves from center to mouse position:
+    // It causes automatic view shift of approximately: mouseOffset * (1 - scale)
+    // We compensate this to prevent hero from following cursor
+    const originCompensation = -mouseOffset * (1 - s);
+    
+    // Panning: Mouse right → See right → Content moves LEFT (negative translation)
+    // (Center - Mouse) gives negative when mouse is right, which is correct
+    const panTranslation = (center - mX) * panSpeed;
+    
+    // Combined: Cancel origin shift + Add panning
+    return originCompensation + panTranslation;
   });
 
   const desktopCameraY = useTransform(() => {
@@ -347,7 +364,12 @@ const App = () => {
     const speedMax = 0.3;
     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
     
-    return (center - mY) * panSpeed;
+    const s = startScale - p * (startScale - 0.15);
+    const mouseOffset = mY - center;
+    const originCompensation = -mouseOffset * (1 - s);
+    const panTranslation = (center - mY) * panSpeed;
+    
+    return originCompensation + panTranslation;
   });
   
   // Mobile: Same logic with drag offset
@@ -360,7 +382,12 @@ const App = () => {
      const speedMax = 0.3;
      const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
      
-     return mobilePanX.get() + (center - mX) * panSpeed;
+     const s = startScale - p * (startScale - 0.15);
+     const mouseOffset = mX - center;
+     const originCompensation = -mouseOffset * (1 - s);
+     const panTranslation = (center - mX) * panSpeed;
+     
+     return mobilePanX.get() + originCompensation + panTranslation;
   });
 
   const mobileCameraY = useTransform(() => {
@@ -372,7 +399,12 @@ const App = () => {
      const speedMax = 0.3;
      const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
      
-     return mobilePanY.get() + (center - mY) * panSpeed;
+     const s = startScale - p * (startScale - 0.15);
+     const mouseOffset = mY - center;
+     const originCompensation = -mouseOffset * (1 - s);
+     const panTranslation = (center - mY) * panSpeed;
+     
+     return mobilePanY.get() + originCompensation + panTranslation;
   });
 
   const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
@@ -397,6 +429,8 @@ const App = () => {
     const x = finalCameraX.get();
     const y = finalCameraY.get();
     if (x === 0 && y === 0) return 0;
+    // Panning X negative means looking Right.
+    // Compass should point to North relative to view?
     return Math.atan2(y, x) * (180 / Math.PI) + 90;
   });
 
