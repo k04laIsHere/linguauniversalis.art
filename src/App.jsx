@@ -517,10 +517,23 @@ const App = () => {
     const mX = smoothMouseX.get();
     const p = smoothProgress.get();
     const center = winSize.w / 2;
-    // Direction: (Center - Mouse) -> Panning moves content to center.
-    // Factor: (1 - p) -> Strongest at Zoom In, Weakest at Zoom Out.
-    // This means at Zoom In, we Center the Mouse.
-    return (center - mX) * (1 - p);
+    
+    // "Pin Point" Zoom with "Look At" Panning
+    // Formula: T = (Center - Mouse) * (Scale * (1 + k) - 1)
+    // k = Panning Sensitivity.
+    // Logic: 
+    // 1. Pinning: To keep a point fixed, T must satisfy T_pin = (Mouse - Center) * (1 - Scale).
+    // 2. Panning: To see edges, we add T_pan = (Center - Mouse) * k * Scale.
+    // Combined gives the formula above.
+    
+    const k = 6; 
+    const s = 1 - p * 0.85; // Desktop Scale (1 -> 0.15)
+    
+    // Check for inversion: s * (1 + k) must be > 1 to maintain direction.
+    // At s=0.15: 0.15 * 7 = 1.05 > 1. OK.
+    
+    const factor = s * (1 + k) - 1;
+    return (center - mX) * factor;
   });
 
   const desktopCameraY = useTransform(() => {
@@ -528,7 +541,12 @@ const App = () => {
     const mY = smoothMouseY.get();
     const p = smoothProgress.get();
     const center = winSize.h / 2;
-    return (center - mY) * (1 - p);
+    
+    const k = 6;
+    const s = 1 - p * 0.85;
+    const factor = s * (1 + k) - 1;
+    
+    return (center - mY) * factor;
   });
   
   // Mobile: Also revert to `(Center - Touch)` logic for Zoom-To-Finger.
