@@ -341,17 +341,17 @@ const App = () => {
     const s = startScale - p * (startScale - 0.15);
     const mouseOffset = mX - center;
     
-    // Zoom-to-Point: Keep world point under mouse cursor fixed during zoom
-    // With dynamic origin at mouse, we need translation compensation to maintain
-    // the world-to-screen mapping when scale changes
-    const zoomCompensation = mouseOffset * (1 - 1 / s);
+    // When dynamic origin moves from center to mouse position:
+    // It causes automatic view shift of approximately: mouseOffset * (1 - scale)
+    // We compensate this to prevent hero from following cursor
+    const originCompensation = -mouseOffset * (1 - s);
     
     // Panning: Mouse right → See right → Content moves LEFT (negative translation)
     // (Center - Mouse) gives negative when mouse is right, which is correct
     const panTranslation = (center - mX) * panSpeed;
     
-    // Combined: Zoom-to-point compensation + Panning
-    return zoomCompensation + panTranslation;
+    // Combined: Cancel origin shift + Add panning
+    return originCompensation + panTranslation;
   });
 
   const desktopCameraY = useTransform(() => {
@@ -366,12 +366,10 @@ const App = () => {
     
     const s = startScale - p * (startScale - 0.15);
     const mouseOffset = mY - center;
-    
-    // Zoom-to-Point: Keep world point under mouse cursor fixed during zoom
-    const zoomCompensation = mouseOffset * (1 - 1 / s);
+    const originCompensation = -mouseOffset * (1 - s);
     const panTranslation = (center - mY) * panSpeed;
     
-    return zoomCompensation + panTranslation;
+    return originCompensation + panTranslation;
   });
   
   // Mobile: Same logic with drag offset
@@ -386,12 +384,10 @@ const App = () => {
      
      const s = startScale - p * (startScale - 0.15);
      const mouseOffset = mX - center;
-     
-     // Zoom-to-Point: Keep world point under touch location fixed during zoom
-     const zoomCompensation = mouseOffset * (1 - 1 / s);
+     const originCompensation = -mouseOffset * (1 - s);
      const panTranslation = (center - mX) * panSpeed;
      
-     return mobilePanX.get() + zoomCompensation + panTranslation;
+     return mobilePanX.get() + originCompensation + panTranslation;
   });
 
   const mobileCameraY = useTransform(() => {
@@ -405,12 +401,10 @@ const App = () => {
      
      const s = startScale - p * (startScale - 0.15);
      const mouseOffset = mY - center;
-     
-     // Zoom-to-Point: Keep world point under touch location fixed during zoom
-     const zoomCompensation = mouseOffset * (1 - 1 / s);
+     const originCompensation = -mouseOffset * (1 - s);
      const panTranslation = (center - mY) * panSpeed;
      
-     return mobilePanY.get() + zoomCompensation + panTranslation;
+     return mobilePanY.get() + originCompensation + panTranslation;
   });
 
   const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
