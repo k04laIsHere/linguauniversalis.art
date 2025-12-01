@@ -142,9 +142,11 @@ const App = () => {
   const zoomProgress = useMotionValue(0);
   const smoothZoomProgress = useSpring(zoomProgress, { stiffness: 100, damping: 30, mass: 1 });
   
-  // Camera pan state (accumulated panning)
-  const cameraPanX = useMotionValue(0);
-  const cameraPanY = useMotionValue(0);
+  // Camera pan state (accumulated panning) - use spring for smooth deceleration
+  const cameraPanXTarget = useMotionValue(0);
+  const cameraPanYTarget = useMotionValue(0);
+  const cameraPanX = useSpring(cameraPanXTarget, { stiffness: 50, damping: 25, mass: 1 });
+  const cameraPanY = useSpring(cameraPanYTarget, { stiffness: 50, damping: 25, mass: 1 });
   
   // Track if mouse is moving
   const mouseMoving = useRef(false);
@@ -155,9 +157,11 @@ const App = () => {
   const touchMoving = useRef(false);
   const touchMoveTimer = useRef(null);
   
-  // Mobile pan state (same as desktop)
-  const mobilePanX = useMotionValue(0);
-  const mobilePanY = useMotionValue(0);
+  // Mobile pan state (same as desktop) - use spring for smooth deceleration
+  const mobilePanXTarget = useMotionValue(0);
+  const mobilePanYTarget = useMotionValue(0);
+  const mobilePanX = useSpring(mobilePanXTarget, { stiffness: 50, damping: 25, mass: 1 });
+  const mobilePanY = useSpring(mobilePanYTarget, { stiffness: 50, damping: 25, mass: 1 });
 
   // --- Calculated Values ---
   // Default zoom level (keep current initial zoom)
@@ -276,12 +280,12 @@ const App = () => {
       if (inEdgeZone) {
         // Fast panning at edges (even if not moving)
         shouldPan = true;
-        panSpeed = 0.3; // Fast panning speed (mid-zoom level)
+        panSpeed = 0.06; // Fast panning speed (5x slower: 0.3 / 5)
         zoomProgress.set(1); // Zoom out during fast panning
       } else if (!atCenter && isMoving) {
         // Slow panning when not at edges and mouse/touch is moving
         shouldPan = true;
-        panSpeed = 0.05; // Slow panning speed (max zoom level)
+        panSpeed = 0.01; // Slow panning speed (5x slower: 0.05 / 5)
         zoomProgress.set(0); // Default zoom
       } else {
         // Stop panning: at center or not moving (and not at edges)
@@ -295,8 +299,8 @@ const App = () => {
         const panDirectionY = (centerY - mY) * panSpeed;
         
         // Get current pan position
-        const currentPanX = isMobile ? mobilePanX.get() : cameraPanX.get();
-        const currentPanY = isMobile ? mobilePanY.get() : cameraPanY.get();
+        const currentPanX = isMobile ? mobilePanXTarget.get() : cameraPanXTarget.get();
+        const currentPanY = isMobile ? mobilePanYTarget.get() : cameraPanYTarget.get();
         
         // Calculate new pan position
         let newPanX = currentPanX + panDirectionX;
@@ -311,12 +315,13 @@ const App = () => {
           newPanY *= scale;
         }
         
+        // Set target values - spring will smoothly animate to these
         if (isMobile) {
-          mobilePanX.set(newPanX);
-          mobilePanY.set(newPanY);
+          mobilePanXTarget.set(newPanX);
+          mobilePanYTarget.set(newPanY);
         } else {
-          cameraPanX.set(newPanX);
-          cameraPanY.set(newPanY);
+          cameraPanXTarget.set(newPanX);
+          cameraPanYTarget.set(newPanY);
         }
       }
       
