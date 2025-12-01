@@ -138,9 +138,9 @@ const App = () => {
 
   // --- State Management ---
   // Zoom state: 0 = default zoom, 1 = zoomed out (during fast panning)
-  // Smooth transition over ~1 second: stiffness 100, damping 30 gives ~1s transition
+  // Smooth transition over 2 seconds: stiffness 50, damping 25 gives ~2s transition
   const zoomProgress = useMotionValue(0);
-  const smoothZoomProgress = useSpring(zoomProgress, { stiffness: 100, damping: 30, mass: 1 });
+  const smoothZoomProgress = useSpring(zoomProgress, { stiffness: 50, damping: 25, mass: 1 });
   
   // Camera pan state (accumulated panning) - use spring for smooth deceleration
   const cameraPanXTarget = useMotionValue(0);
@@ -151,11 +151,19 @@ const App = () => {
   // Track if mouse is moving
   const mouseMoving = useRef(false);
   const mouseMoveTimer = useRef(null);
+  // Track previous mouse position to detect significant movement
+  const prevMouseX = useRef(0);
+  const prevMouseY = useRef(0);
+  const mouseMovementThreshold = 5; // pixels - minimum movement to trigger panning
 
   // --- Mobile Interaction Logic ---
   // Track if touch is moving
   const touchMoving = useRef(false);
   const touchMoveTimer = useRef(null);
+  // Track previous touch position to detect significant movement
+  const prevTouchX = useRef(0);
+  const prevTouchY = useRef(0);
+  const touchMovementThreshold = 5; // pixels - minimum movement to trigger panning
   
   // Mobile pan state (same as desktop) - use spring for smooth deceleration
   const mobilePanXTarget = useMotionValue(0);
@@ -194,15 +202,27 @@ const App = () => {
   useEffect(() => {
     if (isMobile) return;
     const handleMouseMove = (e) => {
-      mouseX.set(e.clientX);
-      mouseY.set(e.clientY);
+      const newX = e.clientX;
+      const newY = e.clientY;
       
-      // Track mouse movement
-      mouseMoving.current = true;
-      if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
-      mouseMoveTimer.current = setTimeout(() => {
-        mouseMoving.current = false;
-      }, 100);
+      // Check if movement is significant
+      const deltaX = Math.abs(newX - prevMouseX.current);
+      const deltaY = Math.abs(newY - prevMouseY.current);
+      const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+      
+      if (movement > mouseMovementThreshold) {
+        mouseX.set(newX);
+        mouseY.set(newY);
+        prevMouseX.current = newX;
+        prevMouseY.current = newY;
+        
+        // Track mouse movement
+        mouseMoving.current = true;
+        if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
+        mouseMoveTimer.current = setTimeout(() => {
+          mouseMoving.current = false;
+        }, 100);
+      }
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => {
@@ -215,15 +235,27 @@ const App = () => {
      if (!isMobile) return;
      const handleTouchMove = (e) => {
         if (e.touches[0]) {
-           mouseX.set(e.touches[0].clientX);
-           mouseY.set(e.touches[0].clientY);
+           const newX = e.touches[0].clientX;
+           const newY = e.touches[0].clientY;
            
-           // Track touch movement
-           touchMoving.current = true;
-           if (touchMoveTimer.current) clearTimeout(touchMoveTimer.current);
-           touchMoveTimer.current = setTimeout(() => {
-             touchMoving.current = false;
-           }, 100);
+           // Check if movement is significant
+           const deltaX = Math.abs(newX - prevTouchX.current);
+           const deltaY = Math.abs(newY - prevTouchY.current);
+           const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+           
+           if (movement > touchMovementThreshold) {
+             mouseX.set(newX);
+             mouseY.set(newY);
+             prevTouchX.current = newX;
+             prevTouchY.current = newY;
+             
+             // Track touch movement
+             touchMoving.current = true;
+             if (touchMoveTimer.current) clearTimeout(touchMoveTimer.current);
+             touchMoveTimer.current = setTimeout(() => {
+               touchMoving.current = false;
+             }, 100);
+           }
         }
      };
      window.addEventListener('touchmove', handleTouchMove, { passive: false });
@@ -280,7 +312,20 @@ const App = () => {
       if (inEdgeZone) {
         // Fast panning at edges (even if not moving)
         shouldPan = true;
-        panSpeed = 0.006; // Fast panning speed (10x slower: 0.06 / 10)
+        // Scale fast pan speed based on screen size
+        // 1440p (2560px width) is baseline, mobile and 2160p need 2x faster
+        const baseSpeed = 0.006;
+        const screenWidth = winSize.w;
+        const baselineWidth = 2560; // 1440p width
+        // Scale: 2x for mobile (< 1000px) and 2160p (> 3000px), 1x for 1440p
+        let speedScale = 1.0;
+        if (screenWidth < 1000 || screenWidth > 3000) {
+          speedScale = 2.0; // 2x faster for mobile and 2160p
+        } else if (screenWidth > baselineWidth) {
+          // Linear scaling between 1440p and 2160p
+          speedScale = 1.0 + ((screenWidth - baselineWidth) / (3840 - baselineWidth));
+        }
+        panSpeed = baseSpeed * speedScale;
         zoomProgress.set(1); // Zoom out during fast panning
       } else if (!atCenter && isMoving) {
         // Slow panning when not at edges and mouse/touch is moving
