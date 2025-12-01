@@ -172,6 +172,14 @@ const App = () => {
     return Math.min(distance / 200, 1);
   });
   
+  // Hint opacity - fade out as user pans away from center
+  const hintOpacity = useTransform(() => {
+    const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
+    const panY = isMobile ? mobilePanY.get() : cameraPanY.get();
+    const distance = Math.sqrt(panX * panX + panY * panY);
+    return Math.max(0, 1 - distance / 200);
+  });
+  
   // --- Mouse / Torch Logic ---
   // Initialize to center to avoid jump on load
   const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
@@ -371,13 +379,7 @@ const App = () => {
       {/* Hint */}
       <motion.div 
         className="fixed bottom-8 left-0 w-full text-center z-[50] text-white/30 text-[10px] uppercase tracking-[0.3em] pointer-events-none"
-        style={{ opacity: useTransform(() => {
-          // Show hint when camera is at center (not panned)
-          const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
-          const panY = isMobile ? mobilePanY.get() : cameraPanY.get();
-          const distance = Math.sqrt(panX * panX + panY * panY);
-          return Math.max(0, 1 - distance / 200); // Fade out as user pans away
-        }) }}
+        style={{ opacity: hintOpacity }}
       >
         {isMobile ? "Touch to Explore • Move to Edges for Fast Panning" : "Move Mouse to Explore • Edges for Fast Panning"}
       </motion.div>
