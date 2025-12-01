@@ -280,12 +280,12 @@ const App = () => {
       if (inEdgeZone) {
         // Fast panning at edges (even if not moving)
         shouldPan = true;
-        panSpeed = 0.06; // Fast panning speed (5x slower: 0.3 / 5)
+        panSpeed = 0.006; // Fast panning speed (10x slower: 0.06 / 10)
         zoomProgress.set(1); // Zoom out during fast panning
       } else if (!atCenter && isMoving) {
         // Slow panning when not at edges and mouse/touch is moving
         shouldPan = true;
-        panSpeed = 0.01; // Slow panning speed (5x slower: 0.05 / 5)
+        panSpeed = 0.002; // Slow panning speed (5x slower: 0.01 / 5)
         zoomProgress.set(0); // Default zoom
       } else {
         // Stop panning: at center or not moving (and not at edges)
