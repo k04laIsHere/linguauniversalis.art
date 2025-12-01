@@ -174,8 +174,9 @@ const App = () => {
   // --- Calculated Values ---
   // Default zoom level (keep current initial zoom)
   const defaultScale = isMobile ? 0.75 : 1;
-  // Zoom out to 0.8 during fast panning
-  const scale = useTransform(smoothZoomProgress, [0, 1], [defaultScale, 0.8]);
+  // Zoom out during fast panning: desktop 1.0 -> 0.8, mobile 0.75 -> 0.6 (more zoom out for mobile)
+  const zoomOutScale = isMobile ? 0.6 : 0.8;
+  const scale = useTransform(smoothZoomProgress, [0, 1], [defaultScale, zoomOutScale]);
   // Content opacity - show when panned away from center
   const contentOpacity = useTransform(() => {
     const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
@@ -304,6 +305,11 @@ const App = () => {
       const centerThreshold = 20; // pixels
       const atCenter = distanceFromCenter < centerThreshold;
       
+      // Calculate normalized distance from center (0 = center, 1 = edge)
+      // Use the maximum possible distance (diagonal from center to corner)
+      const maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
+      const normalizedDistance = Math.min(distanceFromCenter / maxDistance, 1);
+      
       // Determine if should pan
       let shouldPan = false;
       let panSpeed = 0;
@@ -325,7 +331,19 @@ const App = () => {
           // Linear scaling between 1440p and 2160p
           speedScale = 1.0 + ((screenWidth - baselineWidth) / (3840 - baselineWidth));
         }
-        panSpeed = baseSpeed * speedScale;
+        
+        // Adjust speed based on distance from center
+        // At center (0%): 2x faster, at 50%: 1x, after 50%: 1x (constant)
+        let positionSpeedMultiplier = 1.0;
+        if (normalizedDistance <= 0.5) {
+          // Linear interpolation: 2x at 0% to 1x at 50%
+          positionSpeedMultiplier = 2.0 - (normalizedDistance / 0.5) * (2.0 - 1.0);
+        } else {
+          // After 50%, keep at 1x
+          positionSpeedMultiplier = 1.0;
+        }
+        
+        panSpeed = baseSpeed * speedScale * positionSpeedMultiplier;
         zoomProgress.set(1); // Zoom out during fast panning
       } else if (!atCenter && isMoving) {
         // Slow panning when not at edges and mouse/touch is moving
