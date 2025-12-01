@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, useScroll, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
+import { motion, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
 import { Globe, ExternalLink, MapPin } from 'lucide-react';
 import { content } from './data/content';
 
@@ -137,160 +137,40 @@ const App = () => {
   }, []);
 
   // --- State Management ---
-  const progress = useMotionValue(0); // 0 = Center (Zoom In), 1 = Zoom Out
-  const smoothProgress = useSpring(progress, { stiffness: 100, damping: 30, mass: 1 });
+  // Zoom state: 0 = default zoom, 1 = zoomed out (during fast panning)
+  // Smooth transition over ~1 second: stiffness 100, damping 30 gives ~1s transition
+  const zoomProgress = useMotionValue(0);
+  const smoothZoomProgress = useSpring(zoomProgress, { stiffness: 100, damping: 30, mass: 1 });
   
-  // --- Desktop Scroll Logic ---
-  const { scrollY } = useScroll();
-
-  // Sync scrollY to progress (Desktop)
-  useEffect(() => {
-    if (isMobile) return;
-    return scrollY.on("change", (latest) => {
-      const newProgress = Math.min(Math.max(latest / 1500, 0), 1);
-      progress.set(newProgress);
-    });
-  }, [scrollY, isMobile, progress]);
+  // Camera pan state (accumulated panning)
+  const cameraPanX = useMotionValue(0);
+  const cameraPanY = useMotionValue(0);
+  
+  // Track if mouse is moving
+  const mouseMoving = useRef(false);
+  const mouseMoveTimer = useRef(null);
 
   // --- Mobile Interaction Logic ---
-  const touchStart = useRef({ x: 0, y: 0 });
-  // Mobile specific state
+  // Track if touch is moving
+  const touchMoving = useRef(false);
+  const touchMoveTimer = useRef(null);
+  
+  // Mobile pan state (same as desktop)
   const mobilePanX = useMotionValue(0);
   const mobilePanY = useMotionValue(0);
-  const resetTimer = useRef(null);
-  const stationaryTimer = useRef(null);
-  const isInteracting = useRef(false);
-
-  // Reset to center animation loop
-  const resetToCenterMobile = useCallback(() => {
-    const animateReset = () => {
-        if (isInteracting.current) return; 
-        
-        let needsUpdate = false;
-        const currentP = progress.get();
-        const currentX = mobilePanX.get();
-        const currentY = mobilePanY.get();
-
-        if (currentP > 0.001) {
-            progress.set(currentP * 0.95);
-            needsUpdate = true;
-        } else {
-            progress.set(0);
-        }
-
-        if (Math.abs(currentX) > 0.5) {
-            mobilePanX.set(currentX * 0.9);
-            needsUpdate = true;
-        } else {
-            mobilePanX.set(0);
-        }
-
-        if (Math.abs(currentY) > 0.5) {
-            mobilePanY.set(currentY * 0.9);
-            needsUpdate = true;
-        } else {
-            mobilePanY.set(0);
-        }
-
-        if (needsUpdate) {
-            requestAnimationFrame(animateReset);
-        }
-    };
-    requestAnimationFrame(animateReset);
-  }, [progress, mobilePanX, mobilePanY]);
-
-  useEffect(() => {
-    if (!isMobile) return;
-
-    const handleTouchStart = (e) => {
-      isInteracting.current = true;
-      if (resetTimer.current) clearTimeout(resetTimer.current);
-      if (stationaryTimer.current) clearTimeout(stationaryTimer.current);
-      
-      touchStart.current = { 
-        x: e.touches[0].clientX, 
-        y: e.touches[0].clientY
-      };
-    };
-
-    const handleTouchMove = (e) => {
-      const touch = e.touches[0];
-      const deltaX = touch.clientX - touchStart.current.x;
-      const deltaY = touch.clientY - touchStart.current.y;
-      
-      const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
-      // Reset stationary timer on every move
-      if (stationaryTimer.current) clearTimeout(stationaryTimer.current);
-      
-      // If we stop moving for 100ms while touching, trigger zoom in
-      stationaryTimer.current = setTimeout(() => {
-         const animateZoomIn = () => {
-            if (!isInteracting.current) return; // Stop if ended
-            // We assume we are "holding" now
-            const currentP = progress.get();
-            if (currentP > 0) {
-                progress.set(Math.max(0, currentP - 0.02));
-                requestAnimationFrame(animateZoomIn);
-            }
-         };
-         animateZoomIn();
-      }, 150);
-
-      if (movement > 2) {
-        // Zoom Out on movement
-        const currentP = progress.get();
-        progress.set(Math.min(1, currentP + 0.015)); 
-
-        // Pan in direction of swipe (Inverted/Flight Sim?)
-        // User: "slide finger up... pan to top"
-        // Slide Up = DeltaY < 0.
-        // Pan to Top = Go North = -Y? Or +Y?
-        // North is at (0, -OFFSET). South is (0, +OFFSET).
-        // To see North, we need to translate +Y (shift world down).
-        // So Slide Up (-Delta) -> Translate +Y.
-        // So we subtract Delta.
-        // mobilePanY = current - Delta.
-        // Ex: current 0. Delta -10. New = 10. Translate(10). World moves Down. North comes in view.
-        // Correct.
-        
-        const currentPanX = mobilePanX.get();
-        const currentPanY = mobilePanY.get();
-        const panFactor = 1.5;
-
-        mobilePanX.set(currentPanX - deltaX * panFactor); 
-        mobilePanY.set(currentPanY - deltaY * panFactor);
-        
-        touchStart.current.x = touch.clientX;
-        touchStart.current.y = touch.clientY;
-      }
-    };
-
-    const handleTouchEnd = () => {
-      isInteracting.current = false;
-      if (stationaryTimer.current) clearTimeout(stationaryTimer.current);
-      
-      resetTimer.current = setTimeout(() => {
-        resetToCenterMobile();
-      }, 3000); 
-    };
-
-    window.addEventListener('touchstart', handleTouchStart, { passive: false });
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
-    window.addEventListener('touchend', handleTouchEnd);
-    
-    return () => {
-      window.removeEventListener('touchstart', handleTouchStart);
-      window.removeEventListener('touchmove', handleTouchMove);
-      window.removeEventListener('touchend', handleTouchEnd);
-    };
-  }, [isMobile, progress, mobilePanX, mobilePanY, resetToCenterMobile]);
 
   // --- Calculated Values ---
-  // Mobile start zoomed in more (0.5 -> 0.75)
-  const startScale = isMobile ? 0.75 : 1; 
-  const scale = useTransform(smoothProgress, [0, 1], [startScale, 0.15]);
-  const contentOpacity = useTransform(smoothProgress, [0.05, 0.2], [0, 1]);
+  // Default zoom level (keep current initial zoom)
+  const defaultScale = isMobile ? 0.75 : 1;
+  // Zoom out to 0.8 during fast panning
+  const scale = useTransform(smoothZoomProgress, [0, 1], [defaultScale, 0.8]);
+  // Content opacity - show when panned away from center
+  const contentOpacity = useTransform(() => {
+    const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
+    const panY = isMobile ? mobilePanY.get() : cameraPanY.get();
+    const distance = Math.sqrt(panX * panX + panY * panY);
+    return Math.min(distance / 200, 1);
+  });
   
   // --- Mouse / Torch Logic ---
   // Initialize to center to avoid jump on load
@@ -304,9 +184,19 @@ const App = () => {
     const handleMouseMove = (e) => {
       mouseX.set(e.clientX);
       mouseY.set(e.clientY);
+      
+      // Track mouse movement
+      mouseMoving.current = true;
+      if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
+      mouseMoveTimer.current = setTimeout(() => {
+        mouseMoving.current = false;
+      }, 100);
     };
     window.addEventListener('mousemove', handleMouseMove);
-    return () => window.removeEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
+    };
   }, [mouseX, mouseY, isMobile]);
   
   useEffect(() => {
@@ -315,126 +205,143 @@ const App = () => {
         if (e.touches[0]) {
            mouseX.set(e.touches[0].clientX);
            mouseY.set(e.touches[0].clientY);
+           
+           // Track touch movement
+           touchMoving.current = true;
+           if (touchMoveTimer.current) clearTimeout(touchMoveTimer.current);
+           touchMoveTimer.current = setTimeout(() => {
+             touchMoving.current = false;
+           }, 100);
         }
      };
      window.addEventListener('touchmove', handleTouchMove, { passive: false });
-     return () => window.removeEventListener('touchmove', handleTouchMove);
+     return () => {
+       window.removeEventListener('touchmove', handleTouchMove);
+       if (touchMoveTimer.current) clearTimeout(touchMoveTimer.current);
+     };
   }, [isMobile, mouseX, mouseY]);
 
   // --- Camera Logic ---
   
-  // Google Maps-style Zoom-to-Point with Dynamic Origin
-  // Problem: Dynamic origin at mouse causes hero to follow cursor
-  // Solution: Compensate origin shift + handle panning correctly
+  // Edge-based panning: slow panning when not at edges, fast panning at edges (10% from screen edges)
+  // Calculate max pan distance based on section dimensions
+  // Largest section is 900px (Participants), screen needs to accommodate it
+  // Max pan distance should allow section to fill screen
+  // Use SECTION_OFFSET as base, add extra for filling
+  const maxPanDistance = SECTION_OFFSET * 1.2;
+  
+  // Edge detection: 10% from screen edges
+  const edgeThreshold = 0.1;
+  
+  // Panning logic - updates camera position based on mouse/touch position
+  useEffect(() => {
+    const updatePanning = () => {
+      const mX = smoothMouseX.get();
+      const mY = smoothMouseY.get();
+      const centerX = winSize.w / 2;
+      const centerY = winSize.h / 2;
+      
+      // Calculate distance from edges
+      const distFromLeft = mX / winSize.w;
+      const distFromRight = (winSize.w - mX) / winSize.w;
+      const distFromTop = mY / winSize.h;
+      const distFromBottom = (winSize.h - mY) / winSize.h;
+      
+      // Check if in edge zone (within 10% of any edge)
+      const inEdgeZone = distFromLeft < edgeThreshold || 
+                         distFromRight < edgeThreshold ||
+                         distFromTop < edgeThreshold ||
+                         distFromBottom < edgeThreshold;
+      
+      // Check if mouse/touch is at center (within small threshold)
+      const mouseOffsetX = mX - centerX;
+      const mouseOffsetY = mY - centerY;
+      const distanceFromCenter = Math.sqrt(mouseOffsetX * mouseOffsetX + mouseOffsetY * mouseOffsetY);
+      const centerThreshold = 20; // pixels
+      const atCenter = distanceFromCenter < centerThreshold;
+      
+      // Determine if should pan
+      let shouldPan = false;
+      let panSpeed = 0;
+      const isMoving = isMobile ? touchMoving.current : mouseMoving.current;
+      
+      if (inEdgeZone) {
+        // Fast panning at edges (even if not moving)
+        shouldPan = true;
+        panSpeed = 0.3; // Fast panning speed (mid-zoom level)
+        zoomProgress.set(1); // Zoom out during fast panning
+      } else if (!atCenter && isMoving) {
+        // Slow panning when not at edges and mouse/touch is moving
+        shouldPan = true;
+        panSpeed = 0.05; // Slow panning speed (max zoom level)
+        zoomProgress.set(0); // Default zoom
+      } else {
+        // Stop panning: at center or not moving (and not at edges)
+        shouldPan = false;
+        zoomProgress.set(0); // Default zoom
+      }
+      
+      if (shouldPan) {
+        // Calculate pan direction (mouse right → content moves left → see right)
+        const panDirectionX = (centerX - mX) * panSpeed;
+        const panDirectionY = (centerY - mY) * panSpeed;
+        
+        // Get current pan position
+        const currentPanX = isMobile ? mobilePanX.get() : cameraPanX.get();
+        const currentPanY = isMobile ? mobilePanY.get() : cameraPanY.get();
+        
+        // Calculate new pan position
+        let newPanX = currentPanX + panDirectionX;
+        let newPanY = currentPanY + panDirectionY;
+        
+        // Clamp to max pan distance
+        const distance = Math.sqrt(newPanX * newPanX + newPanY * newPanY);
+        const maxDist = maxPanDistance;
+        if (distance > maxDist) {
+          const scale = maxDist / distance;
+          newPanX *= scale;
+          newPanY *= scale;
+        }
+        
+        if (isMobile) {
+          mobilePanX.set(newPanX);
+          mobilePanY.set(newPanY);
+        } else {
+          cameraPanX.set(newPanX);
+          cameraPanY.set(newPanY);
+        }
+      }
+      
+      requestAnimationFrame(updatePanning);
+    };
+    
+    const animationId = requestAnimationFrame(updatePanning);
+    return () => cancelAnimationFrame(animationId);
+  }, [isMobile, winSize, smoothMouseX, smoothMouseY, cameraPanX, cameraPanY, mobilePanX, mobilePanY, zoomProgress, maxPanDistance]);
   
   const desktopCameraX = useTransform(() => {
     if (isMobile) return 0;
-    const mX = smoothMouseX.get();
-    const p = smoothProgress.get();
-    const center = winSize.w / 2;
-    
-    // Pan Speed Curve (Bell Curve)
-    const speedMin = 0.05;
-    const speedMax = 0.3;
-    const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
-    
-    const s = startScale - p * (startScale - 0.15);
-    const mouseOffset = mX - center;
-    
-    // Zoom-to-Point: Keep world point under mouse cursor fixed during zoom
-    // With dynamic origin at mouse, this formula maintains world-to-screen mapping
-    const zoomCompensation = mouseOffset * (1 - 1 / s);
-    
-    // Panning: Mouse right → See right → Content moves LEFT (negative translation)
-    // Scale pan speed by current scale to prevent excessive panning when zoomed out
-    // (Center - Mouse) gives negative when mouse is right, which is correct
-    const panTranslation = (center - mX) * panSpeed * s;
-    
-    // Combined: Zoom-to-point compensation + Scaled panning
-    return zoomCompensation + panTranslation;
+    return cameraPanX.get();
   });
 
   const desktopCameraY = useTransform(() => {
     if (isMobile) return 0;
-    const mY = smoothMouseY.get();
-    const p = smoothProgress.get();
-    const center = winSize.h / 2;
-    
-    const speedMin = 0.05;
-    const speedMax = 0.3;
-    const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
-    
-    const s = startScale - p * (startScale - 0.15);
-    const mouseOffset = mY - center;
-    
-    // Zoom-to-Point: Keep world point under mouse cursor fixed during zoom
-    const zoomCompensation = mouseOffset * (1 - 1 / s);
-    
-    // Panning: Scale pan speed by current scale to prevent excessive panning when zoomed out
-    const panTranslation = (center - mY) * panSpeed * s;
-    
-    return zoomCompensation + panTranslation;
+    return cameraPanY.get();
   });
   
-  // Mobile: Same logic with drag offset
+  // Mobile camera uses same pan state
   const mobileCameraX = useTransform(() => {
-     const mX = smoothMouseX.get(); 
-     const p = smoothProgress.get();
-     const center = winSize.w / 2;
-     
-     const speedMin = 0.05;
-     const speedMax = 0.3;
-     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
-     
-     const s = startScale - p * (startScale - 0.15);
-     const mouseOffset = mX - center;
-     
-     // Zoom-to-Point: Keep world point under touch location fixed during zoom
-     const zoomCompensation = mouseOffset * (1 - 1 / s);
-     
-     // Panning: Scale pan speed by current scale to prevent excessive panning when zoomed out
-     const panTranslation = (center - mX) * panSpeed * s;
-     
-     return mobilePanX.get() + zoomCompensation + panTranslation;
+    if (!isMobile) return 0;
+    return mobilePanX.get();
   });
 
   const mobileCameraY = useTransform(() => {
-     const mY = smoothMouseY.get();
-     const p = smoothProgress.get();
-     const center = winSize.h / 2;
-     
-     const speedMin = 0.05;
-     const speedMax = 0.3;
-     const panSpeed = speedMin + (speedMax - speedMin) * 4 * p * (1 - p);
-     
-     const s = startScale - p * (startScale - 0.15);
-     const mouseOffset = mY - center;
-     
-     // Zoom-to-Point: Keep world point under touch location fixed during zoom
-     const zoomCompensation = mouseOffset * (1 - 1 / s);
-     
-     // Panning: Scale pan speed by current scale to prevent excessive panning when zoomed out
-     const panTranslation = (center - mY) * panSpeed * s;
-     
-     return mobilePanY.get() + zoomCompensation + panTranslation;
+    if (!isMobile) return 0;
+    return mobilePanY.get();
   });
 
   const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
   const finalCameraY = useTransform(() => isMobile ? mobileCameraY.get() : desktopCameraY.get());
-  
-  // Dynamic Origin at Mouse Cursor for Zoom-to-Point
-  // Origin is relative to element center (0,0)
-  const originX = useTransform(() => {
-    const mX = smoothMouseX.get();
-    const center = winSize.w / 2;
-    return (mX - center) + 'px';
-  });
-  
-  const originY = useTransform(() => {
-    const mY = smoothMouseY.get();
-    const center = winSize.h / 2;
-    return (mY - center) + 'px';
-  });
 
   // Compass
   const compassRotation = useTransform(() => {
@@ -448,11 +355,6 @@ const App = () => {
 
   return (
     <>
-      {/* Virtual Scroll Container (Desktop Only) */}
-      {!isMobile && (
-        <div style={{ height: '250vh' }} className="relative w-full pointer-events-none z-[-1]" />
-      )}
-
       <div className="fixed inset-0 bg-black text-lu-text selection:bg-lu-gold selection:text-black overflow-hidden select-none h-[100dvh] touch-none">
       
       {/* Language Switcher */}
@@ -471,7 +373,7 @@ const App = () => {
         className="fixed bottom-8 left-0 w-full text-center z-[50] text-white/30 text-[10px] uppercase tracking-[0.3em] pointer-events-none"
         style={{ opacity: useTransform(smoothProgress, [0, 0.1], [1, 0]) }}
       >
-        {isMobile ? "Swipe to Explore • Hold to Zoom In" : "Scroll to Explore • Follow the Light"}
+        {isMobile ? "Touch to Explore • Move to Edges for Fast Panning" : "Move Mouse to Explore • Edges for Fast Panning"}
       </motion.div>
 
       {/* Layers */}
@@ -486,7 +388,7 @@ const App = () => {
             scale,
             x: finalCameraX,
             y: finalCameraY,
-            transformOrigin: useMotionTemplate`${originX} ${originY}`
+            transformOrigin: 'center center'
           }}
         >
           {/* Center: Title (Always Visible) */}
