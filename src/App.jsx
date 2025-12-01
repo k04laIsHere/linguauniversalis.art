@@ -371,7 +371,13 @@ const App = () => {
       {/* Hint */}
       <motion.div 
         className="fixed bottom-8 left-0 w-full text-center z-[50] text-white/30 text-[10px] uppercase tracking-[0.3em] pointer-events-none"
-        style={{ opacity: useTransform(smoothProgress, [0, 0.1], [1, 0]) }}
+        style={{ opacity: useTransform(() => {
+          // Show hint when camera is at center (not panned)
+          const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
+          const panY = isMobile ? mobilePanY.get() : cameraPanY.get();
+          const distance = Math.sqrt(panX * panX + panY * panY);
+          return Math.max(0, 1 - distance / 200); // Fade out as user pans away
+        }) }}
       >
         {isMobile ? "Touch to Explore • Move to Edges for Fast Panning" : "Move Mouse to Explore • Edges for Fast Panning"}
       </motion.div>
