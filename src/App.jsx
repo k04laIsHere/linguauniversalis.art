@@ -37,7 +37,7 @@ const NoiseLayer = ({ mouseX, mouseY, isTouch, isMobile }) => {
       }}
     >
         <div className="absolute inset-0 bg-noise opacity-[0.2] animate-grain mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-black/90"></div>
+        <div className="absolute inset-0 bg-black/45"></div>
     </motion.div>
   );
 };
@@ -230,37 +230,6 @@ const App = () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [mouseX, mouseY, isMobile]);
-
-  // Track previous touch position
-  const prevTouchX = useRef(0);
-  const prevTouchY = useRef(0);
-  const touchMovementThreshold = 5; // pixels
-
-  useEffect(() => {
-     if (!isMobile) return;
-     const handleTouchMove = (e) => {
-        if (e.touches[0]) {
-           const newX = e.touches[0].clientX;
-           const newY = e.touches[0].clientY;
-
-           // Check if movement is significant
-           const deltaX = Math.abs(newX - prevTouchX.current);
-           const deltaY = Math.abs(newY - prevTouchY.current);
-           const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-
-           if (movement > touchMovementThreshold) {
-             mouseX.set(newX);
-             mouseY.set(newY);
-             prevTouchX.current = newX;
-             prevTouchY.current = newY;
-           }
-        }
-     };
-     window.addEventListener('touchmove', handleTouchMove, { passive: true });
-     return () => {
-       window.removeEventListener('touchmove', handleTouchMove);
-     };
-  }, [isMobile, mouseX, mouseY]);
 
   // --- Flashlight Scanner System ---
   const { flashlightX, flashlightY } = useFlashlightScanner({

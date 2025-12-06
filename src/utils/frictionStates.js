@@ -81,7 +81,7 @@ export function getNextFrictionState(
       // Check if we're close enough to center to lock
       const sectionCenter = (section.scrollStart + section.scrollEnd) / 2;
       const distanceFromCenter = Math.abs(scrollPosition - sectionCenter);
-      const lockThreshold = section.stickyZoneSize * 0.2; // Lock when within 20% of center
+      const lockThreshold = section.stickyZoneSize * 0.8; // Lock when within 80% of sticky zone
 
       if (distanceFromCenter < lockThreshold) {
         return FRICTION_STATES.STICKY_LOCKED;

@@ -61,7 +61,7 @@ export function useScrollTimeline(isMobile = false) {
     if (frictionState === FRICTION_STATES.STICKY_LOCKED.name) {
       if (section) {
         // Calculate virtual content height for scan progress
-        const virtualHeight = section.virtualContentBounds.height * 2; // Multiply for slower scan
+        const virtualHeight = section.virtualContentBounds.height * 1.5; // Balanced scan speed
 
         // Accumulate scan progress (positive only, direction agnostic)
         flashlightScanProgress.current += Math.abs(delta) / virtualHeight;
