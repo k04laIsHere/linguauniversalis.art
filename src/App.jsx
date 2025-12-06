@@ -3,6 +3,15 @@ import { motion, useTransform, useSpring, useMotionValue, useMotionTemplate, Ani
 import { Globe, ExternalLink, MapPin } from 'lucide-react';
 import { content } from './data/content';
 
+// Import new navigation system
+import { useScrollTimeline } from './hooks/useScrollTimeline';
+import { useFlashlightScanner } from './hooks/useFlashlightScanner';
+import { animateToSection } from './utils/navigationAnimation';
+import { SCROLL_PATH, getPositionFromScroll } from './utils/scrollPath';
+import { FRICTION_STATES, getZoomProgress } from './utils/frictionStates';
+import { NavigationNodes } from './components/NavigationNode';
+import { AccessibilityMode } from './components/AccessibilityMode';
+
 // Import assets
 import heroBg from '../assets/images/background.jpg';
 
@@ -14,17 +23,17 @@ const SECTION_OFFSET = 1500; // Distance of sections from center (0,0)
 const NoiseLayer = ({ mouseX, mouseY, isTouch, isMobile }) => {
   // Desktop: 450px, Mobile: 250px
   const radius = isTouch || isMobile ? 250 : 450;
-  
+
   // Use motion template for performant mask updates
   const maskImage = useMotionTemplate`radial-gradient(circle ${radius}px at ${mouseX}px ${mouseY}px, transparent 0%, black 100%)`;
-  
+
   return (
-    <motion.div 
+    <motion.div
       className="fixed inset-0 z-[100] pointer-events-none"
-      style={{ 
+      style={{
         maskImage,
         WebkitMaskImage: maskImage,
-        backdropFilter: 'blur(5px)' 
+        backdropFilter: 'blur(5px)'
       }}
     >
         <div className="absolute inset-0 bg-noise opacity-[0.2] animate-grain mix-blend-overlay"></div>
@@ -35,7 +44,7 @@ const NoiseLayer = ({ mouseX, mouseY, isTouch, isMobile }) => {
 
 const BackgroundLayer = () => (
   <div className="fixed inset-0 z-0 pointer-events-none">
-    <div 
+    <div
       className="absolute inset-0 bg-cover bg-center opacity-40"
       style={{ backgroundImage: `url(${heroBg})` }}
     />
@@ -107,7 +116,7 @@ const Contact = ({ t }) => (
 );
 
 const Compass = ({ rotation }) => (
-  <motion.div 
+  <motion.div
     className="fixed bottom-8 right-8 w-16 h-16 border border-white/10 rounded-full z-50 flex items-center justify-center backdrop-blur-sm pointer-events-none hidden md:flex"
     style={{ rotate: rotation }}
   >
@@ -121,7 +130,7 @@ const Compass = ({ rotation }) => (
 const App = () => {
   const [lang, setLang] = useState('ru');
   const t = content[lang];
-  
+
   // Window dimensions
   const [winSize, setWinSize] = useState({ w: typeof window !== 'undefined' ? window.innerWidth : 1000, h: typeof window !== 'undefined' ? window.innerHeight : 800 });
   const [isMobile, setIsMobile] = useState(false);
@@ -136,306 +145,176 @@ const App = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // --- State Management ---
-  // Zoom state: 0 = default zoom, 1 = zoomed out (during fast panning)
-  // Smooth transition over 2 seconds: stiffness 50, damping 25 gives ~2s transition
-  const zoomProgress = useMotionValue(0);
-  const smoothZoomProgress = useSpring(zoomProgress, { stiffness: 50, damping: 25, mass: 1 });
-  
-  // Camera pan state (accumulated panning) - use spring for smooth deceleration
-  const cameraPanXTarget = useMotionValue(0);
-  const cameraPanYTarget = useMotionValue(0);
-  const cameraPanX = useSpring(cameraPanXTarget, { stiffness: 50, damping: 25, mass: 1 });
-  const cameraPanY = useSpring(cameraPanYTarget, { stiffness: 50, damping: 25, mass: 1 });
-  
-  // Track if mouse is moving
-  const mouseMoving = useRef(false);
-  const mouseMoveTimer = useRef(null);
-  // Track previous mouse position to detect significant movement
-  const prevMouseX = useRef(0);
-  const prevMouseY = useRef(0);
-  const mouseMovementThreshold = 5; // pixels - minimum movement to trigger panning
+  // --- NEW: Scroll-based Navigation System ---
 
-  // --- Mobile Interaction Logic ---
-  // Track if touch is moving
-  const touchMoving = useRef(false);
-  const touchMoveTimer = useRef(null);
-  // Track previous touch position to detect significant movement
-  const prevTouchX = useRef(0);
-  const prevTouchY = useRef(0);
-  const touchMovementThreshold = 5; // pixels - minimum movement to trigger panning
-  
-  // Mobile pan state (same as desktop) - use spring for smooth deceleration
-  const mobilePanXTarget = useMotionValue(0);
-  const mobilePanYTarget = useMotionValue(0);
-  const mobilePanX = useSpring(mobilePanXTarget, { stiffness: 50, damping: 25, mass: 1 });
-  const mobilePanY = useSpring(mobilePanYTarget, { stiffness: 50, damping: 25, mass: 1 });
+  // Scroll timeline hook
+  const {
+    scrollPosition,
+    scrollProgress,
+    frictionState,
+    currentSection,
+    flashlightScanProgress,
+    scrollToPosition,
+  } = useScrollTimeline(isMobile);
 
-  // --- Calculated Values ---
+  // Calculate camera position from scroll progress
+  const cameraPosition = useTransform(scrollProgress, (progress) => {
+    const pos = getPositionFromScroll(progress * SCROLL_PATH.totalDistance);
+    return pos;
+  });
+
+  const finalCameraX = useTransform(cameraPosition, (pos) => -pos.x); // Invert for camera movement
+  const finalCameraY = useTransform(cameraPosition, (pos) => -pos.y); // Invert for camera movement
+
+  // Zoom out during travel state
+  const zoomProgressTarget = useMotionValue(0);
+
+  useEffect(() => {
+    const target = getZoomProgress(frictionState);
+    zoomProgressTarget.set(target);
+  }, [frictionState, zoomProgressTarget]);
+
+  const smoothZoomProgress = useSpring(zoomProgressTarget, { stiffness: 50, damping: 25, mass: 1 });
+
   // Default zoom level (keep current initial zoom)
   const defaultScale = isMobile ? 0.75 : 1;
-  // Zoom out during fast panning: desktop 1.0 -> 0.8, mobile 0.75 -> 0.6 (more zoom out for mobile)
+  // Zoom out during fast panning: desktop 1.0 -> 0.8, mobile 0.75 -> 0.6
   const zoomOutScale = isMobile ? 0.6 : 0.8;
   const scale = useTransform(smoothZoomProgress, [0, 1], [defaultScale, zoomOutScale]);
+
   // Content opacity - show when panned away from center
   const contentOpacity = useTransform(() => {
-    const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
-    const panY = isMobile ? mobilePanY.get() : cameraPanY.get();
-    const distance = Math.sqrt(panX * panX + panY * panY);
-    return Math.min(distance / 200, 1);
+    const progress = scrollProgress.get();
+    // Fade in content as we move away from initial position
+    return Math.min(progress * 5, 1); // Fast fade-in
   });
-  
-  // Hint opacity - fade out as user pans away from center
+
+  // Hint opacity - fade out as user scrolls
   const hintOpacity = useTransform(() => {
-    const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
-    const panY = isMobile ? mobilePanY.get() : cameraPanY.get();
-    const distance = Math.sqrt(panX * panX + panY * panY);
-    return Math.max(0, 1 - distance / 200);
+    const progress = scrollProgress.get();
+    return Math.max(0, 1 - progress * 5); // Fast fade-out
   });
-  
-  // --- Mouse / Torch Logic ---
+
+  // --- Mouse / Touch Tracking (for flashlight) ---
   // Initialize to center to avoid jump on load
   const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
   const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
   const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150 });
   const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150 });
 
+  // Track previous mouse position to detect significant movement
+  const prevMouseX = useRef(0);
+  const prevMouseY = useRef(0);
+  const mouseMovementThreshold = 5; // pixels
+
   useEffect(() => {
     if (isMobile) return;
     const handleMouseMove = (e) => {
       const newX = e.clientX;
       const newY = e.clientY;
-      
+
       // Check if movement is significant
       const deltaX = Math.abs(newX - prevMouseX.current);
       const deltaY = Math.abs(newY - prevMouseY.current);
       const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
+
       if (movement > mouseMovementThreshold) {
         mouseX.set(newX);
         mouseY.set(newY);
         prevMouseX.current = newX;
         prevMouseY.current = newY;
-        
-        // Track mouse movement
-        mouseMoving.current = true;
-        if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
-        mouseMoveTimer.current = setTimeout(() => {
-          mouseMoving.current = false;
-        }, 100);
       }
     };
     window.addEventListener('mousemove', handleMouseMove);
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
     };
   }, [mouseX, mouseY, isMobile]);
-  
+
+  // Track previous touch position
+  const prevTouchX = useRef(0);
+  const prevTouchY = useRef(0);
+  const touchMovementThreshold = 5; // pixels
+
   useEffect(() => {
      if (!isMobile) return;
      const handleTouchMove = (e) => {
         if (e.touches[0]) {
            const newX = e.touches[0].clientX;
            const newY = e.touches[0].clientY;
-           
+
            // Check if movement is significant
            const deltaX = Math.abs(newX - prevTouchX.current);
            const deltaY = Math.abs(newY - prevTouchY.current);
            const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-           
+
            if (movement > touchMovementThreshold) {
              mouseX.set(newX);
              mouseY.set(newY);
              prevTouchX.current = newX;
              prevTouchY.current = newY;
-             
-             // Track touch movement
-             touchMoving.current = true;
-             if (touchMoveTimer.current) clearTimeout(touchMoveTimer.current);
-             touchMoveTimer.current = setTimeout(() => {
-               touchMoving.current = false;
-             }, 100);
            }
         }
      };
-     window.addEventListener('touchmove', handleTouchMove, { passive: false });
+     window.addEventListener('touchmove', handleTouchMove, { passive: true });
      return () => {
        window.removeEventListener('touchmove', handleTouchMove);
-       if (touchMoveTimer.current) clearTimeout(touchMoveTimer.current);
      };
   }, [isMobile, mouseX, mouseY]);
 
-  // --- Camera Logic ---
-  
-  // Edge-based panning: slow panning when not at edges, fast panning at edges (10% from screen edges)
-  // Calculate max pan distance based on section dimensions
-  // Largest section is 900px (Participants), screen needs to accommodate it
-  // Max pan distance should allow section to fill screen
-  // Use SECTION_OFFSET as base, add extra for filling
-  const maxPanDistance = SECTION_OFFSET * 1.2;
-  
-  // Edge detection: 10% from screen edges
-  const edgeThreshold = 0.1;
-  
-  // Panning logic - updates camera position based on mouse/touch position
-  useEffect(() => {
-    const updatePanning = () => {
-      const mX = smoothMouseX.get();
-      const mY = smoothMouseY.get();
-      const centerX = winSize.w / 2;
-      const centerY = winSize.h / 2;
-      
-      // Calculate distance from edges
-      const distFromLeft = mX / winSize.w;
-      const distFromRight = (winSize.w - mX) / winSize.w;
-      const distFromTop = mY / winSize.h;
-      const distFromBottom = (winSize.h - mY) / winSize.h;
-      
-      // Check if in edge zone (within 10% of any edge)
-      const inEdgeZone = distFromLeft < edgeThreshold || 
-                         distFromRight < edgeThreshold ||
-                         distFromTop < edgeThreshold ||
-                         distFromBottom < edgeThreshold;
-      
-      // Check if mouse/touch is at center (within small threshold)
-      const mouseOffsetX = mX - centerX;
-      const mouseOffsetY = mY - centerY;
-      const distanceFromCenter = Math.sqrt(mouseOffsetX * mouseOffsetX + mouseOffsetY * mouseOffsetY);
-      const centerThreshold = 20; // pixels
-      const atCenter = distanceFromCenter < centerThreshold;
-      
-      // Calculate normalized distance from center (0 = center, 1 = edge)
-      // Use the maximum possible distance (diagonal from center to corner)
-      const maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
-      const normalizedDistance = Math.min(distanceFromCenter / maxDistance, 1);
-      
-      // Determine if should pan
-      let shouldPan = false;
-      let panSpeed = 0;
-      const isMoving = isMobile ? touchMoving.current : mouseMoving.current;
-      
-      if (inEdgeZone) {
-        // Fast panning at edges (even if not moving)
-        shouldPan = true;
-        // Scale fast pan speed based on screen size
-        // 1440p (2560px width) is baseline, mobile and 2160p need 2x faster
-        const baseSpeed = 0.006;
-        const screenWidth = winSize.w;
-        const baselineWidth = 2560; // 1440p width
-        // Scale: 2x for mobile (< 1000px) and 2160p (> 3000px), 1x for 1440p
-        let speedScale = 1.0;
-        if (screenWidth < 1000 || screenWidth > 3000) {
-          speedScale = 2.0; // 2x faster for mobile and 2160p
-        } else if (screenWidth > baselineWidth) {
-          // Linear scaling between 1440p and 2160p
-          speedScale = 1.0 + ((screenWidth - baselineWidth) / (3840 - baselineWidth));
-        }
-        
-        // Adjust speed based on distance from center
-        // At center (0%): 2x faster, at 50%: 1x, after 50%: 1x (constant)
-        let positionSpeedMultiplier = 1.0;
-        if (normalizedDistance <= 0.5) {
-          // Linear interpolation: 2x at 0% to 1x at 50%
-          positionSpeedMultiplier = 2.0 - (normalizedDistance / 0.5) * (2.0 - 1.0);
-        } else {
-          // After 50%, keep at 1x
-          positionSpeedMultiplier = 1.0;
-        }
-        
-        panSpeed = baseSpeed * speedScale * positionSpeedMultiplier;
-        zoomProgress.set(1); // Zoom out during fast panning
-      } else if (!atCenter && isMoving) {
-        // Slow panning when not at edges and mouse/touch is moving
-        shouldPan = true;
-        panSpeed = 0.002; // Slow panning speed (5x slower: 0.01 / 5)
-        zoomProgress.set(0); // Default zoom
-      } else {
-        // Stop panning: at center or not moving (and not at edges)
-        shouldPan = false;
-        zoomProgress.set(0); // Default zoom
+  // --- Flashlight Scanner System ---
+  const { flashlightX, flashlightY } = useFlashlightScanner({
+    isMobile,
+    frictionState,
+    currentSection,
+    flashlightScanProgress,
+    mouseX: smoothMouseX,
+    mouseY: smoothMouseY,
+    finalCameraX,
+    finalCameraY,
+    winSize,
+  });
+
+  // --- Navigation Handler ---
+  const handleNavigateToSection = useCallback((section) => {
+    animateToSection(
+      scrollProgress,
+      scrollToPosition,
+      section,
+      () => {
+        // Animation complete
+        console.log('Navigated to', section.name);
       }
-      
-      if (shouldPan) {
-        // Calculate pan direction (mouse right → content moves left → see right)
-        const panDirectionX = (centerX - mX) * panSpeed;
-        const panDirectionY = (centerY - mY) * panSpeed;
-        
-        // Get current pan position
-        const currentPanX = isMobile ? mobilePanXTarget.get() : cameraPanXTarget.get();
-        const currentPanY = isMobile ? mobilePanYTarget.get() : cameraPanYTarget.get();
-        
-        // Calculate new pan position
-        let newPanX = currentPanX + panDirectionX;
-        let newPanY = currentPanY + panDirectionY;
-        
-        // Clamp to max pan distance
-        const distance = Math.sqrt(newPanX * newPanX + newPanY * newPanY);
-        const maxDist = maxPanDistance;
-        if (distance > maxDist) {
-          const scale = maxDist / distance;
-          newPanX *= scale;
-          newPanY *= scale;
-        }
-        
-        // Set target values - spring will smoothly animate to these
-        if (isMobile) {
-          mobilePanXTarget.set(newPanX);
-          mobilePanYTarget.set(newPanY);
-        } else {
-          cameraPanXTarget.set(newPanX);
-          cameraPanYTarget.set(newPanY);
-        }
-      }
-      
-      requestAnimationFrame(updatePanning);
-    };
-    
-    const animationId = requestAnimationFrame(updatePanning);
-    return () => cancelAnimationFrame(animationId);
-  }, [isMobile, winSize, smoothMouseX, smoothMouseY, cameraPanX, cameraPanY, mobilePanX, mobilePanY, zoomProgress, maxPanDistance]);
-  
-  const desktopCameraX = useTransform(() => {
-    if (isMobile) return 0;
-    return cameraPanX.get();
-  });
+    );
+  }, [scrollProgress, scrollToPosition]);
 
-  const desktopCameraY = useTransform(() => {
-    if (isMobile) return 0;
-    return cameraPanY.get();
-  });
-  
-  // Mobile camera uses same pan state
-  const mobileCameraX = useTransform(() => {
-    if (!isMobile) return 0;
-    return mobilePanX.get();
-  });
+  // --- Accessibility Mode ---
+  const [accessibilityMode, setAccessibilityMode] = useState(false);
 
-  const mobileCameraY = useTransform(() => {
-    if (!isMobile) return 0;
-    return mobilePanY.get();
-  });
-
-  const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
-  const finalCameraY = useTransform(() => isMobile ? mobileCameraY.get() : desktopCameraY.get());
-
-  // Compass
+  // Compass rotation
   const compassRotation = useTransform(() => {
     const x = finalCameraX.get();
     const y = finalCameraY.get();
     if (x === 0 && y === 0) return 0;
-    // Panning X negative means looking Right.
-    // Compass should point to North relative to view?
     return Math.atan2(y, x) * (180 / Math.PI) + 90;
   });
 
   return (
     <>
       <div className="fixed inset-0 bg-black text-lu-text selection:bg-lu-gold selection:text-black overflow-hidden select-none h-[100dvh] touch-none">
-      
+
+      {/* Text Version Toggle (Top Left) */}
+      <button
+        onClick={() => setAccessibilityMode(!accessibilityMode)}
+        className="fixed top-8 left-8 z-[200] text-xs uppercase tracking-widest text-white/50 hover:text-lu-gold transition-colors pointer-events-auto"
+        aria-label="Toggle text-only mode"
+      >
+        Text Version
+      </button>
+
       {/* Language Switcher */}
       <div className="fixed top-8 right-8 z-[200] mix-blend-difference pointer-events-auto">
-         <button 
+         <button
             onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
             className="flex items-center gap-2 text-xs tracking-[0.2em] text-white hover:text-lu-gold transition-colors uppercase font-light"
           >
@@ -445,22 +324,22 @@ const App = () => {
       </div>
 
       {/* Hint */}
-      <motion.div 
+      <motion.div
         className="fixed bottom-8 left-0 w-full text-center z-[50] text-white/30 text-[10px] uppercase tracking-[0.3em] pointer-events-none"
         style={{ opacity: hintOpacity }}
       >
-        {isMobile ? "Touch to Explore • Move to Edges for Fast Panning" : "Move Mouse to Explore • Edges for Fast Panning"}
+        {isMobile ? "Swipe to Navigate • Scroll at Sections to Explore" : "Scroll to Navigate • Camera Locks at Sections"}
       </motion.div>
 
       {/* Layers */}
       <BackgroundLayer />
-      <NoiseLayer mouseX={smoothMouseX} mouseY={smoothMouseY} isTouch={isMobile} isMobile={isMobile} />
+      <NoiseLayer mouseX={flashlightX} mouseY={flashlightY} isTouch={isMobile} isMobile={isMobile} />
 
       {/* Spatial Canvas */}
       <div className="fixed inset-0 overflow-hidden flex items-center justify-center pointer-events-none">
         <motion.div
           className="relative w-0 h-0 flex items-center justify-center"
-          style={{ 
+          style={{
             scale,
             x: finalCameraX,
             y: finalCameraY,
@@ -470,7 +349,7 @@ const App = () => {
           {/* Center: Title (Always Visible) */}
           <div className="absolute inset-0 flex items-center justify-center w-[100vw] h-[100vh] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
              <div className="text-center">
-                <motion.h1 
+                <motion.h1
                   className="font-serif text-6xl md:text-9xl tracking-widest text-white drop-shadow-2xl whitespace-nowrap"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -492,7 +371,7 @@ const App = () => {
           {/* Peripheral Content (Fades in on Scroll) */}
           <motion.div style={{ opacity: contentOpacity }}>
             {/* North: Manifesto */}
-            <div 
+            <div
               className="absolute w-[80vw] md:w-[600px] pointer-events-auto flex flex-col items-center"
               style={{ transform: `translate(-50%, -${SECTION_OFFSET}px)` }}
             >
@@ -501,7 +380,7 @@ const App = () => {
             </div>
 
             {/* East: Participants */}
-            <div 
+            <div
               className="absolute w-[80vw] md:w-[900px] pointer-events-auto"
               style={{ transform: `translate(${SECTION_OFFSET * 0.8}px, -50%)` }}
             >
@@ -509,7 +388,7 @@ const App = () => {
             </div>
 
             {/* South: Events */}
-            <div 
+            <div
               className="absolute w-[80vw] md:w-[600px] pointer-events-auto flex flex-col-reverse items-center"
               style={{ transform: `translate(-50%, ${SECTION_OFFSET * 0.8}px)` }}
             >
@@ -518,7 +397,7 @@ const App = () => {
             </div>
 
              {/* West: Contact */}
-             <div 
+             <div
               className="absolute w-[80vw] md:w-[500px] pointer-events-auto"
               style={{ transform: `translate(-${SECTION_OFFSET}px, -50%)` }}
             >
@@ -533,12 +412,30 @@ const App = () => {
                <line x1="0" y1="0" x2="0" y2={`${SECTION_OFFSET}`} stroke="white" />
                <line x1="0" y1="0" x2={`${SECTION_OFFSET}`} y2="0" stroke="white" />
             </svg>
+
+            {/* Navigation Nodes (visible when zoomed out) */}
+            <motion.div style={{ opacity: smoothZoomProgress }}>
+              <NavigationNodes
+                sections={SCROLL_PATH.sections.filter(s => !s.id.includes('return'))} // Exclude return section
+                currentSection={currentSection}
+                isVisible={true} // Controlled by parent opacity
+                onNavigate={handleNavigateToSection}
+              />
+            </motion.div>
           </motion.div>
 
         </motion.div>
       </div>
 
       <Compass rotation={compassRotation} />
+
+      {/* Accessibility Mode Overlay */}
+      <AccessibilityMode
+        isActive={accessibilityMode}
+        onClose={() => setAccessibilityMode(false)}
+        content={t}
+        lang={lang}
+      />
       </div>
     </>
   );
