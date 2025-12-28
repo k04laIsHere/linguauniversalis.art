@@ -13,25 +13,24 @@ const PROXIMITY_THRESHOLD = 350;
 // --- Components ---
 
 const Flashlight = ({ isMobile, isInGallery, globalMouseX, globalMouseY, flashlightOpacity }) => {
-  const baseSize = isMobile ? 300 : 800;
-  const expandedSize = isMobile ? 600 : 1600;
+  const baseSize = isMobile ? 250 : 800;
+  const expandedSize = isMobile ? 500 : 1600;
   
   const size = isInGallery ? expandedSize : baseSize;
   const smoothSize = useSpring(size, { damping: 30, stiffness: 50 });
 
-  // Explicitly center for mobile, ignore globalMouseX/Y
-  const x = isMobile ? '50%' : useMotionTemplate`${globalMouseX}px`;
-  const y = isMobile ? '50%' : useMotionTemplate`${globalMouseY}px`;
-  const radius = useMotionTemplate`${smoothSize}px`;
+  // Use separate templates for mobile and desktop to avoid runtime issues
+  const desktopMask = useMotionTemplate`radial-gradient(circle ${smoothSize}px at ${globalMouseX}px ${globalMouseY}px, transparent 0%, rgba(0,0,0,0.98) 95%, black 100%)`;
+  const mobileMask = useMotionTemplate`radial-gradient(circle ${smoothSize}px at 50% 50%, transparent 0%, rgba(0,0,0,0.98) 95%, black 100%)`;
 
-  const maskImage = useMotionTemplate`radial-gradient(circle ${radius} at ${x} ${y}, transparent 0%, rgba(0,0,0,0.98) 95%, black 100%)`;
+  const mask = isMobile ? mobileMask : desktopMask;
 
   return (
     <motion.div 
       className="fixed inset-0 z-[100] pointer-events-none bg-black"
       style={{ 
-        maskImage,
-        WebkitMaskImage: maskImage,
+        maskImage: mask,
+        WebkitMaskImage: mask,
         opacity: flashlightOpacity
       }}
     >
@@ -53,11 +52,12 @@ const InteractiveElement = ({ children, index, globalMouseX, globalMouseY, isMob
   });
   
   // Varied parallax speeds
-  const speed = useMemo(() => (index % 3 + 1) * 30 * parallaxSpeed, [index, parallaxSpeed]);
-  const yMove = useTransform(scrollYProgress, [0, 1], [speed, -speed]);
+  const speedValue = useMemo(() => (index % 4 + 2) * 20 * parallaxSpeed, [index, parallaxSpeed]);
+  const yMove = useTransform(scrollYProgress, [0, 1], [speedValue, -speedValue]);
   const smoothY = useSpring(yMove, { stiffness: 50, damping: 20 });
 
   useEffect(() => {
+    let frameId;
     const updateProximity = () => {
       if (!containerRef.current) return;
       const rect = containerRef.current.getBoundingClientRect();
@@ -70,18 +70,18 @@ const InteractiveElement = ({ children, index, globalMouseX, globalMouseY, isMob
       const dist = Math.sqrt(Math.pow(fx - centerX, 2) + Math.pow(fy - centerY, 2));
       setIsRevealed(dist < PROXIMITY_THRESHOLD);
       
-      requestAnimationFrame(updateProximity);
+      frameId = requestAnimationFrame(updateProximity);
     };
     
-    const animId = requestAnimationFrame(updateProximity);
-    return () => cancelAnimationFrame(animId);
+    frameId = requestAnimationFrame(updateProximity);
+    return () => cancelAnimationFrame(frameId);
   }, [globalMouseX, globalMouseY, isMobile]);
 
   return (
     <motion.div 
       ref={containerRef}
       style={{ y: smoothY }}
-      className="w-full h-full"
+      className="w-full"
     >
       {typeof children === 'function' ? children(isRevealed) : React.cloneElement(children, { isRevealed })}
     </motion.div>
@@ -90,33 +90,33 @@ const InteractiveElement = ({ children, index, globalMouseX, globalMouseY, isMob
 
 const InteractiveImage = ({ src, alt, title, subtitle, quote, isLeft, index, globalMouseX, globalMouseY, isMobile }) => {
   return (
-    <div className={`relative mb-64 flex w-full ${isLeft ? 'justify-start md:pl-[15%]' : 'justify-end md:pr-[15%]'}`}>
+    <div className={`relative mb-64 flex w-full ${isLeft ? 'justify-start md:pl-[10%]' : 'justify-end md:pr-[10%]'}`}>
       <InteractiveElement index={index} globalMouseX={globalMouseX} globalMouseY={globalMouseY} isMobile={isMobile}>
         {(isRevealed) => (
-          <div className="relative max-w-xl group">
+          <div className="relative max-w-xl group px-6 md:px-0">
             <div className="relative overflow-hidden">
               <img 
                 src={src} 
                 alt={alt}
-                className={`w-full transition-all duration-1000 ease-in-out ${isRevealed ? 'grayscale-0 brightness-100' : 'grayscale brightness-50'}`}
+                className={`w-full transition-all duration-1000 ease-in-out ${isRevealed ? 'grayscale-0 brightness-100' : 'grayscale brightness-50 blur-sm'}`}
                 style={{
-                  maskImage: 'radial-gradient(rgba(0,0,0,1) 30%, rgba(0,0,0,0) 80%)',
-                  WebkitMaskImage: 'radial-gradient(rgba(0,0,0,1) 30%, rgba(0,0,0,0) 80%)'
+                  maskImage: 'radial-gradient(rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)',
+                  WebkitMaskImage: 'radial-gradient(rgba(0,0,0,1) 40%, rgba(0,0,0,0) 80%)'
                 }}
               />
             </div>
             
             <div className={`mt-8 space-y-4 max-w-sm transition-opacity duration-700 ${isRevealed ? 'opacity-100' : 'opacity-0'}`}>
-              <h3 className="font-serif text-3xl text-lu-gold tracking-wider uppercase">
+              <h3 className="font-serif text-2xl md:text-3xl text-lu-gold tracking-wider uppercase">
                 {title}
               </h3>
               {subtitle && (
-                <p className="font-sans text-xs text-white/40 uppercase tracking-[0.4em] font-light">
+                <p className="font-sans text-[10px] md:text-xs text-white/40 uppercase tracking-[0.4em] font-light">
                   {subtitle}
                 </p>
               )}
               {quote && (
-                <p className="text-lg text-white/50 font-extralight leading-relaxed italic border-l border-lu-gold/20 pl-6 mt-6">
+                <p className="text-base md:text-lg text-white/50 font-extralight leading-relaxed italic border-l border-lu-gold/20 pl-6 mt-6">
                   {quote}
                 </p>
               )}
@@ -145,8 +145,8 @@ const App = () => {
 
   const { scrollY } = useScroll();
   
-  // Parallax: More visible background parallax, 2x on mobile
-  const bgParallaxRange = isMobile ? -1500 : -800;
+  // High-performance parallax: More visible background parallax
+  const bgParallaxRange = isMobile ? -2000 : -1000;
   const bgY = useTransform(scrollY, [0, 5000], [0, bgParallaxRange]);
 
   useEffect(() => {
@@ -160,7 +160,7 @@ const App = () => {
         setIsInGallery(rect.top < window.innerHeight && rect.bottom > 0);
       }
     };
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.removeEventListener('resize', checkMobile);
@@ -168,41 +168,42 @@ const App = () => {
     };
   }, []);
 
-  // Flashlight Dimming Effect
+  // Flashlight Dimming Logic - Robust implementation
   useEffect(() => {
     let dimTimer;
     
-    const handleInteraction = () => {
+    const wakeUp = () => {
       flashlightOpacity.set(1);
       if (dimTimer) clearTimeout(dimTimer);
-      
-      // Dim after 1.5s of no interaction
       dimTimer = setTimeout(() => {
-        flashlightOpacity.set(0.1);
+        flashlightOpacity.set(0.15);
       }, 1500);
     };
 
+    const handleMouseMove = (e) => {
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
+      wakeUp();
+    };
+
     if (isMobile) {
-      window.addEventListener('touchstart', handleInteraction, { passive: true });
-      window.addEventListener('touchmove', handleInteraction, { passive: true });
+      // On mobile, just use touch for wake up, no move
+      window.addEventListener('touchstart', wakeUp, { passive: true });
+      window.addEventListener('touchmove', wakeUp, { passive: true });
+      window.addEventListener('scroll', wakeUp, { passive: true });
     } else {
-      window.addEventListener('mousemove', (e) => {
-        mouseX.set(e.clientX);
-        mouseY.set(e.clientY);
-        handleInteraction();
-      });
-      window.addEventListener('scroll', handleInteraction, { passive: true });
+      window.addEventListener('mousemove', handleMouseMove, { passive: true });
+      window.addEventListener('scroll', wakeUp, { passive: true });
     }
 
-    // Initial timer
-    handleInteraction();
+    wakeUp(); // Initial state
 
     return () => {
       if (dimTimer) clearTimeout(dimTimer);
-      window.removeEventListener('touchstart', handleInteraction);
-      window.removeEventListener('touchmove', handleInteraction);
-      window.removeEventListener('mousemove', handleInteraction);
-      window.removeEventListener('scroll', handleInteraction);
+      window.removeEventListener('touchstart', wakeUp);
+      window.removeEventListener('touchmove', wakeUp);
+      window.removeEventListener('scroll', wakeUp);
+      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, [isMobile]);
 
@@ -210,12 +211,13 @@ const App = () => {
     <div className="relative min-h-screen bg-black overflow-x-hidden selection:bg-lu-gold selection:text-black">
       {/* Optimized Tiled & Parallax Background */}
       <motion.div 
-        className="fixed inset-0 z-0 opacity-40 pointer-events-none"
+        className="fixed inset-0 z-0 opacity-40 pointer-events-none bg-fixed"
         style={{ 
           backgroundImage: `url(${rockTexture})`,
           backgroundRepeat: 'repeat',
-          backgroundSize: isMobile ? '400px' : '800px',
-          y: bgY
+          backgroundSize: isMobile ? '300px' : '600px',
+          y: bgY,
+          willChange: 'transform'
         }}
       />
       
@@ -240,16 +242,16 @@ const App = () => {
         {/* Hero */}
         <section className="mb-[60vh] text-center px-6 relative w-full flex flex-col items-center">
           <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 3, ease: "easeOut" }}
-            className="w-full max-w-[90vw] md:max-w-none"
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            transition={{ duration: 2, ease: "easeOut" }}
+            className="w-full max-w-[95vw] md:max-w-none"
           >
-            {/* Reduced Title Size on Mobile */}
-            <h1 className="font-serif text-4xl sm:text-6xl md:text-[14rem] text-white tracking-[0.1em] md:tracking-[0.3em] mb-4 drop-shadow-2xl uppercase leading-tight">
+            {/* Further Reduced Title Size for Mobile */}
+            <h1 className="font-serif text-3xl sm:text-5xl md:text-[14rem] text-white tracking-[0.1em] md:tracking-[0.3em] mb-4 drop-shadow-2xl uppercase leading-tight">
               LINGUA<br />UNIVERSALIS
             </h1>
-            <p className="font-sans text-[8px] md:text-lg text-lu-gold tracking-[0.4em] md:tracking-[1em] uppercase opacity-40 font-extralight">
+            <p className="font-sans text-[7px] md:text-lg text-lu-gold tracking-[0.3em] md:tracking-[1em] uppercase opacity-40 font-extralight">
               {t.hero.subtitle}
             </p>
           </motion.div>
@@ -258,20 +260,20 @@ const App = () => {
 
         {/* Philosophy Section */}
         <section className="w-full max-w-6xl px-8 mb-[50vh] flex flex-col md:flex-row gap-20 items-start">
-          <InteractiveElement index={1} globalMouseX={smoothMouseX} globalMouseY={smoothMouseY} isMobile={isMobile} parallaxSpeed={0.5}>
+          <InteractiveElement index={1} globalMouseX={smoothMouseX} globalMouseY={smoothMouseY} isMobile={isMobile} parallaxSpeed={0.4}>
             <div className="relative flex-1">
-              <div className="space-y-20">
-                <h2 className="font-serif text-5xl md:text-6xl text-lu-gold uppercase tracking-[0.4em] mb-12">
+              <div className="space-y-12 md:space-y-20">
+                <h2 className="font-serif text-4xl md:text-6xl text-lu-gold uppercase tracking-[0.4em] mb-12">
                   {t.sections.philosophy}
                 </h2>
-                <p className="text-3xl md:text-5xl font-extralight text-white/80 leading-relaxed">
+                <p className="text-2xl md:text-5xl font-extralight text-white/80 leading-relaxed">
                   {t.hero.philosophy}
                 </p>
               </div>
             </div>
           </InteractiveElement>
-          <InteractiveElement index={2} globalMouseX={smoothMouseX} globalMouseY={smoothMouseY} isMobile={isMobile} parallaxSpeed={0.8}>
-            <div className="flex-1 text-lg md:text-xl text-white/40 leading-loose space-y-12 max-w-md ml-auto border-r border-lu-gold/10 pr-10 font-extralight">
+          <InteractiveElement index={2} globalMouseX={smoothMouseX} globalMouseY={smoothMouseY} isMobile={isMobile} parallaxSpeed={0.7}>
+            <div className="flex-1 text-base md:text-xl text-white/40 leading-loose space-y-8 md:space-y-12 max-w-md ml-auto border-r border-lu-gold/10 pr-10 font-extralight">
               <p>
                 The project is a bridge between the prehistoric (shamanic cave art) and the post-modern (digital cinematic art). Every design element is a piece of a singular, interconnected whole.
               </p>
@@ -284,7 +286,7 @@ const App = () => {
 
         {/* Gallery */}
         <section ref={galleryRef} className="w-full max-w-7xl px-4 mb-[40vh]">
-          <h2 className="text-center font-serif text-4xl text-lu-gold/40 uppercase tracking-[0.5em] mb-48">
+          <h2 className="text-center font-serif text-3xl md:text-4xl text-lu-gold/40 uppercase tracking-[0.5em] mb-48">
             {t.sections.gallery}
           </h2>
           <div className="space-y-32">
@@ -305,15 +307,15 @@ const App = () => {
           </div>
         </section>
 
-        {/* Movie Section with Proximity Reveal */}
+        {/* Movie Section */}
         <section className="w-full mb-[40vh] flex flex-col items-center px-4">
-          <h2 className="font-serif text-4xl text-lu-gold uppercase tracking-[0.5em] mb-20">
+          <h2 className="font-serif text-3xl md:text-4xl text-lu-gold uppercase tracking-[0.5em] mb-20">
             {t.sections.movie}
           </h2>
-          <InteractiveElement index={5} globalMouseX={smoothMouseX} globalMouseY={smoothMouseY} isMobile={isMobile}>
+          <InteractiveElement index={5} globalMouseX={smoothMouseX} globalMouseY={smoothMouseY} isMobile={isMobile} parallaxSpeed={0.5}>
             {(isRevealed) => (
-              <div className={`relative w-full max-w-6xl aspect-video transition-all duration-1000 ${isRevealed ? 'grayscale-0 brightness-100' : 'grayscale brightness-50 blur-sm'}`}>
-                <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none group-hover:bg-transparent transition-colors duration-1000" />
+              <div className={`relative w-full max-w-6xl aspect-video transition-all duration-1000 ${isRevealed ? 'grayscale-0 brightness-100 blur-0' : 'grayscale brightness-50 blur-md'}`}>
+                <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
                 <div className="absolute inset-0 bg-noise opacity-10 z-20 pointer-events-none animate-grain" />
                 <iframe 
                   className="w-full h-full"
@@ -331,7 +333,7 @@ const App = () => {
 
         {/* Team Section */}
         <section className="w-full max-w-5xl px-8 mb-[40vh]">
-          <h2 className="text-center font-serif text-5xl text-lu-gold uppercase tracking-[0.3em] mb-64">
+          <h2 className="text-center font-serif text-4xl md:text-5xl text-lu-gold uppercase tracking-[0.3em] mb-64">
             {t.sections.team}
           </h2>
           <div>
@@ -344,7 +346,7 @@ const App = () => {
                 subtitle={member.role}
                 quote={member.quote}
                 isLeft={i % 2 === 0}
-                index={i + 10}
+                index={i + 12}
                 globalMouseX={smoothMouseX}
                 globalMouseY={smoothMouseY}
                 isMobile={isMobile}
@@ -355,18 +357,18 @@ const App = () => {
 
         {/* Events & Contact */}
         <section className="w-full max-w-5xl px-8 flex flex-col items-center">
-           <h2 className="font-serif text-4xl text-lu-gold uppercase tracking-[0.5em] mb-24">
+           <h2 className="font-serif text-3xl md:text-4xl text-lu-gold uppercase tracking-[0.5em] mb-24">
             {t.sections.events}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-24 w-full">
             {t.events.list.map((event, i) => (
-              <InteractiveElement key={i} index={i} globalMouseX={smoothMouseX} globalMouseY={smoothMouseY} isMobile={isMobile} parallaxSpeed={0.3}>
+              <InteractiveElement key={i} index={i} globalMouseX={smoothMouseX} globalMouseY={smoothMouseY} isMobile={isMobile} parallaxSpeed={0.2}>
                 <div className="space-y-6 border-t border-lu-gold/10 pt-12">
-                  <h3 className="font-serif text-2xl text-white font-extralight">{event.title}</h3>
+                  <h3 className="font-serif text-xl md:text-2xl text-white font-extralight">{event.title}</h3>
                   <div className="flex items-center gap-3 text-xs text-lu-gold tracking-widest uppercase font-extralight">
                     <MapPin size={14} /> {event.location}
                   </div>
-                  <p className="text-base text-white/40 leading-relaxed font-extralight">{event.desc}</p>
+                  <p className="text-sm md:text-base text-white/40 leading-relaxed font-extralight">{event.desc}</p>
                   <a 
                     href={event.link} 
                     target="_blank" 
@@ -383,7 +385,7 @@ const App = () => {
           <div className="mt-[40vh] text-center space-y-12">
              <div className="h-32 w-[1px] bg-gradient-to-b from-transparent to-lu-gold/50 mx-auto" />
              <p className="text-xs tracking-[0.8em] text-white/20 uppercase font-extralight">{t.footer.contacts}</p>
-             <h4 className="font-serif text-lu-gold text-2xl tracking-widest font-extralight">{t.footer.text}</h4>
+             <h4 className="font-serif text-lu-gold text-xl md:text-2xl tracking-widest font-extralight">{t.footer.text}</h4>
           </div>
         </section>
 
