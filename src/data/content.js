@@ -90,7 +90,7 @@ export const content = {
       philosophy: 'Философия',
       gallery: 'Галерея Творений',
       team: 'Творцы',
-      movie: 'Проекция',
+      movie: 'Фильм',
       events: 'События',
       contact: 'Связь'
     },
