@@ -1,0 +1,11 @@
+PROJECT PHILOSOPHY: LINGUA UNIVERSALIS
+
+The Core Paradox: The project is a bridge between the prehistoric (shamanic cave art) and the post-modern (digital cinematic art). The design must feel simultaneously ancient and futuristic.
+
+The "Non-Interface" Principle: The user should not feel like they are using a website; they should feel like they are exploring a site of discovery. Avoid generic UI patterns (centered buttons, rigid grids, top-aligned navbars). Navigation is a journey, not a menu.
+
+The Illumination of Truth: Knowledge is hidden in the dark. The "Flashlight" or "Spark" is the primary metaphor for consciousness. Information only reveals itself when the user provides focus (the "Light").
+
+Organic Chaos: Nature does not work in 90-degree angles. The layout should feel like it was "grown" or "eroded" rather than "programmed." Use asymmetry, organic transitions, and depth.
+
+The Universal Thread: There is a single frequency connecting the first handprint on a cave wall to a digital frame. Every design element should feel like a piece of a singular, interconnected whole.

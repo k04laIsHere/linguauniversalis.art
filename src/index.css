@@ -61,3 +61,21 @@ html {
 .animate-grain {
   animation: grain 8s steps(10) infinite;
 }
+
+/* Organic Layout Utilities */
+
+.shape-outside-rock {
+  shape-margin: 2rem;
+  clip-path: polygon(0% 0%, 100% 0%, 85% 30%, 100% 60%, 75% 100%, 0% 100%);
+}
+
+.mask-radial-fade {
+  mask-image: radial-gradient(circle at center, black 50%, transparent 100%);
+  -webkit-mask-image: radial-gradient(circle at center, black 50%, transparent 100%);
+}
+
+@layer utilities {
+  .text-indent-lg {
+    text-indent: 4rem;
+  }
+}
