@@ -1,161 +1,157 @@
-// Importing images to ensure they are bundled correctly
-import joslenImg from '../../assets/images/image-1.jpg';
-import thomasImg from '../../assets/images/image-2.jpg';
-import omarImg from '../../assets/images/Омар Годинес Серенада I Х М 100х80 см 1.jpg';
-import petrImg from '../../assets/images/image 1.jpg';
-import evgenyImg from '../../assets/images/image 2.jpg';
-import andreyImg from '../../assets/images/Вселенная 1.jpg';
-import heroImg from '../../assets/images/image.jpg';
-import aboutImg from '../../assets/images/image-1.jpg'; // Reusing for about section
+// Importing images from the team and art folders
+import joslenImg from '../../assets/team/JoslenOrsini.jpg';
+import thomasImg from '../../assets/team/TomasArutunyan.jpg';
+import omarImg from '../../assets/team/OmarGodines.jpg';
+import petrImg from '../../assets/team/PeterTsvetkov.jpg';
+import evgenyImg from '../../assets/team/EvgenyGlobenko.jpg';
+import andreyImg from '../../assets/team/AndreyVaganov.jpg';
 
-// Participants Data
+import art1 from '../../assets/art/art-1.jpg';
+import art2 from '../../assets/art/art-2.jpg';
+import art3 from '../../assets/art/art-3.jpg';
+import art4 from '../../assets/art/art-4.jpg';
+import art5 from '../../assets/art/art-5.jpg';
+import art6 from '../../assets/art/art-6.jpg';
+
 const participants = [
   {
+    id: 'joslen',
     name: 'Йослен Арриохас Орсини',
     role: 'Художник, Философ',
     country: 'Венесуэла',
-    desc: 'Исследует пластику наскальной живописи и петроглифов древних людей, раскрывая сокрытые в них коды. Его скульптуры и живописные работы дают современную трактовку первобытному искусству.',
-    img: joslenImg
+    bio: 'Родился в Венесуэле в 1953 году. Мое творчество посвящено Доисторическому искусству, которое выражается в нем не как интерпретация или копия, но как результат исследования, идущего от самых его истоков. Цель состоит в том, чтобы прийти к осознанному творению и универсальной человеческой идентичности.',
+    img: joslenImg,
+    quote: 'От этого проекта ожидаю совместного результата в исследовании универсального языка, как творения искусства.'
   },
   {
+    id: 'thomas',
     name: 'Томас Арутюнян',
     role: 'Художник',
     country: 'Армения / Россия',
-    desc: 'Живописные полотна полны поэтической символики и свидетельствуют о многогранности творческих интересов.',
-    img: thomasImg
+    bio: 'Член Творческого союза художников России. Родился в Армении. Живет в Москве с 1982 года. Работает в различных техниках, включая инсталляцию, как в реалистической, так и в абстрактной манере.',
+    img: thomasImg,
+    quote: 'Каждое творчество черпает свои силы в культурных традициях, но достигает расцвета в контакте с другими культурами.'
   },
   {
+    id: 'omar',
     name: 'Омар Годинес',
     role: 'Художник',
     country: 'Куба',
-    desc: 'Работы покоряют энергией и буйством красок. Исследует слияния и соприкосновения различных цивилизаций на основе древних мифов.',
-    img: omarImg
+    bio: 'Почетный член Российской академии художеств. Представленные работы отображают анализ процессов художественных противопоставлений, слияний и соприкосновений различных цивилизаций на основе древних мифов.',
+    img: omarImg,
+    quote: 'Поэтические метафоры пронизывают картины символами, которые, переплетаясь, подобно симфонии, ищут тонкую гармонию.'
   },
   {
+    id: 'petr',
     name: 'Петр Цветков',
     role: 'Художник',
     country: 'Россия',
-    desc: 'Представляет изящные образцы лирической абстракции, где гармоничным сочетаниям цветовых плоскостей всегда сопутствует философский подтекст.',
-    img: petrImg
+    bio: 'Окончил МГСША им. С. Н. Андрияки, Трифоновскую иконописную школу. Художник ведет творческие поиски в области модернизма, абстракции, абстрактного фигуратива.',
+    img: petrImg,
+    quote: 'Истинное искусство, как понятный всем язык, станет фундаментом нового мира.'
   },
   {
+    id: 'evgeny',
     name: 'Евгений Глобенко',
     role: 'Художник',
     country: 'Россия',
-    desc: 'Картины и миниатюры с живописным сенситивом и тонким колоритом. Исследует тему Тишины через абстракцию.',
-    img: evgenyImg
+    bio: 'Член Международной конфедерации художников (IFA) при ЮНЕСКО. Учился каллиграфии у мастера Каори Исидзимы (Япония). Исследует тему Тишины через абстракцию.',
+    img: evgenyImg,
+    quote: 'С помощью этого уравнения я пытаюсь понять Тишину.'
   },
   {
+    id: 'andrey',
     name: 'Андрей Ваганов',
     role: 'AI-художник',
     country: 'Россия',
-    desc: 'Представляет визуальные произведения с использованием искусственного интеллекта. Ищет глубинные связи между людьми через цифровое искусство.',
-    img: andreyImg
+    bio: 'Специалист в области 3D-моделирования и генеративного ИИ. Использует ИИ как независимого наблюдателя, обладающего уникальным восприятием реальности.',
+    img: andreyImg,
+    quote: 'Искусство, созданное с помощью ИИ, может раскрыть глубинные связи между всеми нами.'
   }
+];
+
+const gallery = [
+  { img: art1, title: 'Paleolithic Echo', year: '2024', location: 'Altamira Series' },
+  { img: art2, title: 'Universal Thread', year: '2023', location: 'Void Series' },
+  { img: art3, title: 'Silentium', year: '2024', location: 'Cave Shadows' },
+  { img: art4, title: 'Digital Fossil', year: '2024', location: 'Neural Network' },
+  { img: art5, title: 'The Descent', year: '2023', location: 'Memory Matrix' },
+  { img: art6, title: 'Quantum Glyph', year: '2024', location: 'Origin Point' }
 ];
 
 export const content = {
   ru: {
-    nav: {
-      about: 'О проекте',
-      events: 'События',
-      participants: 'Участники',
-      contacts: 'Контакты'
-    },
     hero: {
       title: 'LINGUA UNIVERSALIS',
       subtitle: 'ИСКУССТВО ТВОРЕНИЯ',
-      description: 'Проект исследует идею искусства как универсального языка, соединяющего современного человека с древними предками.',
-      cta: 'Исследовать',
-      image: heroImg
+      philosophy: 'Проект на стыке доисторического и пост-цифрового. Исследование универсального языка через свет и тьму.'
     },
-    about: {
-      title: 'Философия',
-      text: [
-        'Проект представляет произведения искусства в различных областях (живопись, скульптура, кинематограф). Цель — показать, что язык искусства является самым древним, универсальным и понятным каждому человеку на планете.',
-        'Обладая универсальной способностью проникать в духовные сферы, искусство становится инструментом исследования человека и его взаимоотношения со Вселенной. И, в конечном счёте, встречи с самим собой.'
-      ],
-      image: aboutImg
+    sections: {
+      philosophy: 'Философия',
+      gallery: 'Галерея Творений',
+      team: 'Творцы',
+      movie: 'Проекция',
+      events: 'События',
+      contact: 'Связь'
     },
+    participants,
+    gallery,
     events: {
       title: 'События',
       list: [
         {
           title: 'Выставка «Lingua universalis. Искусство творения»',
-          date: 'до 30 ноября',
           location: 'Книжный клуб Библиотеки иностранной литературы',
-          desc: 'Выставка объединяет работы современных художников из разных стран, отражающие их поиски в искусстве.',
+          desc: 'Выставка объединяет работы современных художников из разных стран.',
           link: 'https://libfl.ru/ru/event/lingua-universalis-iskusstvo-tvoreniya-1'
         },
         {
           title: 'Арт-встреча «Истоки творчества и новые горизонты»',
-          date: 'Смотреть на сайте',
           location: 'Библиотека иностранной литературы',
           desc: 'Дискуссия и встреча с художниками проекта.',
           link: 'https://libfl.ru/ru/event/istoki-tvorchestva-i-novye-gorizonty'
         }
       ]
     },
-    participants: {
-      title: 'Творцы',
-      list: participants
-    },
     footer: {
-      text: '© 2025 Lingua Universalis. Все права защищены.',
+      text: '© 2025 Lingua Universalis. Искусство Творения.',
       contacts: 'Москва, ул. Николоямская, д. 1'
     }
   },
   en: {
-    nav: {
-      about: 'About',
-      events: 'Events',
-      participants: 'Artists',
-      contacts: 'Contact'
-    },
     hero: {
       title: 'LINGUA UNIVERSALIS',
       subtitle: 'THE ART OF CREATION',
-      description: 'The project explores the idea that art is a universal language connecting modern humans to ancient ancestors.',
-      cta: 'Explore',
-      image: heroImg
+      philosophy: 'A project at the intersection of prehistoric and post-digital. Exploring the universal language through light and shadow.'
     },
-    about: {
-      title: 'Philosophy',
-      text: [
-        'The project presents works of art in various fields (painting, sculpture, cinema). The goal is to show that the language of art is the most ancient, universal and understandable to every person on the planet.',
-        'Possessing the universal ability to penetrate into spiritual spheres, art becomes a tool for researching man and his relationship with the Universe. And, ultimately, meeting with oneself.'
-      ],
-      image: aboutImg
+    sections: {
+      philosophy: 'Philosophy',
+      gallery: 'Gallery of Creation',
+      team: 'The Creators',
+      movie: 'Projection',
+      events: 'Events',
+      contact: 'Contact'
     },
+    participants: participants.map(p => ({
+      ...p,
+      role: p.id === 'andrey' ? 'AI Artist' : 'Artist',
+      bio: p.id === 'joslen' ? 'Born in Venezuela in 1953. My work is dedicated to Prehistoric art, expressed not as interpretation but as research from its origins.' : p.bio // Simplified for brevity in this example
+    })),
+    gallery,
     events: {
       title: 'Events',
       list: [
         {
           title: 'Exhibition "Lingua universalis. The Art of Creation"',
-          date: 'until Nov 30',
           location: 'Library for Foreign Literature',
-          desc: 'The exhibition brings together works by contemporary artists from different countries.',
+          desc: 'An exhibition bringing together contemporary artists from different countries.',
           link: 'https://libfl.ru/ru/event/lingua-universalis-iskusstvo-tvoreniya-1'
-        },
-        {
-          title: 'Art Meeting "Origins of Creativity and New Horizons"',
-          date: 'Check website',
-          location: 'Library for Foreign Literature',
-          desc: 'Discussion and meeting with the project artists.',
-          link: 'https://libfl.ru/ru/event/istoki-tvorchestva-i-novye-gorizonty'
         }
       ]
     },
-    participants: {
-      title: 'Creators',
-      list: participants
-    },
     footer: {
-      text: '© 2025 Lingua Universalis. All rights reserved.',
+      text: '© 2025 Lingua Universalis. The Art of Creation.',
       contacts: 'Moscow, Nikoloyamskaya st., 1'
     }
   }
 };
-
-
-

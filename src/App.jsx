@@ -1,546 +1,320 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { motion, useTransform, useSpring, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
-import { Globe, ExternalLink, MapPin } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, useScroll, useSpring, useTransform, useMotionValue, useMotionTemplate, AnimatePresence } from 'framer-motion';
+import { Globe, Eye, MapPin, ExternalLink, Info } from 'lucide-react';
 import { content } from './data/content';
 
-// Import assets
-import heroBg from '../assets/images/background.jpg';
-
-// --- Constants ---
-const SECTION_OFFSET = 1500; // Distance of sections from center (0,0)
+// Assets
+import rockTexture from '../assets/rock-texture.jpg';
+import noiseGrain from '../assets/noise-grain.png';
+import rockEdgeLeft from '../assets/rock-edge-left.png';
+import rockEdgeRight from '../assets/rock-edge-right.png';
 
 // --- Components ---
 
-const NoiseLayer = ({ mouseX, mouseY, isTouch, isMobile }) => {
-  // Desktop: 450px, Mobile: 250px
-  const radius = isTouch || isMobile ? 250 : 450;
+const Flashlight = ({ isMobile }) => {
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
   
-  // Use motion template for performant mask updates
-  const maskImage = useMotionTemplate`radial-gradient(circle ${radius}px at ${mouseX}px ${mouseY}px, transparent 0%, black 100%)`;
-  
-  return (
-    <motion.div 
-      className="fixed inset-0 z-[100] pointer-events-none"
-      style={{ 
-        maskImage,
-        WebkitMaskImage: maskImage,
-        backdropFilter: 'blur(5px)' 
-      }}
-    >
-        <div className="absolute inset-0 bg-noise opacity-[0.2] animate-grain mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-black/90"></div>
-    </motion.div>
-  );
-};
-
-const BackgroundLayer = () => (
-  <div className="fixed inset-0 z-0 pointer-events-none">
-    <div 
-      className="absolute inset-0 bg-cover bg-center opacity-40"
-      style={{ backgroundImage: `url(${heroBg})` }}
-    />
-    <div className="absolute inset-0 bg-black/60" />
-  </div>
-);
-
-// Reusing existing content components with minimal tweaks for spatial layout
-const Manifesto = ({ t }) => (
-  <div className="max-w-2xl mx-auto text-center p-8 bg-black/80 border border-lu-gold/20 backdrop-blur-md">
-    <h2 className="font-serif text-4xl text-lu-gold mb-8">{t.about.title}</h2>
-    <div className="space-y-6 font-light text-lg text-gray-300">
-      {t.about.text.map((p, i) => <p key={i}>{p}</p>)}
-    </div>
-  </div>
-);
-
-const Participants = ({ t }) => (
-  <div className="max-w-4xl mx-auto p-8">
-    <h2 className="font-serif text-4xl text-lu-gold mb-12 text-center">{t.participants.title}</h2>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      {t.participants.list.map((p, i) => (
-        <div key={i} className="bg-black/80 border border-white/10 p-6 hover:border-lu-gold/50 transition-colors">
-          <div className="aspect-[4/5] mb-4 overflow-hidden">
-            <img src={p.img} alt={p.name} className="w-full h-full object-cover opacity-80 hover:scale-105 transition-transform duration-700" />
-          </div>
-          <h3 className="font-serif text-xl text-white">{p.name}</h3>
-          <p className="text-xs text-lu-gold uppercase tracking-wider mt-1">{p.role}</p>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const Events = ({ t }) => (
-  <div className="max-w-2xl mx-auto p-8 bg-black/80 border border-lu-gold/20 backdrop-blur-md">
-    <h2 className="font-serif text-4xl text-lu-gold mb-8 text-center">{t.events.title}</h2>
-    <div className="space-y-8">
-      {t.events.list.map((e, i) => (
-        <div key={i} className="border-b border-white/10 pb-8 last:border-0">
-          <h3 className="font-serif text-2xl text-white mb-2">{e.title}</h3>
-          <div className="flex items-center gap-2 text-sm text-lu-gold mb-4">
-            <MapPin size={14} />
-            <span>{e.location}</span>
-          </div>
-          <p className="text-gray-400 font-light mb-4">{e.desc}</p>
-          <a href={e.link} target="_blank" rel="noreferrer" className="text-xs uppercase tracking-widest hover:text-lu-gold transition-colors flex items-center gap-2">
-            Details <ExternalLink size={12} />
-          </a>
-        </div>
-      ))}
-    </div>
-  </div>
-);
-
-const Contact = ({ t }) => (
-  <div className="max-w-xl mx-auto p-8 bg-black/80 border border-lu-gold/20 backdrop-blur-md text-center">
-    <h2 className="font-serif text-4xl text-lu-gold mb-8">{t.nav.contacts}</h2>
-    <div className="space-y-4 text-gray-300 font-light">
-      <p className="text-xl">{t.footer.contacts}</p>
-      <p className="text-sm opacity-60">{t.footer.text}</p>
-      <div className="pt-8">
-        <a href="mailto:info@linguauniversalis.art" className="inline-block border border-lu-gold px-8 py-3 text-xs uppercase tracking-widest hover:bg-lu-gold hover:text-black transition-colors">
-          Email Us
-        </a>
-      </div>
-    </div>
-  </div>
-);
-
-const Compass = ({ rotation }) => (
-  <motion.div 
-    className="fixed bottom-8 right-8 w-16 h-16 border border-white/10 rounded-full z-50 flex items-center justify-center backdrop-blur-sm pointer-events-none hidden md:flex"
-    style={{ rotate: rotation }}
-  >
-    <div className="w-full h-[1px] bg-white/20 absolute" />
-    <div className="h-full w-[1px] bg-white/20 absolute" />
-    <div className="w-2 h-2 bg-lu-gold rounded-full" />
-    <div className="absolute top-1 text-[8px] text-lu-gold">N</div>
-  </motion.div>
-);
-
-const App = () => {
-  const [lang, setLang] = useState('ru');
-  const t = content[lang];
-  
-  // Window dimensions
-  const [winSize, setWinSize] = useState({ w: typeof window !== 'undefined' ? window.innerWidth : 1000, h: typeof window !== 'undefined' ? window.innerHeight : 800 });
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const handleResize = () => {
-      setWinSize({ w: window.innerWidth, h: window.innerHeight });
-      setIsMobile(window.innerWidth < 768);
-    };
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // --- State Management ---
-  // Zoom state: 0 = default zoom, 1 = zoomed out (during fast panning)
-  // Smooth transition over 2 seconds: stiffness 50, damping 25 gives ~2s transition
-  const zoomProgress = useMotionValue(0);
-  const smoothZoomProgress = useSpring(zoomProgress, { stiffness: 50, damping: 25, mass: 1 });
-  
-  // Camera pan state (accumulated panning) - use spring for smooth deceleration
-  const cameraPanXTarget = useMotionValue(0);
-  const cameraPanYTarget = useMotionValue(0);
-  const cameraPanX = useSpring(cameraPanXTarget, { stiffness: 50, damping: 25, mass: 1 });
-  const cameraPanY = useSpring(cameraPanYTarget, { stiffness: 50, damping: 25, mass: 1 });
-  
-  // Track if mouse is moving
-  const mouseMoving = useRef(false);
-  const mouseMoveTimer = useRef(null);
-  // Track previous mouse position to detect significant movement
-  const prevMouseX = useRef(0);
-  const prevMouseY = useRef(0);
-  const mouseMovementThreshold = 5; // pixels - minimum movement to trigger panning
-
-  // --- Mobile Interaction Logic ---
-  // Track if touch is moving
-  const touchMoving = useRef(false);
-  const touchMoveTimer = useRef(null);
-  // Track previous touch position to detect significant movement
-  const prevTouchX = useRef(0);
-  const prevTouchY = useRef(0);
-  const touchMovementThreshold = 5; // pixels - minimum movement to trigger panning
-  
-  // Mobile pan state (same as desktop) - use spring for smooth deceleration
-  const mobilePanXTarget = useMotionValue(0);
-  const mobilePanYTarget = useMotionValue(0);
-  const mobilePanX = useSpring(mobilePanXTarget, { stiffness: 50, damping: 25, mass: 1 });
-  const mobilePanY = useSpring(mobilePanYTarget, { stiffness: 50, damping: 25, mass: 1 });
-
-  // --- Calculated Values ---
-  // Default zoom level (keep current initial zoom)
-  const defaultScale = isMobile ? 0.75 : 1;
-  // Zoom out during fast panning: desktop 1.0 -> 0.8, mobile 0.75 -> 0.6 (more zoom out for mobile)
-  const zoomOutScale = isMobile ? 0.6 : 0.8;
-  const scale = useTransform(smoothZoomProgress, [0, 1], [defaultScale, zoomOutScale]);
-  // Content opacity - show when panned away from center
-  const contentOpacity = useTransform(() => {
-    const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
-    const panY = isMobile ? mobilePanY.get() : cameraPanY.get();
-    const distance = Math.sqrt(panX * panX + panY * panY);
-    return Math.min(distance / 200, 1);
-  });
-  
-  // Hint opacity - fade out as user pans away from center
-  const hintOpacity = useTransform(() => {
-    const panX = isMobile ? mobilePanX.get() : cameraPanX.get();
-    const panY = isMobile ? mobilePanY.get() : cameraPanY.get();
-    const distance = Math.sqrt(panX * panX + panY * panY);
-    return Math.max(0, 1 - distance / 200);
-  });
-  
-  // --- Mouse / Torch Logic ---
-  // Initialize to center to avoid jump on load
-  const mouseX = useMotionValue(typeof window !== 'undefined' ? window.innerWidth / 2 : 0);
-  const mouseY = useMotionValue(typeof window !== 'undefined' ? window.innerHeight / 2 : 0);
-  const smoothMouseX = useSpring(mouseX, { damping: 25, stiffness: 150 });
-  const smoothMouseY = useSpring(mouseY, { damping: 25, stiffness: 150 });
+  const smoothX = useSpring(mouseX, { damping: 30, stiffness: 200 });
+  const smoothY = useSpring(mouseY, { damping: 30, stiffness: 200 });
 
   useEffect(() => {
     if (isMobile) return;
     const handleMouseMove = (e) => {
-      const newX = e.clientX;
-      const newY = e.clientY;
-      
-      // Check if movement is significant
-      const deltaX = Math.abs(newX - prevMouseX.current);
-      const deltaY = Math.abs(newY - prevMouseY.current);
-      const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-      
-      if (movement > mouseMovementThreshold) {
-        mouseX.set(newX);
-        mouseY.set(newY);
-        prevMouseX.current = newX;
-        prevMouseY.current = newY;
-        
-        // Track mouse movement
-        mouseMoving.current = true;
-        if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
-        mouseMoveTimer.current = setTimeout(() => {
-          mouseMoving.current = false;
-        }, 100);
-      }
+      mouseX.set(e.clientX);
+      mouseY.set(e.clientY);
     };
     window.addEventListener('mousemove', handleMouseMove);
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      if (mouseMoveTimer.current) clearTimeout(mouseMoveTimer.current);
-    };
-  }, [mouseX, mouseY, isMobile]);
-  
-  useEffect(() => {
-     if (!isMobile) return;
-     const handleTouchMove = (e) => {
-        if (e.touches[0]) {
-           const newX = e.touches[0].clientX;
-           const newY = e.touches[0].clientY;
-           
-           // Check if movement is significant
-           const deltaX = Math.abs(newX - prevTouchX.current);
-           const deltaY = Math.abs(newY - prevTouchY.current);
-           const movement = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-           
-           if (movement > touchMovementThreshold) {
-             mouseX.set(newX);
-             mouseY.set(newY);
-             prevTouchX.current = newX;
-             prevTouchY.current = newY;
-             
-             // Track touch movement
-             touchMoving.current = true;
-             if (touchMoveTimer.current) clearTimeout(touchMoveTimer.current);
-             touchMoveTimer.current = setTimeout(() => {
-               touchMoving.current = false;
-             }, 100);
-           }
-        }
-     };
-     window.addEventListener('touchmove', handleTouchMove, { passive: false });
-     return () => {
-       window.removeEventListener('touchmove', handleTouchMove);
-       if (touchMoveTimer.current) clearTimeout(touchMoveTimer.current);
-     };
+    return () => window.removeEventListener('mousemove', handleMouseMove);
   }, [isMobile, mouseX, mouseY]);
 
-  // --- Camera Logic ---
-  
-  // Edge-based panning: slow panning when not at edges, fast panning at edges (10% from screen edges)
-  // Calculate max pan distance based on section dimensions
-  // Largest section is 900px (Participants), screen needs to accommodate it
-  // Max pan distance should allow section to fill screen
-  // Use SECTION_OFFSET as base, add extra for filling
-  const maxPanDistance = SECTION_OFFSET * 1.2;
-  
-  // Edge detection: 10% from screen edges
-  const edgeThreshold = 0.1;
-  
-  // Panning logic - updates camera position based on mouse/touch position
-  useEffect(() => {
-    const updatePanning = () => {
-      const mX = smoothMouseX.get();
-      const mY = smoothMouseY.get();
-      const centerX = winSize.w / 2;
-      const centerY = winSize.h / 2;
-      
-      // Calculate distance from edges
-      const distFromLeft = mX / winSize.w;
-      const distFromRight = (winSize.w - mX) / winSize.w;
-      const distFromTop = mY / winSize.h;
-      const distFromBottom = (winSize.h - mY) / winSize.h;
-      
-      // Check if in edge zone (within 10% of any edge)
-      const inEdgeZone = distFromLeft < edgeThreshold || 
-                         distFromRight < edgeThreshold ||
-                         distFromTop < edgeThreshold ||
-                         distFromBottom < edgeThreshold;
-      
-      // Check if mouse/touch is at center (within small threshold)
-      const mouseOffsetX = mX - centerX;
-      const mouseOffsetY = mY - centerY;
-      const distanceFromCenter = Math.sqrt(mouseOffsetX * mouseOffsetX + mouseOffsetY * mouseOffsetY);
-      const centerThreshold = 20; // pixels
-      const atCenter = distanceFromCenter < centerThreshold;
-      
-      // Calculate normalized distance from center (0 = center, 1 = edge)
-      // Use the maximum possible distance (diagonal from center to corner)
-      const maxDistance = Math.sqrt(centerX * centerX + centerY * centerY);
-      const normalizedDistance = Math.min(distanceFromCenter / maxDistance, 1);
-      
-      // Determine if should pan
-      let shouldPan = false;
-      let panSpeed = 0;
-      const isMoving = isMobile ? touchMoving.current : mouseMoving.current;
-      
-      if (inEdgeZone) {
-        // Fast panning at edges (even if not moving)
-        shouldPan = true;
-        // Scale fast pan speed based on screen size
-        // 1440p (2560px width) is baseline, mobile and 2160p need 2x faster
-        const baseSpeed = 0.006;
-        const screenWidth = winSize.w;
-        const baselineWidth = 2560; // 1440p width
-        // Scale: 2x for mobile (< 1000px) and 2160p (> 3000px), 1x for 1440p
-        let speedScale = 1.0;
-        if (screenWidth < 1000 || screenWidth > 3000) {
-          speedScale = 2.0; // 2x faster for mobile and 2160p
-        } else if (screenWidth > baselineWidth) {
-          // Linear scaling between 1440p and 2160p
-          speedScale = 1.0 + ((screenWidth - baselineWidth) / (3840 - baselineWidth));
-        }
-        
-        // Adjust speed based on distance from center
-        // At center (0%): 2x faster, at 50%: 1x, after 50%: 1x (constant)
-        let positionSpeedMultiplier = 1.0;
-        if (normalizedDistance <= 0.5) {
-          // Linear interpolation: 2x at 0% to 1x at 50%
-          positionSpeedMultiplier = 2.0 - (normalizedDistance / 0.5) * (2.0 - 1.0);
-        } else {
-          // After 50%, keep at 1x
-          positionSpeedMultiplier = 1.0;
-        }
-        
-        panSpeed = baseSpeed * speedScale * positionSpeedMultiplier;
-        zoomProgress.set(1); // Zoom out during fast panning
-      } else if (!atCenter && isMoving) {
-        // Slow panning when not at edges and mouse/touch is moving
-        shouldPan = true;
-        panSpeed = 0.002; // Slow panning speed (5x slower: 0.01 / 5)
-        zoomProgress.set(0); // Default zoom
-      } else {
-        // Stop panning: at center or not moving (and not at edges)
-        shouldPan = false;
-        zoomProgress.set(0); // Default zoom
-      }
-      
-      if (shouldPan) {
-        // Calculate pan direction (mouse right → content moves left → see right)
-        const panDirectionX = (centerX - mX) * panSpeed;
-        const panDirectionY = (centerY - mY) * panSpeed;
-        
-        // Get current pan position
-        const currentPanX = isMobile ? mobilePanXTarget.get() : cameraPanXTarget.get();
-        const currentPanY = isMobile ? mobilePanYTarget.get() : cameraPanYTarget.get();
-        
-        // Calculate new pan position
-        let newPanX = currentPanX + panDirectionX;
-        let newPanY = currentPanY + panDirectionY;
-        
-        // Clamp to max pan distance
-        const distance = Math.sqrt(newPanX * newPanX + newPanY * newPanY);
-        const maxDist = maxPanDistance;
-        if (distance > maxDist) {
-          const scale = maxDist / distance;
-          newPanX *= scale;
-          newPanY *= scale;
-        }
-        
-        // Set target values - spring will smoothly animate to these
-        if (isMobile) {
-          mobilePanXTarget.set(newPanX);
-          mobilePanYTarget.set(newPanY);
-        } else {
-          cameraPanXTarget.set(newPanX);
-          cameraPanYTarget.set(newPanY);
-        }
-      }
-      
-      requestAnimationFrame(updatePanning);
-    };
-    
-    const animationId = requestAnimationFrame(updatePanning);
-    return () => cancelAnimationFrame(animationId);
-  }, [isMobile, winSize, smoothMouseX, smoothMouseY, cameraPanX, cameraPanY, mobilePanX, mobilePanY, zoomProgress, maxPanDistance]);
-  
-  const desktopCameraX = useTransform(() => {
-    if (isMobile) return 0;
-    return cameraPanX.get();
-  });
+  // For mobile, the flashlight is centered
+  const x = isMobile ? '50%' : useMotionTemplate`${smoothX}px`;
+  const y = isMobile ? '50%' : useMotionTemplate`${smoothY}px`;
+  const radius = isMobile ? '120px' : '200px';
 
-  const desktopCameraY = useTransform(() => {
-    if (isMobile) return 0;
-    return cameraPanY.get();
-  });
-  
-  // Mobile camera uses same pan state
-  const mobileCameraX = useTransform(() => {
-    if (!isMobile) return 0;
-    return mobilePanX.get();
-  });
-
-  const mobileCameraY = useTransform(() => {
-    if (!isMobile) return 0;
-    return mobilePanY.get();
-  });
-
-  const finalCameraX = useTransform(() => isMobile ? mobileCameraX.get() : desktopCameraX.get());
-  const finalCameraY = useTransform(() => isMobile ? mobileCameraY.get() : desktopCameraY.get());
-
-  // Compass
-  const compassRotation = useTransform(() => {
-    const x = finalCameraX.get();
-    const y = finalCameraY.get();
-    if (x === 0 && y === 0) return 0;
-    // Panning X negative means looking Right.
-    // Compass should point to North relative to view?
-    return Math.atan2(y, x) * (180 / Math.PI) + 90;
-  });
+  const maskImage = useMotionTemplate`radial-gradient(circle ${radius} at ${x} ${y}, transparent 0%, rgba(0,0,0,0.95) 80%, black 100%)`;
 
   return (
-    <>
-      <div className="fixed inset-0 bg-black text-lu-text selection:bg-lu-gold selection:text-black overflow-hidden select-none h-[100dvh] touch-none">
+    <motion.div 
+      className="fixed inset-0 z-[100] pointer-events-none bg-black"
+      style={{ 
+        maskImage,
+        WebkitMaskImage: maskImage,
+      }}
+    >
+      <div 
+        className="absolute inset-0 opacity-20 mix-blend-overlay animate-grain"
+        style={{ backgroundImage: `url(${noiseGrain})` }}
+      />
+    </motion.div>
+  );
+};
+
+const ArtPiece = ({ item, index }) => {
+  const [hovered, setHovered] = useState(false);
+  const ref = useRef(null);
+  
+  const { scrollYProgress } = useScroll({
+    target: ref,
+    offset: ["start end", "end start"]
+  });
+  
+  const y = useSpring(useTransform(scrollYProgress, [0, 1], [100, -100]), { stiffness: 50, damping: 20 });
+  
+  return (
+    <motion.div 
+      ref={ref}
+      style={{ y }}
+      className={`relative group mb-32 flex ${index % 2 === 0 ? 'justify-start ml-[10%]' : 'justify-end mr-[10%]'}`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      <div className="relative max-w-lg">
+        <img 
+          src={item.img} 
+          alt={item.title}
+          className="w-full grayscale brightness-50 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-1000 ease-in-out"
+          style={{
+            maskImage: 'radial-gradient(circle at center, black 40%, transparent 95%)',
+            WebkitMaskImage: 'radial-gradient(circle at center, black 40%, transparent 95%)'
+          }}
+        />
+        
+        <AnimatePresence>
+          {hovered && (
+            <motion.div 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute -bottom-12 left-0 right-0 text-center"
+            >
+              <div className="font-serif text-lu-gold text-lg tracking-widest uppercase mb-1 drop-shadow-lg">
+                {item.title}
+              </div>
+              <div className="font-sans text-[10px] text-white/40 tracking-[0.3em] uppercase">
+                {item.location} • {item.year}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </motion.div>
+  );
+};
+
+const TeamMember = ({ member, index }) => {
+  return (
+    <div 
+      className={`relative mb-40 flex flex-col ${index % 2 === 0 ? 'items-start pl-[10%]' : 'items-end pr-[10%]'}`}
+    >
+      <div className="relative group max-w-sm">
+        {/* Carved effect: shadow and contrast */}
+        <div className="absolute inset-0 bg-black/40 mix-blend-multiply rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-1000" />
+        <img 
+          src={member.img} 
+          alt={member.name}
+          className="w-48 h-48 md:w-64 md:h-64 object-cover rounded-full filter grayscale contrast-125 brightness-50 mix-blend-luminosity border-4 border-transparent group-hover:border-lu-gold/20 transition-all duration-700"
+          style={{
+            maskImage: 'radial-gradient(circle at center, black 50%, transparent 100%)',
+            WebkitMaskImage: 'radial-gradient(circle at center, black 50%, transparent 100%)'
+          }}
+        />
+        <div className="mt-6 space-y-2 max-w-xs">
+          <h3 className="font-serif text-2xl text-lu-gold/80 tracking-wider uppercase group-hover:text-lu-gold transition-colors">
+            {member.name}
+          </h3>
+          <p className="font-sans text-[10px] text-white/30 uppercase tracking-[0.4em]">
+            {member.role}
+          </p>
+          <p className="text-sm text-white/50 font-light leading-relaxed italic border-l border-lu-gold/20 pl-4 mt-4">
+            {member.quote}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const App = () => {
+  const [lang, setLang] = useState('ru');
+  const t = content[lang];
+  const [isMobile, setIsMobile] = useState(false);
+  
+  const { scrollYProgress } = useScroll();
+  const smoothProgress = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
+
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  return (
+    <div className="relative min-h-screen bg-black overflow-x-hidden selection:bg-lu-gold selection:text-black">
+      {/* Fixed Stone Background */}
+      <div 
+        className="fixed inset-0 z-0 opacity-60 bg-cover bg-center pointer-events-none bg-fixed"
+        style={{ backgroundImage: `url(${rockTexture})` }}
+      />
       
       {/* Language Switcher */}
-      <div className="fixed top-8 right-8 z-[200] mix-blend-difference pointer-events-auto">
-         <button 
-            onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-            className="flex items-center gap-2 text-xs tracking-[0.2em] text-white hover:text-lu-gold transition-colors uppercase font-light"
-          >
-            <Globe size={14} />
-            {lang}
-          </button>
-      </div>
-
-      {/* Hint */}
-      <motion.div 
-        className="fixed bottom-8 left-0 w-full text-center z-[50] text-white/30 text-[10px] uppercase tracking-[0.3em] pointer-events-none"
-        style={{ opacity: hintOpacity }}
+      <button 
+        onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
+        className="fixed top-8 right-8 z-[110] flex items-center gap-2 text-[10px] tracking-[0.4em] text-white/40 hover:text-lu-gold transition-colors uppercase font-light mix-blend-difference"
       >
-        {isMobile ? "Touch to Explore • Move to Edges for Fast Panning" : "Move Mouse to Explore • Edges for Fast Panning"}
-      </motion.div>
+        <Globe size={12} />
+        {lang}
+      </button>
 
-      {/* Layers */}
-      <BackgroundLayer />
-      <NoiseLayer mouseX={smoothMouseX} mouseY={smoothMouseY} isTouch={isMobile} isMobile={isMobile} />
+      <Flashlight isMobile={isMobile} />
 
-      {/* Spatial Canvas */}
-      <div className="fixed inset-0 overflow-hidden flex items-center justify-center pointer-events-none">
-        <motion.div
-          className="relative w-0 h-0 flex items-center justify-center"
-          style={{ 
-            scale,
-            x: finalCameraX,
-            y: finalCameraY,
-            transformOrigin: 'center center'
-          }}
-        >
-          {/* Center: Title (Always Visible) */}
-          <div className="absolute inset-0 flex items-center justify-center w-[100vw] h-[100vh] -translate-x-1/2 -translate-y-1/2 pointer-events-auto">
-             <div className="text-center">
-                <motion.h1 
-                  className="font-serif text-6xl md:text-9xl tracking-widest text-white drop-shadow-2xl whitespace-nowrap"
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 1.5 }}
-                >
-                  LINGUA<br />UNIVERSALIS
-                </motion.h1>
-                <motion.p
-                  className="font-sans text-sm tracking-[0.5em] text-lu-gold uppercase mt-8"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1, duration: 1 }}
-                >
-                  {t.hero.subtitle}
-                </motion.p>
-             </div>
-          </div>
-
-          {/* Peripheral Content (Fades in on Scroll) */}
-          <motion.div style={{ opacity: contentOpacity }}>
-            {/* North: Manifesto */}
-            <div 
-              className="absolute w-[80vw] md:w-[600px] pointer-events-auto flex flex-col items-center"
-              style={{ transform: `translate(-50%, -${SECTION_OFFSET}px)` }}
-            >
-               <Manifesto t={t} />
-               <div className="h-32 w-[1px] bg-gradient-to-b from-transparent to-lu-gold/50 mt-8"></div>
-            </div>
-
-            {/* East: Participants */}
-            <div 
-              className="absolute w-[80vw] md:w-[900px] pointer-events-auto"
-              style={{ transform: `translate(${SECTION_OFFSET * 0.8}px, -50%)` }}
-            >
-              <Participants t={t} />
-            </div>
-
-            {/* South: Events */}
-            <div 
-              className="absolute w-[80vw] md:w-[600px] pointer-events-auto flex flex-col-reverse items-center"
-              style={{ transform: `translate(-50%, ${SECTION_OFFSET * 0.8}px)` }}
-            >
-               <Events t={t} />
-               <div className="h-32 w-[1px] bg-gradient-to-t from-transparent to-lu-gold/50 mb-8"></div>
-            </div>
-
-             {/* West: Contact */}
-             <div 
-              className="absolute w-[80vw] md:w-[500px] pointer-events-auto"
-              style={{ transform: `translate(-${SECTION_OFFSET}px, -50%)` }}
-            >
-              <Contact t={t} />
-            </div>
-
-            {/* Connection Lines */}
-            <svg className="absolute top-0 left-0 overflow-visible opacity-20 pointer-events-none" style={{ width: 1, height: 1 }}>
-               <circle cx="0" cy="0" r={SECTION_OFFSET} fill="none" stroke="white" strokeWidth="2" strokeDasharray="4 4" />
-               <line x1="0" y1="0" x2="0" y2={`-${SECTION_OFFSET}`} stroke="white" />
-               <line x1="0" y1="0" x2={`-${SECTION_OFFSET}`} y2="0" stroke="white" />
-               <line x1="0" y1="0" x2="0" y2={`${SECTION_OFFSET}`} stroke="white" />
-               <line x1="0" y1="0" x2={`${SECTION_OFFSET}`} y2="0" stroke="white" />
-            </svg>
+      {/* Main Content */}
+      <main className="relative z-10 flex flex-col items-center pt-[30vh] pb-[20vh] w-full">
+        
+        {/* Hero */}
+        <section className="mb-[60vh] text-center px-6 relative">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 3, ease: "easeOut" }}
+          >
+            <h1 className="font-serif text-8xl md:text-[12rem] text-white tracking-[0.3em] mb-4 drop-shadow-2xl">
+              LINGUA<br />UNIVERSALIS
+            </h1>
+            <p className="font-sans text-xs md:text-sm text-lu-gold tracking-[1em] uppercase opacity-60">
+              {t.hero.subtitle}
+            </p>
           </motion.div>
+          {/* Decorative element */}
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] border border-white/5 rounded-full pointer-events-none -z-10 animate-spin-slow" />
+        </section>
 
-        </motion.div>
+        {/* Philosophy Section - More Chaotic */}
+        <section className="w-full max-w-5xl px-8 mb-[50vh] flex flex-col md:flex-row gap-12 items-center">
+          <div className="relative flex-1">
+            <div 
+              className="hidden md:block w-64 h-96 float-left shape-outside-rock"
+              style={{ 
+                shapeOutside: `url(${rockEdgeLeft})`,
+                shapeMargin: '3rem'
+              }}
+            >
+               <img src={rockEdgeLeft} className="w-full opacity-20 filter invert brightness-200" alt="" />
+            </div>
+            <div className="space-y-16">
+              <h2 className="font-serif text-5xl text-lu-gold uppercase tracking-[0.4em] mb-12">
+                {t.sections.philosophy}
+              </h2>
+              <p className="text-2xl md:text-3xl font-light text-white/80 leading-relaxed md:indent-24">
+                {t.hero.philosophy}
+              </p>
+            </div>
+          </div>
+          <div className="flex-1 text-sm text-white/40 leading-loose space-y-8 max-w-sm ml-auto border-r border-lu-gold/10 pr-8">
+            <p>
+              The project is a bridge between the prehistoric (shamanic cave art) and the post-modern (digital cinematic art). Every design element is a piece of a singular, interconnected whole.
+            </p>
+            <p>
+              Today's world has reached an apex of fragmentation. Real connection between cultures is only possible through the universal language of art and our shared human origins.
+            </p>
+          </div>
+        </section>
+
+        {/* Gallery */}
+        <section className="w-full max-w-6xl px-4 mb-[40vh]">
+          <h2 className="text-center font-serif text-3xl text-lu-gold/40 uppercase tracking-[0.5em] mb-32">
+            {t.sections.gallery}
+          </h2>
+          <div className="space-y-16">
+            {t.gallery.map((item, i) => (
+              <ArtPiece key={i} item={item} index={i} />
+            ))}
+          </div>
+        </section>
+
+        {/* Movie Projection Section */}
+        <section className="w-full mb-[40vh] flex flex-col items-center">
+           <h2 className="font-serif text-3xl text-lu-gold uppercase tracking-[0.5em] mb-12">
+            {t.sections.movie}
+          </h2>
+          <div className="relative w-full max-w-5xl aspect-video group">
+            <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none group-hover:bg-transparent transition-colors duration-1000" />
+            <div className="absolute inset-0 bg-noise opacity-10 z-20 pointer-events-none animate-grain" />
+            <iframe 
+              className="w-full h-full grayscale brightness-75 group-hover:grayscale-0 group-hover:brightness-100 transition-all duration-1000"
+              src="https://www.youtube.com/embed/dQw4w9WgXcQ" // Placeholder for movie
+              title="Lingua Universalis Projection"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+            ></iframe>
+            {/* Projector light effect */}
+            <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-32 h-32 bg-lu-gold/10 blur-[100px] rounded-full pointer-events-none" />
+          </div>
+        </section>
+
+        {/* Team Section */}
+        <section className="w-full max-w-4xl px-8 mb-[40vh]">
+          <h2 className="text-center font-serif text-4xl text-lu-gold uppercase tracking-[0.3em] mb-40">
+            {t.sections.team}
+          </h2>
+          <div>
+            {t.participants.map((member, i) => (
+              <TeamMember key={member.id} member={member} index={i} />
+            ))}
+          </div>
+        </section>
+
+        {/* Events & Contact */}
+        <section className="w-full max-w-4xl px-8 flex flex-col items-center">
+           <h2 className="font-serif text-3xl text-lu-gold uppercase tracking-[0.5em] mb-20">
+            {t.sections.events}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-16 w-full">
+            {t.events.list.map((event, i) => (
+              <div key={i} className="space-y-4 border-t border-lu-gold/10 pt-8">
+                <h3 className="font-serif text-xl text-white">{event.title}</h3>
+                <div className="flex items-center gap-2 text-[10px] text-lu-gold tracking-widest uppercase">
+                  <MapPin size={12} /> {event.location}
+                </div>
+                <p className="text-xs text-white/40 leading-relaxed font-light">{event.desc}</p>
+                <a 
+                  href={event.link} 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 text-[9px] text-lu-gold uppercase tracking-[0.3em] border border-lu-gold/30 px-4 py-2 hover:bg-lu-gold hover:text-black transition-all"
+                >
+                  Explore <ExternalLink size={10} />
+                </a>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-[30vh] text-center space-y-8">
+             <div className="h-24 w-[1px] bg-gradient-to-b from-transparent to-lu-gold/50 mx-auto" />
+             <p className="text-[10px] tracking-[0.6em] text-white/20 uppercase">{t.footer.contacts}</p>
+             <h4 className="font-serif text-lu-gold text-lg tracking-widest">{t.footer.text}</h4>
+          </div>
+        </section>
+
+      </main>
+
+      {/* Side Scroll Indicator */}
+      <div className="fixed left-8 bottom-8 z-[110] flex flex-col items-center gap-4 mix-blend-difference opacity-20 hover:opacity-100 transition-opacity">
+        <div className="h-32 w-[1px] bg-white/20 relative">
+          <motion.div 
+            className="absolute top-0 left-0 w-full bg-lu-gold"
+            style={{ height: useTransform(smoothProgress, [0, 1], ['0%', '100%']) }}
+          />
+        </div>
+        <span className="text-[8px] uppercase tracking-[0.4em] rotate-90 origin-left ml-2 whitespace-nowrap text-white">
+          The Descent
+        </span>
       </div>
 
-      <Compass rotation={compassRotation} />
-      </div>
-    </>
+    </div>
   );
 };
 
