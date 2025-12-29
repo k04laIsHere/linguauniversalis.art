@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@200;300;400;600&display=swap');
+/* Fonts loaded via index.html with preconnect for faster loading */
 
 @tailwind base;
 @tailwind components;
@@ -11,6 +11,13 @@
 body {
   @apply bg-lu-dark text-lu-text font-sans overflow-x-hidden;
   background-color: #020202; /* Even darker */
+}
+
+/* GPU acceleration hints for animated elements */
+.will-change-transform {
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 /* Custom Scrollbar */
@@ -44,20 +51,22 @@ html {
   @apply bg-lu-gold text-black;
 }
 
-/* Grain Animation */
+/* Grain Animation - optimized with GPU acceleration */
 @keyframes grain {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-5%, -10%); }
-  20% { transform: translate(-15%, 5%); }
-  30% { transform: translate(7%, -25%); }
-  40% { transform: translate(-5%, 25%); }
-  50% { transform: translate(-15%, 10%); }
-  60% { transform: translate(15%, 0%); }
-  70% { transform: translate(0%, 15%); }
-  80% { transform: translate(3%, 35%); }
-  90% { transform: translate(-10%, 10%); }
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  10% { transform: translate3d(-5%, -10%, 0); }
+  20% { transform: translate3d(-15%, 5%, 0); }
+  30% { transform: translate3d(7%, -25%, 0); }
+  40% { transform: translate3d(-5%, 25%, 0); }
+  50% { transform: translate3d(-15%, 10%, 0); }
+  60% { transform: translate3d(15%, 0%, 0); }
+  70% { transform: translate3d(0%, 15%, 0); }
+  80% { transform: translate3d(3%, 35%, 0); }
+  90% { transform: translate3d(-10%, 10%, 0); }
 }
 
 .animate-grain {
   animation: grain 8s steps(10) infinite;
+  will-change: transform;
+  transform: translateZ(0);
 }

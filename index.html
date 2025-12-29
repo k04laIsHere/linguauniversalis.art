@@ -4,11 +4,35 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Lingua Universalis — The Art of Creation</title>
+    
+    <!-- Preconnect to font origins -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=Merriweather:wght@300;400;700&display=swap" rel="stylesheet">
+    
+    <!-- Preload critical assets -->
+    <link rel="preload" href="/assets/noise-grain.png" as="image" type="image/png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700&family=Inter:wght@200;300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- Critical CSS for initial load -->
+    <style>
+      /* Prevent FOUC and ensure smooth initial load */
+      html {
+        background-color: #020202;
+      }
+      body {
+        background-color: #020202;
+        margin: 0;
+        overflow-x: hidden;
+      }
+      #root {
+        min-height: 100vh;
+        background-color: #020202;
+      }
+    </style>
   </head>
-  <body class="antialiased bg-[#0b0b0b] text-[#e9e6e1]">
+  <body class="antialiased bg-[#020202] text-[#e9e6e1]">
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

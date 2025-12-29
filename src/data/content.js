@@ -1,4 +1,4 @@
-// Importing images from the team and art folders
+// Importing images from the team, art, and gallery folders
 import joslenImg from '../../assets/team/JoslenOrsini.jpg';
 import thomasImg from '../../assets/team/TomasArutunyan.jpg';
 import omarImg from '../../assets/team/OmarGodines.jpg';
@@ -12,6 +12,11 @@ import art3 from '../../assets/art/art-3.jpg';
 import art4 from '../../assets/art/art-4.jpg';
 import art5 from '../../assets/art/art-5.jpg';
 import art6 from '../../assets/art/art-6.jpg';
+
+import gallery1 from '../../assets/gallery/BreathofNature.jpg';
+import gallery2 from '../../assets/gallery/Tellings.jpg';
+import gallery3 from '../../assets/gallery/thePath.jpg';
+import gallery4 from '../../assets/gallery/TheUnityofTheUniverse.jpg';
 
 const participants = [
   {
@@ -70,13 +75,20 @@ const participants = [
   }
 ];
 
-const gallery = [
+const ancientGallery = [
   { img: art1, title: 'Paleolithic Echo', year: '2024', location: 'Altamira Series' },
   { img: art2, title: 'Universal Thread', year: '2023', location: 'Void Series' },
   { img: art3, title: 'Silentium', year: '2024', location: 'Cave Shadows' },
   { img: art4, title: 'Digital Fossil', year: '2024', location: 'Neural Network' },
   { img: art5, title: 'The Descent', year: '2023', location: 'Memory Matrix' },
   { img: art6, title: 'Quantum Glyph', year: '2024', location: 'Origin Point' }
+];
+
+const digitalGallery = [
+  { img: gallery1, title: 'Breath of Nature', year: '2025', location: 'Nature Cycle' },
+  { img: gallery2, title: 'Tellings', year: '2025', location: 'Mythos' },
+  { img: gallery3, title: 'The Path', year: '2025', location: 'Journey' },
+  { img: gallery4, title: 'Unity of Universe', year: '2025', location: 'Cosmos' }
 ];
 
 export const content = {
@@ -88,14 +100,16 @@ export const content = {
     },
     sections: {
       philosophy: 'Философия',
-      gallery: 'Галерея Творений',
+      ancientGallery: 'Древняя Галерея',
+      digitalGallery: 'Цифровая Галерея',
       team: 'Творцы',
       movie: 'Фильм',
       events: 'События',
       contact: 'Связь'
     },
     participants,
-    gallery,
+    ancientGallery,
+    digitalGallery,
     events: {
       title: 'События',
       list: [
@@ -126,7 +140,8 @@ export const content = {
     },
     sections: {
       philosophy: 'Philosophy',
-      gallery: 'Gallery of Creation',
+      ancientGallery: 'Ancient Gallery',
+      digitalGallery: 'Digital Gallery',
       team: 'The Creators',
       movie: 'Film',
       events: 'Events',
@@ -137,7 +152,8 @@ export const content = {
       role: p.id === 'andrey' ? 'AI Artist' : 'Artist',
       bio: p.id === 'joslen' ? 'Born in Venezuela in 1953. My work is dedicated to Prehistoric art, expressed not as interpretation but as research from its origins.' : p.bio
     })),
-    gallery,
+    ancientGallery,
+    digitalGallery,
     events: {
       title: 'Events',
       list: [
