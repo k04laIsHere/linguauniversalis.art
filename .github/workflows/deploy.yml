@@ -24,10 +24,10 @@ jobs:
           node-version: '18'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build
-        run: npm run build
+        run: npx vite build
 
       - name: Show dist contents
         run: |

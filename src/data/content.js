@@ -96,7 +96,8 @@ export const content = {
     hero: {
       title: 'LINGUA UNIVERSALIS',
       subtitle: 'ИСКУССТВО ТВОРЕНИЯ',
-      philosophy: 'Проект на стыке доисторического и пост-цифрового. Исследование универсального языка через свет и тьму.'
+      philosophy: 'Проект на стыке доисторического и будущего. Каждая деталь дизайна — часть единого, взаимосвязанного целого.',
+      connection: 'Истинная связь между культурами возможна только через универсальный язык искусства и наши общие человеческие истоки.'
     },
     sections: {
       philosophy: 'Философия',
@@ -136,7 +137,8 @@ export const content = {
     hero: {
       title: 'LINGUA UNIVERSALIS',
       subtitle: 'THE ART OF CREATION',
-      philosophy: 'A project at the intersection of prehistoric and post-digital. Exploring the universal language through light and shadow.'
+      philosophy: 'The project is a bridge between the prehistoric and the future. Every design element is a piece of a singular, interconnected whole.',
+      connection: 'Real connection between cultures is only possible through the universal language of art and our shared human origins.'
     },
     sections: {
       philosophy: 'Philosophy',

@@ -15,7 +15,7 @@ const EDGE_THRESHOLD = 0.15; // 15% from edge triggers shrink
 
 // --- Components ---
 
-const Flashlight = ({ isMobile, flashlightX, flashlightY, isInactive }) => {
+const Flashlight = ({ isMobile, flashlightX, flashlightY, isInactive, isForceActive }) => {
   const baseSize = isMobile ? 300 : 800;
   
   // Use motion value + spring for reactive updates
@@ -26,10 +26,14 @@ const Flashlight = ({ isMobile, flashlightX, flashlightY, isInactive }) => {
     mass: 1.5
   });
 
-  // Update target when isInactive changes
+  // Update target when isInactive or isForceActive changes
   useEffect(() => {
-    sizeTarget.set(isInactive ? 0 : baseSize);
-  }, [isInactive, baseSize, sizeTarget]);
+    if (isForceActive) {
+      sizeTarget.set(2000); // Large enough to cover screen
+    } else {
+      sizeTarget.set(isInactive ? 0 : baseSize);
+    }
+  }, [isInactive, isForceActive, baseSize, sizeTarget]);
 
   const mask = useMotionTemplate`radial-gradient(circle ${smoothSize}px at ${flashlightX} ${flashlightY}, transparent 0%, rgba(0,0,0,0.98) 95%, black 100%)`;
 
@@ -381,37 +385,59 @@ const InteractiveImage = ({ src, alt, title, subtitle, quote, index, fx, fy, isM
   );
 };
 
-// Efficient CSS-based rock texture pattern with optimized tiling
+// Efficient CSS-based rock texture pattern with optimized parallax tiling
 const RockBackground = () => {
+  const { scrollYProgress } = useScroll();
+  
+  // Parallax offsets for different layers
+  const y1 = useTransform(scrollYProgress, [0, 1], [0, -150]);
+  const y2 = useTransform(scrollYProgress, [0, 1], [0, -300]);
+  
+  // Smooth springs for fluid movement
+  const smoothY1 = useSpring(y1, { damping: 25, stiffness: 40 });
+  const smoothY2 = useSpring(y2, { damping: 25, stiffness: 40 });
+
   return (
     <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden bg-[#050505]">
-      {/* Real tiled rock texture - higher opacity for visibility */}
-      <div 
-        className="absolute inset-0 opacity-[0.25]"
+      {/* Layer 1: Far tiled texture */}
+      <motion.div 
+        className="absolute -top-[20%] -left-[10%] -right-[10%] -bottom-[20%] opacity-[0.35]"
         style={{ 
+          y: smoothY1,
           backgroundImage: `url(${rockTexture})`,
           backgroundRepeat: 'repeat',
-          backgroundSize: '300px 300px',
-          mixBlendMode: 'soft-light',
-          filter: 'brightness(1.2) contrast(1.1)'
+          backgroundSize: '400px 400px',
+          filter: 'brightness(1.1) contrast(1.1)'
         }}
       />
       
-      {/* Base dark gradient depth */}
+      {/* Layer 2: Near tiled texture for depth */}
+      <motion.div 
+        className="absolute -top-[20%] -left-[10%] -right-[10%] -bottom-[20%] opacity-[0.2]"
+        style={{ 
+          y: smoothY2,
+          backgroundImage: `url(${rockTexture})`,
+          backgroundRepeat: 'repeat',
+          backgroundSize: '700px 700px',
+          filter: 'brightness(1.3) contrast(1.2) hue-rotate(5deg)',
+          mixBlendMode: 'screen'
+        }}
+      />
+      
+      {/* Depth gradient overlay */}
       <div 
-        className="absolute inset-0 opacity-60"
+        className="absolute inset-0"
         style={{
           background: `
-            radial-gradient(circle at 30% 20%, rgba(90, 60, 45, 0.4) 0%, transparent 60%),
-            radial-gradient(circle at 70% 80%, rgba(75, 50, 40, 0.3) 0%, transparent 60%),
-            radial-gradient(circle at 50% 50%, transparent 0%, rgba(0, 0, 0, 0.9) 100%)
+            radial-gradient(circle at 50% 50%, transparent 20%, rgba(0, 0, 0, 0.7) 100%),
+            linear-gradient(to bottom, rgba(5, 5, 5, 0.9) 0%, transparent 30%, transparent 70%, rgba(5, 5, 5, 0.9) 100%)
           `
         }}
       />
       
-      {/* Noise grain overlay */}
+      {/* Noise grain overlay - kept fixed for consistency */}
       <div 
-        className="absolute inset-0 animate-grain opacity-30"
+        className="absolute inset-0 animate-grain opacity-20"
         style={{ 
           backgroundImage: `url(${noiseGrain})`,
           backgroundSize: '180px',
@@ -427,7 +453,9 @@ const App = () => {
   const t = content[lang];
   const [isMobile, setIsMobile] = useState(false);
   const [isInactive, setIsInactive] = useState(false);
+  const [isVideoVisible, setIsVideoVisible] = useState(false);
   const inactivityTimerRef = useRef(null);
+  const videoSectionRef = useRef(null);
   
   const rawX = useMotionValue(0);
   const rawY = useMotionValue(0);
@@ -501,6 +529,21 @@ const App = () => {
   const flashlightX = useTransform(smoothX, (v) => isMobile ? "50%" : `${v}px`);
   const flashlightY = useTransform(smoothY, (v) => isMobile ? "50%" : `${v}px`);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVideoVisible(entry.isIntersecting);
+      },
+      { threshold: 0.3 } // Trigger when 30% of video section is visible
+    );
+
+    if (videoSectionRef.current) {
+      observer.observe(videoSectionRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="relative min-h-screen bg-black overflow-x-hidden selection:bg-lu-gold selection:text-black">
       {/* Efficient background with tiled rock texture */}
@@ -519,6 +562,7 @@ const App = () => {
         flashlightX={flashlightX} 
         flashlightY={flashlightY} 
         isInactive={isInactive}
+        isForceActive={isVideoVisible}
       />
 
       <main className="relative z-10 flex flex-col items-center pt-[35vh] pb-[20vh] w-full">
@@ -529,7 +573,7 @@ const App = () => {
             transition={{ duration: 2 }}
             className="w-full"
           >
-            <h1 className="font-serif text-[7vw] sm:text-[6vw] md:text-[8vw] lg:text-[9vw] text-white tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] mb-4 drop-shadow-2xl uppercase leading-[0.9]">
+            <h1 className="font-serif text-[7vw] sm:text-[6vw] md:text-[8vw] lg:text-[9vw] text-white tracking-[0.15em] sm:tracking-[0.2em] md:tracking-[0.3em] mb-4 drop-shadow-2xl uppercase leading-[0.9] [text-shadow:0_0_20px_rgba(255,255,255,0.1)]">
               LINGUA<br />UNIVERSALIS
             </h1>
             <p className="font-sans text-[10px] md:text-lg text-lu-gold tracking-[0.3em] md:tracking-[0.5em] uppercase opacity-40 font-extralight mt-4">
@@ -550,8 +594,7 @@ const App = () => {
           <InteractiveElement index={2} fx={fx} fy={fy} isMobile={isMobile} parallaxSpeed={0.7}>
             {(isRevealed) => (
               <div className={`flex-1 text-base md:text-xl text-white/40 leading-loose space-y-8 md:space-y-12 max-w-md ml-auto border-r border-lu-gold/10 pr-10 font-extralight transition-opacity duration-1000 ${isRevealed ? 'opacity-100' : 'opacity-0'}`}>
-                <p>The project is a bridge between the prehistoric and the post-modern. Every design element is a piece of a singular, interconnected whole.</p>
-                <p>Real connection between cultures is only possible through the universal language of art and our shared human origins.</p>
+                <p>{t.hero.connection}</p>
               </div>
             )}
           </InteractiveElement>
@@ -582,15 +625,23 @@ const App = () => {
         </section>
 
         {/* Movie Section Centered */}
-        <section className="w-full mb-[40vh] flex flex-col items-center px-4">
+        <section ref={videoSectionRef} className="w-full mb-[40vh] flex flex-col items-center px-4">
           <h2 className="font-serif text-3xl md:text-4xl text-lu-gold uppercase tracking-[0.5em] mb-20">{t.sections.movie}</h2>
           <div className="w-full max-w-6xl flex justify-center">
             <InteractiveElement index={5} fx={fx} fy={fy} isMobile={isMobile} parallaxSpeed={0.5}>
               {(isRevealed) => (
-                <div className={`relative w-full aspect-video transition-all duration-1000 ${isRevealed ? 'grayscale-0 brightness-100 blur-0' : 'grayscale brightness-50 blur-md'}`}>
-                  <div className="absolute inset-0 bg-black/40 z-10 pointer-events-none" />
-                  <div className="absolute inset-0 bg-noise opacity-10 z-20 pointer-events-none animate-grain" />
-                  <iframe className="w-full h-full" src="https://www.youtube.com/embed/dQw4w9WgXcQ" title="Lingua Universalis Movie" frameBorder="0" allowFullScreen></iframe>
+                <div className={`relative w-full max-w-[720px] aspect-video transition-all duration-1000 ${isRevealed || isVideoVisible ? 'grayscale-0 brightness-100 blur-0' : 'grayscale brightness-50 blur-md'}`}>
+                  <div className="absolute inset-0 bg-black/20 z-10 pointer-events-none" />
+                  <iframe 
+                    className="w-full h-full" 
+                    src="https://rutube.ru/play/embed/250e0fe59efd7f8bc6026577e8331b58/" 
+                    style={{ border: 'none' }} 
+                    allow="clipboard-write; autoplay" 
+                    webkitAllowFullScreen 
+                    mozallowfullscreen 
+                    allowFullScreen
+                    title="Lingua Universalis Movie"
+                  ></iframe>
                   <div className="absolute -top-10 left-1/2 -translate-x-1/2 w-48 h-48 bg-lu-gold/10 blur-[120px] rounded-full pointer-events-none" />
                 </div>
               )}
