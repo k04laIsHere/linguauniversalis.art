@@ -96,13 +96,13 @@
 .grid > div:nth-child(even) .textBack {
   top: 55%;
   left: 65%;
-  transform: translate(-50%, -50%) rotate(-5deg);
+  transform: translate(-50%, -50%);
 }
 
 .grid > div:nth-child(odd) .textBack {
   top: 35%;
   left: 35%;
-  transform: translate(-50%, -50%) rotate(5deg);
+  transform: translate(-50%, -50%);
 }
 
 .photoWrapper {
@@ -178,7 +178,17 @@
   text-transform: uppercase;
   color: #d9c08d;
   font-weight: 500;
+  transition: color 0.3s ease;
 }
+
+.card:hover .name {
+  color: #fff;
+}
+
+.card:active .textContent {
+  transform: scale(0.98);
+}
+
 
 .divider {
   width: 30px;

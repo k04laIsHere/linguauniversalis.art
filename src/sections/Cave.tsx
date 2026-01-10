@@ -14,15 +14,147 @@ export function Cave() {
 
     const io = new IntersectionObserver(
       (entries) => {
-        const any = entries.some((e) => e.isIntersecting);
-        if (any) root.dataset.caveActive = '1';
-        else delete root.dataset.caveActive;
+        const entry = entries[0];
+        // Use a more strict intersection check: hide cave effects as soon as it's mostly gone
+        if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+          root.dataset.caveActive = '1';
+        } else {
+          delete root.dataset.caveActive;
+        }
       },
-      { root: null, threshold: [0, 0.05, 0.15], rootMargin: '0px 0px -10% 0px' },
+      { root: null, threshold: [0, 0.1, 0.2], rootMargin: '-10% 0px -20% 0px' },
     );
     io.observe(root);
 
     const ctx = gsap.context(() => {
+      // Background parallax: very subtle scroll
+      gsap.fromTo(
+        `.${styles.bg}`,
+        { y: -15 },
+        {
+          y: 15,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: root,
+            start: 'top top',
+            end: 'bottom bottom',
+            scrub: true,
+          },
+        }
+      );
+
+      // Hero reveal
+      gsap.fromTo(
+        `.${styles.title}`,
+        { opacity: 0, letterSpacing: '0.8em', filter: 'blur(20px)' },
+        {
+          opacity: 1,
+          letterSpacing: '0.35em',
+          filter: 'blur(0px)',
+          duration: 3,
+          ease: 'expo.out',
+          scrollTrigger: {
+            trigger: `.${styles.hero}`,
+            start: 'top 95%',
+          },
+        }
+      );
+
+      gsap.fromTo(
+        `.${styles.subtitle}`,
+        { opacity: 0, y: 50 },
+        {
+          opacity: 0.7,
+          y: 0,
+          duration: 2,
+          delay: 0.8,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: `.${styles.hero}`,
+            start: 'top 95%',
+          },
+        }
+      );
+
+      // Manifesto items
+      const isMobile = window.innerWidth <= 960;
+      const manifestoItems = gsap.utils.toArray<HTMLElement>(`.${styles.manifestoItem}`);
+
+      manifestoItems.forEach((item, i) => {
+        const baseRotation = i % 2 === 0 ? -4 : 3;
+        const initialY = isMobile ? 0 : (i % 2 === 0 ? 0 : 120);
+
+        // Initial entry animation
+        gsap.fromTo(
+          item,
+          { 
+            opacity: 0, 
+            x: isMobile ? 0 : (i % 2 === 0 ? -60 : 60),
+            y: initialY + 100,
+            rotation: baseRotation * 2,
+          },
+          {
+            opacity: 1,
+            x: 0,
+            y: initialY,
+            rotation: baseRotation,
+            duration: 2,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: item,
+              start: 'top 100%',
+              end: 'bottom 80%',
+              scrub: 1.5,
+            },
+          }
+        );
+
+        // Straighten on scroll (Sweet spot in center)
+        gsap.to(item, {
+          rotation: 0,
+          scale: isMobile ? 1.02 : 1.05,
+          ease: 'power1.inOut',
+          scrollTrigger: {
+            trigger: item,
+            start: 'top 70%',
+            end: 'top 30%',
+            scrub: 0.5,
+          },
+        });
+
+        // Mouse proximity straightening (Desktop)
+        if (!isMobile) {
+          const onMouseMove = (e: MouseEvent) => {
+            const rect = item.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY);
+            
+            const maxDist = 800; /* Heavily enlarged hover area */
+            const proximity = Math.max(0, 1 - dist / maxDist);
+            
+            gsap.to(item, {
+              rotation: baseRotation * (1 - proximity),
+              scale: 1 + proximity * 0.08,
+              duration: 0.15, /* Very fast response */
+              overwrite: 'auto'
+            });
+          };
+
+          const onMouseLeave = () => {
+            gsap.to(item, {
+              rotation: baseRotation,
+              scale: 1,
+              duration: 0.4,
+              overwrite: 'auto'
+            });
+          };
+
+          item.addEventListener('mousemove', onMouseMove);
+          item.addEventListener('mouseleave', onMouseLeave);
+        }
+      });
+
       // Artifact parallax: move them at slightly different speeds
       gsap.utils.toArray<HTMLElement>(`.${styles.artifact}`).forEach((art, i) => {
         const speed = 40 + (i % 3) * 25; 
@@ -67,17 +199,24 @@ export function Cave() {
       <div className={styles.shadowMask} aria-hidden="true" />
 
       <div className={styles.inner}>
-        <div className={styles.titleBlock}>
-          <h1 className={styles.title}>{t.cave.title}</h1>
-          <p className={styles.subtitle}>{t.cave.subtitle}</p>
+        <div className={styles.manifestoWrapper} id="manifesto">
+          <header className={styles.hero}>
+            <h1 className={styles.title}>{t.cave.title}</h1>
+            <p className={styles.subtitle}>{t.cave.subtitle}</p>
+          </header>
 
-          <div id="manifesto" />
-          <div className={styles.manifestoTitle}>{t.cave.manifestoTitle}</div>
-          <ol className={styles.manifestoList}>
-            {t.cave.manifesto.map((line) => (
-              <li key={line}>{line}</li>
+          <div className={styles.manifestoGrid}>
+            {t.cave.manifesto.map((line, i) => (
+              <div 
+                key={i} 
+                className={styles.manifestoItem}
+                style={{ '--index': i } as React.CSSProperties}
+              >
+                <span className={styles.manifestoNumber}>{i + 1}</span>
+                <p className={styles.manifestoText}>{line}</p>
+              </div>
             ))}
-          </ol>
+          </div>
         </div>
 
         <div

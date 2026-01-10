@@ -1,7 +1,7 @@
 .root {
   position: fixed;
   inset: 0;
-  z-index: -1;
+  z-index: 0; /* Changed from -1 to 0 to ensure visibility over body bg */
   opacity: 0;
   pointer-events: none;
   will-change: transform, opacity, filter;
@@ -10,6 +10,8 @@
   background-position: center;
   transform: scale(1.02);
   filter: saturate(1.02) contrast(1.02);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .veil {

@@ -14,15 +14,29 @@ export function useActiveSection(sectionIds: string[]) {
 
     const io = new IntersectionObserver(
       (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => (b.intersectionRatio ?? 0) - (a.intersectionRatio ?? 0))[0];
-        if (visible?.target?.id) setActive(visible.target.id);
+        // We only care about elements that are actually visible in the viewport
+        const visible = entries.filter((e) => e.isIntersecting);
+        
+        if (visible.length > 0) {
+          // Find the element that occupies the most of our "active zone" (the middle of the screen)
+          const best = visible.sort((a, b) => {
+            // Priority 1: Distance from the vertical center of the screen
+            const centerA = a.boundingClientRect.top + a.boundingClientRect.height / 2;
+            const centerB = b.boundingClientRect.top + b.boundingClientRect.height / 2;
+            const viewportCenter = window.innerHeight / 2;
+            
+            return Math.abs(centerA - viewportCenter) - Math.abs(centerB - viewportCenter);
+          })[0];
+
+          if (best?.target?.id) {
+            setActive(best.target.id);
+          }
+        }
       },
       {
         root: null,
-        threshold: [0.15, 0.25, 0.35, 0.5],
-        rootMargin: '-20% 0px -60% 0px',
+        threshold: [0, 0.1, 0.2, 0.5, 0.8],
+        rootMargin: '-110px 0px -40% 0px',
       },
     );
 

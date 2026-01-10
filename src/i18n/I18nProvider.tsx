@@ -1,15 +1,8 @@
-import React, { createContext, useEffect, useMemo, useState } from 'react';
-import type { I18nDict, Lang } from './types';
+import React, { useEffect, useMemo, useState } from 'react';
+import type { Lang } from './types';
 import { ru } from '../content/ru';
 import { en } from '../content/en';
-
-type I18nState = {
-  lang: Lang;
-  setLang: (lang: Lang) => void;
-  t: I18nDict;
-};
-
-export const I18nContext = createContext<I18nState | null>(null);
+import { I18nContext } from './I18nContext';
 
 const STORAGE_KEY = 'lu_lang';
 

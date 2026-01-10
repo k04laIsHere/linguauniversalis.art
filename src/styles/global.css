@@ -1,3 +1,19 @@
+@font-face {
+  font-family: 'Cinzel';
+  src: url('/fonts/Cinzel/cinzel_regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cinzel';
+  src: url('/fonts/Cinzel/cinzel_bold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
   --bg: #050608;
@@ -8,7 +24,7 @@
   --accent: rgb(212, 175, 55);
   --font-body: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Noto Sans',
     'Liberation Sans', sans-serif;
-  --font-title: Cinzel, ui-serif, Georgia, 'Times New Roman', serif;
+  --font-title: 'Cinzel', ui-serif, Georgia, 'Times New Roman', serif;
 }
 
 * {
@@ -82,12 +98,12 @@ main {
 
 /* Avoid scroll snap surprises; we’ll drive some sections via GSAP pinning instead. */
 html {
-  scroll-behavior: smooth;
+  /* scroll-behavior: smooth; -- Removed to avoid conflict with GSAP scrollTo */
 }
 
 section,
 [id] {
-  scroll-margin-top: 86px;
+  scroll-margin-top: 110px; /* Adjusted for floating header offset */
 }
 
 

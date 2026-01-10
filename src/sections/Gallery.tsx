@@ -4,44 +4,55 @@ import { GalleryLightbox } from '../components/GalleryLightbox/GalleryLightbox';
 import { useI18n } from '../i18n/useI18n';
 import styles from './Gallery.module.css';
 
-function norm(s: string) {
-  return s
-    .toLowerCase()
-    .normalize('NFKD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+function setGalleryHash(params: { workId?: string | null; artist?: string | null }) {
+  const hash = window.location.hash || '#gallery';
+  const [anchor, query] = hash.split('?');
+  const searchParams = new URLSearchParams(query || '');
 
-function setGalleryHash(workId: string | null) {
-  const base = '#gallery';
-  if (!workId) {
-    window.location.hash = base;
-    return;
+  if (params.workId !== undefined) {
+    if (params.workId) searchParams.set('work', params.workId);
+    else searchParams.delete('work');
   }
-  window.location.hash = `${base}?work=${encodeURIComponent(workId)}`;
+
+  if (params.artist !== undefined) {
+    if (params.artist && params.artist !== '__all__') searchParams.set('artist', params.artist);
+    else searchParams.delete('artist');
+  }
+
+  const qs = searchParams.toString();
+  window.location.hash = qs ? `${anchor}?${qs}` : anchor;
 }
 
-function getWorkIdFromHash(): string | null {
+function getGalleryParamsFromHash() {
   const hash = window.location.hash || '';
   const [anchor, query] = hash.split('?');
-  if (anchor !== '#gallery' || !query) return null;
-  const p = new URLSearchParams(query);
-  const id = p.get('work');
-  return id ? decodeURIComponent(id) : null;
+  const p = new URLSearchParams(query || '');
+  
+  // If we are at #gallery, or if we have gallery-specific params even on another anchor
+  // (though usually they only come with #gallery)
+  const isGallery = anchor.startsWith('#gallery');
+  
+  return {
+    workId: p.get('work'),
+    artist: p.get('artist') || (isGallery ? '__all__' : null),
+  };
 }
 
 export function Gallery() {
   const { t, lang } = useI18n();
-  const [q, setQ] = useState('');
   const [artist, setArtist] = useState<string>('__all__');
-  const [sort, setSort] = useState<'artist' | 'title'>('artist');
   const [openId, setOpenId] = useState<string | null>(null);
 
   useEffect(() => {
     const onHash = () => {
-      const id = getWorkIdFromHash();
-      setOpenId(id);
+      const { workId, artist: hashArtist } = getGalleryParamsFromHash();
+      setOpenId(workId);
+      if (hashArtist) {
+        setArtist(hashArtist);
+      } else if (window.location.hash === '' || window.location.hash === '#') {
+        // Reset only if hash is completely cleared
+        setArtist('__all__');
+      }
     };
     onHash();
     window.addEventListener('hashchange', onHash);
@@ -54,35 +65,23 @@ export function Gallery() {
   }, []);
 
   const filtered = useMemo(() => {
-    const nq = norm(q);
     let arr = galleryWorks.slice();
     if (artist !== '__all__') arr = arr.filter((w) => w.artist === artist);
-    if (nq) {
-      arr = arr.filter((w) => {
-        const hay = norm(
-          [
-            w.artist,
-            w.titleEn,
-            w.titleRu,
-            ...(w.tags ?? []),
-            lang === 'ru' ? w.titleRu : w.titleEn,
-          ].join(' '),
-        );
-        return hay.includes(nq);
-      });
-    }
+    
+    // Always sort by title
     arr.sort((a, b) => {
-      if (sort === 'artist') return a.artist.localeCompare(b.artist) || a.titleEn.localeCompare(b.titleEn);
-      return a.titleEn.localeCompare(b.titleEn) || a.artist.localeCompare(b.artist);
+      const titleA = lang === 'ru' ? a.titleRu : a.titleEn;
+      const titleB = lang === 'ru' ? b.titleRu : b.titleEn;
+      return titleA.localeCompare(titleB);
     });
     return arr;
-  }, [artist, lang, q, sort]);
+  }, [artist, lang]);
 
   const currentIndex = useMemo(() => filtered.findIndex((w) => w.id === openId), [filtered, openId]);
   const current = currentIndex >= 0 ? filtered[currentIndex] : null;
 
-  const open = (id: string) => setGalleryHash(id);
-  const close = () => setGalleryHash(null);
+  const open = (id: string) => setGalleryHash({ workId: id });
+  const close = () => setGalleryHash({ workId: null });
   const prev = () => {
     if (filtered.length === 0) return;
     const i = currentIndex <= 0 ? filtered.length - 1 : currentIndex - 1;
@@ -94,44 +93,39 @@ export function Gallery() {
     open(filtered[i].id);
   };
 
+  const handleArtistClick = (a: string) => {
+    setGalleryHash({ artist: a });
+  };
+
   return (
     <section id="gallery" className={styles.root} aria-label="Gallery">
       <div className={styles.inner}>
         <h2 className={styles.title}>{t.gallery.title}</h2>
-        <p className={styles.lede}>{t.gallery.lede}</p>
-
+        
         <div className={styles.toolbar}>
-          <input
-            className={styles.input}
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder={t.gallery.searchPlaceholder}
-            aria-label="Search"
-          />
-          <select
-            className={styles.select}
-            value={artist}
-            onChange={(e) => setArtist(e.target.value)}
-            aria-label="Artist filter"
-          >
-            <option value="__all__">{t.gallery.artistFilterAll}</option>
-            {artists.map((a) => (
-              <option key={a} value={a}>
-                {a}
-              </option>
-            ))}
-          </select>
-          <select
-            className={styles.select}
-            value={sort}
-            onChange={(e) => setSort(e.target.value as 'artist' | 'title')}
-            aria-label="Sort"
-          >
-            <option value="artist">{t.gallery.sortArtist}</option>
-            <option value="title">{t.gallery.sortTitle}</option>
-          </select>
-          <div className={styles.count}>
-            {filtered.length}/{galleryWorks.length}
+          <div className={styles.filterGroup}>
+            <div className={styles.artistTags}>
+              <button
+                type="button"
+                className={`${styles.tag} ${styles.allArtistsTag} ${artist === '__all__' ? styles.tagActive : ''}`}
+                onClick={() => handleArtistClick('__all__')}
+              >
+                {t.gallery.artistFilterAll}
+              </button>
+              
+              <div className={styles.artistList}>
+                {artists.map((a) => (
+                  <button
+                    key={a}
+                    type="button"
+                    className={`${styles.tag} ${artist === a ? styles.tagActive : ''}`}
+                    onClick={() => handleArtistClick(a)}
+                  >
+                    {a}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
 

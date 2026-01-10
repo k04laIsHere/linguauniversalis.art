@@ -2,6 +2,7 @@
   position: relative;
   height: 100vh;
   background: transparent;
+  z-index: 10; /* Above Cave's fixed shadowMask (z-index 3) */
 }
 
 .pin {
@@ -14,6 +15,8 @@
   position: absolute;
   inset: 0;
   will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 /* Changed baseDark to look like the cave wall we are leaving */
@@ -27,19 +30,21 @@
   filter: brightness(0.4) contrast(1.1);
   pointer-events: none;
   will-change: opacity, transform;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .exitFill {
   background-image: url('/assets/images/backgrounds/cave-exit-landscape.png');
   background-size: cover;
-  background-position: center bottom;
-  z-index: 2;
+  background-position: center;
+  z-index: 4; /* Above Cave's shadowMask (z-index 3) */
 }
 
 .edgesContainer {
   position: absolute;
   inset: 0;
-  z-index: 3;
+  z-index: 5; /* Above exitFill and shadowMask */
   pointer-events: none;
   /* Use the arch image as a mask for the whole container (arch + flashlight) */
   -webkit-mask-image: url('/assets/images/backgrounds/cave-arch-mask.png');
@@ -48,7 +53,7 @@
   mask-size: cover;
   -webkit-mask-position: center;
   mask-position: center;
-  will-change: transform, opacity;
+  /* Removed will-change to avoid layer thrashing with masks */
 }
 
 .caveEdges {
@@ -64,7 +69,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: rgba(0, 0, 0, 0.88);
+  background: rgba(0, 0, 0, 0.65); /* Reduced from 0.88 for better visibility without flashlight */
   -webkit-mask-image: radial-gradient(
     circle var(--lu_r, 520px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
     transparent 0%,

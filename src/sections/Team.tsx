@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import { gsap, initGsap } from '../animation/gsap';
 import { teamMembers } from '../content/teamData';
 import { useI18n } from '../i18n/useI18n';
+import { scrollToId } from '../utils/scroll';
 import styles from './Team.module.css';
 
 export function Team() {
@@ -106,6 +107,16 @@ export function Team() {
     };
   }, []);
 
+  const handleArtistClick = (name: string) => {
+    // 1. Update hash first so Gallery filters its content
+    window.location.hash = `#gallery?artist=${encodeURIComponent(name)}`;
+    
+    // 2. Wait a tiny bit for React to update Gallery height, then scroll
+    setTimeout(() => {
+      scrollToId('gallery');
+    }, 50);
+  };
+
   return (
     <section id="team" ref={rootRef} className={styles.root} aria-label="Team">
       <div className={styles.container}>
@@ -114,12 +125,12 @@ export function Team() {
             <h2 className={styles.title}>{t.team.title}</h2>
             <p className={styles.subtitle}>Команда проекта / Project Team</p>
           </div>
-          <div className={styles.chip}>Scroll to Explore</div>
+          <div className={styles.chip}>Click member to view works</div>
         </header>
 
         <div ref={containerRef} className={styles.grid}>
           {teamMembers.map((m) => (
-            <div key={m.id} className={styles.card}>
+            <div key={m.id} className={styles.card} onClick={() => handleArtistClick(m.name)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && handleArtistClick(m.name)}>
               <div className={styles.textBack} aria-hidden="true">
                 {m.name.split(' ').map((word, i) => (
                   <span key={i}>{word}<br /></span>

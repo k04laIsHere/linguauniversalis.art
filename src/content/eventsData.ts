@@ -16,7 +16,7 @@ export type EventItem = {
 export const events: EventItem[] = [
   {
     id: 'exhibition-manifesto',
-    titleRu: 'Выставка «Lingua Universalis. Искусство созидания»',
+    titleRu: 'Выставка «Lingua Universalis. Искусство творения»',
     titleEn: 'Exhibition “Lingua Universalis. The Art of Creation”',
     descRu:
       'Первая масштабная манифестация проекта в Библиотеке иностранной литературы.',
