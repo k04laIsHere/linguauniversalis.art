@@ -1,0 +1,41 @@
+.container {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 5;
+  overflow: hidden;
+}
+
+.whisper {
+  position: absolute;
+  font-family: var(--font-body);
+  color: rgba(255, 255, 255, 0.12);
+  white-space: nowrap;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  pointer-events: none;
+  animation: fadeInOut linear forwards;
+  filter: blur(1px);
+  user-select: none;
+}
+
+@keyframes fadeInOut {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.95);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  85% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-20px) scale(1.05);
+  }
+}
+
+

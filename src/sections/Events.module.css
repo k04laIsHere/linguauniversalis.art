@@ -1,0 +1,401 @@
+.root {
+  position: relative;
+  width: 100%;
+  background: transparent;
+  color: #fff;
+  overflow: hidden;
+}
+
+.pin {
+  position: relative;
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.backgroundText {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 15vw;
+  font-weight: 900;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.03);
+  white-space: nowrap;
+  pointer-events: none;
+  z-index: 1;
+  letter-spacing: 0.2em;
+}
+
+.content {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+}
+
+.eventSection {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  opacity: 0;
+  pointer-events: none;
+  /* Smooth exit for the whole section */
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.eventSection.active {
+  pointer-events: auto;
+}
+
+.mediaContainer {
+  position: relative;
+  width: 100%;
+  max-width: 1400px;
+  height: 65vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  perspective: 2000px;
+}
+
+.imageWrapper {
+  position: absolute;
+  /* 2x larger on desktop */
+  width: min(800px, 85vw);
+  aspect-ratio: 16/10;
+  border-radius: 2px;
+  overflow: hidden;
+  box-shadow: 0 50px 100px rgba(0,0,0,0.7);
+  background: rgba(10, 10, 10, 0.4);
+  transform-style: preserve-3d;
+  transition: filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.1s linear;
+  filter: brightness(0.8) contrast(1.05) saturate(0.9);
+  cursor: pointer;
+}
+
+.imageWrapper:hover {
+  filter: brightness(1.1) contrast(1.05) saturate(1.1);
+  z-index: 50 !important;
+  box-shadow: 0 60px 120px rgba(0,0,0,0.8);
+}
+
+/* Blurred edges / "eroded" look */
+.eventImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  /* Reduced transparency at center to fix invisibility issue */
+  mask-image: radial-gradient(ellipse at center, black 60%, transparent 98%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 60%, transparent 98%);
+  transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.imageWrapper:hover .eventImage {
+  transform: scale(1.05);
+}
+
+/* Cluster positions - Higher index = Higher z-index and slightly larger/shifted to appear "in front" */
+.imageWrapper[data-image-index="0"] {
+  transform: translate(-20%, -15%) rotate(-5deg);
+  z-index: 1;
+  width: min(700px, 75vw);
+}
+.imageWrapper[data-image-index="1"] {
+  transform: translate(15%, 5%) rotate(3deg);
+  z-index: 2;
+  width: min(750px, 80vw);
+}
+.imageWrapper[data-image-index="2"] {
+  transform: translate(-5%, 25%) rotate(-2deg);
+  z-index: 3;
+  width: min(800px, 85vw);
+}
+
+.infoBox {
+  position: relative;
+  z-index: 10;
+  margin-top: 2rem;
+  max-width: 600px;
+  text-align: center;
+  padding: 2.5rem;
+  /* Persistent glass background */
+  background: rgba(10, 12, 15, 0.65);
+  backdrop-filter: blur(25px) saturate(150%);
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  /* Smooth transitions for opacity/transform reveals */
+  transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
+              transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Remove separate active state for matte effect as it's now persistent */
+.eventSection.active .infoBox {
+  opacity: 1;
+}
+
+.eventTitle {
+  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  margin: 0 0 0.5rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: #d9c08d; /* Matching team section color */
+  text-transform: uppercase;
+}
+
+.eventMeta {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1.5rem;
+  font-size: 0.8rem;
+  color: rgba(217, 192, 141, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+}
+
+.eventDesc {
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.8);
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+}
+
+.exploreBtn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  padding: 0.9rem 2.5rem;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  backdrop-filter: blur(5px);
+}
+
+.exploreBtn:hover {
+  background: #d9c08d;
+  color: #0a0c0f;
+  border-color: #d9c08d;
+  transform: translateY(-3px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+/* Scroll Hint */
+.scrollHint {
+  position: absolute;
+  bottom: 1.5rem; /* Moved further down */
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem; /* Reduced gap */
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.5s;
+  z-index: 5; /* Lowered z-index to stay below infoBox if they overlap */
+  pointer-events: none;
+}
+
+.scrollHint.visible {
+  opacity: 0.4;
+  visibility: visible;
+}
+
+.scrollText {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.5em;
+  color: #d9c08d;
+  font-weight: 300;
+}
+
+.mouse {
+  width: 1px;
+  height: 60px;
+  background: linear-gradient(to bottom, transparent, #d9c08d, transparent);
+  position: relative;
+  overflow: hidden;
+}
+
+.wheel {
+  width: 100%;
+  height: 20px;
+  background: #fff;
+  position: absolute;
+  top: -20px;
+  left: 0;
+  animation: scrollAnim 2.5s infinite;
+}
+
+@keyframes scrollAnim {
+  0% { transform: translateY(0); opacity: 0; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
+  100% { transform: translateY(80px); opacity: 0; }
+}
+
+/* Overlay / Modal */
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 9, 0.92);
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  backdrop-filter: blur(15px);
+}
+
+.detailsModal {
+  position: relative;
+  width: 100%;
+  max-width: 1100px;
+  max-height: 85vh;
+  background: #0a0c0f;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  overflow-y: auto;
+  animation: modalIn 0.6s cubic-bezier(0.23, 1, 0.32, 1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(217, 192, 141, 0.2) transparent;
+}
+
+@keyframes modalIn {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.closeBtn {
+  position: absolute;
+  top: 1.5rem;
+  right: 1.5rem;
+  background: none;
+  border: none;
+  color: #fff;
+  font-size: 2rem;
+  cursor: pointer;
+  z-index: 10;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.4;
+  transition: opacity 0.3s, transform 0.3s;
+}
+
+.closeBtn:hover {
+  opacity: 1;
+  transform: rotate(90deg);
+}
+
+.modalContent {
+  padding: 4rem 3rem;
+}
+
+.modalHeader {
+  margin-bottom: 3.5rem;
+  text-align: center;
+}
+
+.modalHeader h2 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 200;
+  margin-bottom: 1rem;
+  color: #d9c08d;
+  letter-spacing: 0.05em;
+}
+
+.modalMeta {
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  font-size: 0.8rem;
+}
+
+.modalBody {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.modalImages {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.modalImg {
+  width: 100%;
+  border-radius: 4px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+  filter: saturate(1.1);
+}
+
+.modalText {
+  font-size: 1.15rem;
+  line-height: 1.9;
+  color: rgba(255, 255, 255, 0.85);
+  font-weight: 300;
+}
+
+/* Mobile responsive */
+@media (max-width: 900px) {
+  .modalBody {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .infoBox {
+    padding: 2rem 1.5rem;
+    width: 92vw;
+    margin-top: 0;
+  }
+  
+  .mediaContainer {
+    height: 45vh;
+  }
+  
+  .imageWrapper {
+    width: 75vw;
+  }
+
+  .modalContent {
+    padding: 3rem 1.5rem;
+  }
+  
+  .backgroundText {
+    font-size: 25vw;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .eventSection {
+    position: relative;
+    opacity: 1;
+    pointer-events: auto;
+    margin-bottom: 100px;
+  }
+  .pin {
+    height: auto;
+    min-height: 100vh;
+  }
+}

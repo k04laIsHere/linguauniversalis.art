@@ -1,0 +1,265 @@
+.root {
+  position: relative;
+  min-height: 350vh; /* Made it even longer */
+  padding: 120px 18px 100px;
+  overflow: hidden;
+  background: #020305;
+}
+
+/* Background wrapper to contain the cave environment */
+.bgWrapper {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.bg {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/images/backgrounds/cave-wall-texture.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: saturate(0.8) contrast(1.1) brightness(0.5);
+  opacity: 0;
+  transition: opacity 1.2s ease; /* Slightly slower fade */
+  z-index: 0;
+}
+
+.vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 40%, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.95));
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  z-index: 1;
+}
+
+.shadowMask {
+  position: fixed; /* Keep it fixed to the viewport for the flashlight effect */
+  inset: 0;
+  background: rgba(0, 0, 0, 0.98);
+  pointer-events: none;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 1.2s ease;
+  
+  mask-image: radial-gradient(
+    circle var(--lu_r, 510px) at var(--lu_x, 50vw) var(--lu_y, 38vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.1) 40%,
+    rgba(0, 0, 0, 0.4) 60%,
+    black 85%
+  );
+  -webkit-mask-image: radial-gradient(
+    circle var(--lu_r, 510px) at var(--lu_x, 50vw) var(--lu_y, 38vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.1) 40%,
+    rgba(0, 0, 0, 0.4) 60%,
+    black 85%
+  );
+}
+
+.root[data-cave-active='1'] .bg,
+.root[data-cave-active='1'] .vignette,
+.root[data-cave-active='1'] .shadowMask {
+  opacity: 1;
+}
+
+.inner {
+  position: relative;
+  max-width: 1200px;
+  margin: 0 auto;
+  z-index: 2;
+}
+
+.titleBlock {
+  padding: 60px 40px;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 32px;
+  backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 120px;
+  text-align: center;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
+}
+
+.title {
+  margin: 0 0 15px;
+  font-size: clamp(40px, 6vw, 64px);
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #fff;
+  text-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
+}
+
+.subtitle {
+  margin: 0 0 30px;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 20px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.manifestoTitle {
+  margin: 40px 0 20px;
+  font-size: 15px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--accent, #d9c08d);
+  font-weight: 600;
+}
+
+.manifestoList {
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  color: rgba(255, 255, 255, 0.9);
+  max-width: 750px;
+  text-align: left;
+}
+
+.manifestoList li {
+  margin-bottom: 16px;
+  line-height: 1.8;
+  font-size: 17px;
+  opacity: 0.85;
+  padding-left: 28px;
+  position: relative;
+  transition: opacity 0.3s ease;
+}
+
+.manifestoList li:hover {
+  opacity: 1;
+}
+
+.manifestoList li::before {
+  content: '•';
+  position: absolute;
+  left: 0;
+  color: var(--accent, #d9c08d);
+  font-size: 1.2em;
+}
+
+.artifactField {
+  position: relative;
+  margin-top: 100px;
+  min-height: 280vh; /* Increased for more artifacts */
+}
+
+.artifact {
+  position: absolute;
+  width: min(640px, 75vw); /* Increased base size */
+  overflow: visible;
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  cursor: pointer;
+  z-index: 2; /* Keep below shadowMask (z-index 3) to enable flashlight interaction */
+}
+
+.large {
+  width: min(820px, 85vw); /* Increased large size */
+}
+
+.medium {
+  width: min(580px, 65vw); /* Increased medium size */
+}
+
+.artifactImgWrapper {
+  position: relative;
+  /* Removed border-radius and overflow:hidden to keep feathered edges visible when expanded */
+  overflow: visible; 
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
+  transition: transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1), 
+              box-shadow 1.2s cubic-bezier(0.15, 0.85, 0.35, 1);
+}
+
+/* Beautiful zoom on long hover - expands more on desktop */
+.artifact:hover {
+  z-index: 10; /* Bring above shadowMask when hovered for full clarity */
+}
+
+.artifact:hover .artifactImgWrapper {
+  transform: scale(1.3) translateY(-40px); /* Even more dramatic expansion */
+  box-shadow: 0 80px 160px rgba(0, 0, 0, 1);
+}
+
+.artifactImg {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  filter: brightness(0.7) contrast(1.1) grayscale(0.3);
+  transition: filter 1.2s cubic-bezier(0.15, 0.85, 0.35, 1), 
+              transform 1.8s cubic-bezier(0.1, 0, 0.1, 1);
+}
+
+.artifact:hover .artifactImg {
+  filter: brightness(1.2) contrast(1.05) grayscale(0);
+  transform: scale(1.1); /* Combined scale is ~1.43 */
+}
+
+.artifactCap {
+  padding: 25px 20px;
+  text-align: center;
+  opacity: 0.4;
+  transform: translateY(10px);
+  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.artifact:hover .artifactCap {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.artifactTitle {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent, #d9c08d);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+
+.artifactSub {
+  margin: 10px 0 0;
+  font-size: 13px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+@media (max-width: 960px) {
+  .artifactField {
+    min-height: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 80px;
+    margin-top: 50px;
+  }
+  .artifact {
+    position: relative;
+    top: auto !important;
+    left: auto !important;
+    width: 100% !important;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+}
+
+.hint {
+  padding: 14px 14px;
+  border-radius: 16px;
+  border: 0;
+  background: rgba(0, 0, 0, 0.16);
+  backdrop-filter: blur(14px);
+  color: rgba(255, 255, 255, 0.68);
+  font-size: 13px;
+  margin-top: 18px;
+}
+
+@media (max-width: 860px) {
+  .title {
+    font-size: 30px;
+  }
+}

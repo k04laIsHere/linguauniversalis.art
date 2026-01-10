@@ -1,0 +1,93 @@
+:root {
+  color-scheme: dark;
+  --bg: #050608;
+  --fg: rgba(255, 255, 255, 0.92);
+  --muted: rgba(255, 255, 255, 0.68);
+  --panel: rgba(10, 12, 14, 0.62);
+  --hairline: rgba(255, 255, 255, 0.14);
+  --accent: rgb(212, 175, 55);
+  --font-body: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, 'Noto Sans',
+    'Liberation Sans', sans-serif;
+  --font-title: Cinzel, ui-serif, Georgia, 'Times New Roman', serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font: 16px/1.45 var(--font-body);
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-title);
+  color: var(--accent);
+}
+
+a {
+  color: inherit;
+}
+
+button,
+input,
+select {
+  font: inherit;
+  color: inherit;
+}
+
+.featherRect {
+  /* Even feather on all edges (rectangular) */
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0, #fff 16px),
+    linear-gradient(to left, transparent 0, #fff 16px),
+    linear-gradient(to bottom, transparent 0, #fff 16px),
+    linear-gradient(to top, transparent 0, #fff 16px);
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  -webkit-mask-position: 0 0;
+  -webkit-mask-composite: source-in, source-in, source-in;
+
+  mask-image:
+    linear-gradient(to right, transparent 0, #fff 16px),
+    linear-gradient(to left, transparent 0, #fff 16px),
+    linear-gradient(to bottom, transparent 0, #fff 16px),
+    linear-gradient(to top, transparent 0, #fff 16px);
+  mask-repeat: no-repeat;
+  mask-size: 100% 100%;
+  mask-position: 0 0;
+  mask-composite: intersect, intersect, intersect;
+}
+
+.appRoot {
+  min-height: 100vh;
+  position: relative;
+  z-index: 0;
+}
+
+main {
+  position: relative;
+  z-index: 1;
+}
+
+/* Avoid scroll snap surprises; we’ll drive some sections via GSAP pinning instead. */
+html {
+  scroll-behavior: smooth;
+}
+
+section,
+[id] {
+  scroll-margin-top: 86px;
+}
+
+

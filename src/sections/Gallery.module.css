@@ -1,0 +1,199 @@
+.root {
+  position: relative;
+  padding: 120px 18px 140px;
+  background: transparent;
+  content-visibility: auto;
+  contain-intrinsic-size: 900px;
+}
+
+.inner {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.title {
+  margin: 0 0 15px;
+  font-family: var(--font-title);
+  font-size: 42px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-align: center;
+}
+
+.lede {
+  margin: 0 0 40px;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  padding: 20px;
+  margin-bottom: 60px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 0;
+  color: white;
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  width: 200px;
+  transition: border-color 0.3s ease;
+  outline: none;
+}
+
+.input:focus {
+  border-color: var(--accent);
+}
+
+.select {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  outline: none;
+  transition: color 0.3s ease;
+}
+
+.select:hover {
+  color: white;
+}
+
+.count {
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.grid {
+  columns: 4;
+  column-gap: 20px;
+}
+
+.card {
+  break-inside: avoid;
+  display: block;
+  width: 100%;
+  margin-bottom: 20px;
+  position: relative;
+  appearance: none;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  overflow: hidden;
+  transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+}
+
+.card:hover {
+  transform: scale(1.02);
+  z-index: 2;
+}
+
+.thumb {
+  display: block;
+  width: 100%;
+  height: auto;
+  transition: filter 0.4s ease;
+}
+
+.card:hover .thumb {
+  filter: saturate(1.2) brightness(1.1);
+}
+
+.meta {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  backdrop-filter: blur(4px);
+  text-align: center;
+}
+
+.card:hover .meta {
+  opacity: 1;
+}
+
+.artist {
+  font-family: var(--font-title);
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.workTitle {
+  font-size: 14px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: white;
+}
+
+@media (max-width: 1200px) {
+  .grid {
+    columns: 3;
+  }
+}
+
+@media (max-width: 900px) {
+  .grid {
+    columns: 2;
+  }
+}
+
+@media (max-width: 600px) {
+  .grid {
+    columns: 1;
+  }
+  .title {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 980px) {
+  .grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 720px) {
+  .toolbar {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto;
+  }
+  .count {
+    grid-column: 1 / -1;
+  }
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+

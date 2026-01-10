@@ -1,0 +1,130 @@
+.root {
+  position: relative;
+  height: 100vh;
+  background: transparent;
+}
+
+.pin {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  will-change: transform, opacity;
+}
+
+/* Changed baseDark to look like the cave wall we are leaving */
+.baseDark {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background-image: url('/assets/images/backgrounds/cave-wall-texture.jpg');
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.4) contrast(1.1);
+  pointer-events: none;
+  will-change: opacity, transform;
+}
+
+.exitFill {
+  background-image: url('/assets/images/backgrounds/cave-exit-landscape.png');
+  background-size: cover;
+  background-position: center bottom;
+  z-index: 2;
+}
+
+.edgesContainer {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  /* Use the arch image as a mask for the whole container (arch + flashlight) */
+  -webkit-mask-image: url('/assets/images/backgrounds/cave-arch-mask.png');
+  mask-image: url('/assets/images/backgrounds/cave-arch-mask.png');
+  -webkit-mask-size: cover;
+  mask-size: cover;
+  -webkit-mask-position: center;
+  mask-position: center;
+  will-change: transform, opacity;
+}
+
+.caveEdges {
+  position: absolute;
+  inset: 0;
+  background-image: url('/assets/images/backgrounds/cave-arch-mask.png');
+  background-size: cover;
+  background-position: center;
+  filter: contrast(1.03) brightness(0.92);
+}
+
+.edgesLightMask {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.88);
+  -webkit-mask-image: radial-gradient(
+    circle var(--lu_r, 520px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.1) 45%,
+    rgba(0, 0, 0, 0.4) 70%,
+    black 90%
+  );
+  mask-image: radial-gradient(
+    circle var(--lu_r, 520px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
+    transparent 0%,
+    rgba(0, 0, 0, 0.1) 45%,
+    rgba(0, 0, 0, 0.4) 70%,
+    black 90%
+  );
+}
+
+.ui {
+  position: absolute;
+  left: 18px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 12px;
+  pointer-events: none;
+}
+
+.title {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.hint {
+  margin: 6px 0 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.65);
+  max-width: 520px;
+}
+
+.chip {
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(10, 12, 14, 0.28);
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .root {
+    height: auto;
+  }
+  .pin {
+    height: 80vh;
+  }
+}
