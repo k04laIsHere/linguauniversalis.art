@@ -1,14 +1,13 @@
 .root {
   position: fixed;
   inset: 0;
-  z-index: 0; /* Changed from -1 to 0 */
+  z-index: 0; /* Changed back to 0 */
   opacity: 0;
   pointer-events: none;
-  will-change: opacity, transform;
-  background-image: url('/assets/images/backgrounds/skyscraper-rooftop.jpg');
+  will-change: opacity;
+  background-image: url('/assets/videos/background_video_frames/background_video_000192.webp');
   background-size: cover;
   background-position: center;
-  transform: scale(1.18) translate3d(0, -28px, 0);
 }
 
 

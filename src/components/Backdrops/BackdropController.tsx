@@ -17,118 +17,109 @@ export function BackdropController() {
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
     if (reduced) return;
 
-    const showNature = () => gsap.to(nature, { opacity: 1, duration: 0.4, ease: 'power2.out' });
-    const hideNature = () => gsap.to(nature, { opacity: 0, duration: 0.5, ease: 'power2.out' });
-    const showUrban = () => gsap.to(urban, { opacity: 1, duration: 0.5, ease: 'power2.out' });
-    const hideUrban = () => gsap.to(urban, { opacity: 0, duration: 0.5, ease: 'power2.out' });
+    const setNature = () => {
+      // Only set opacity, don't kill other tweens like scale or filter
+      gsap.to(nature, { opacity: 1, duration: 0.5, overwrite: 'auto' });
+      gsap.to(urban, { opacity: 0, duration: 0.5, overwrite: 'auto' });
+    };
+    const setUrban = () => {
+      gsap.to(urban, { opacity: 1, duration: 0.5, overwrite: 'auto' });
+      gsap.to(nature, { opacity: 0, duration: 0.5, overwrite: 'auto' });
+    };
+    const setNone = () => {
+      gsap.to([nature, urban], { opacity: 0, duration: 0.5, overwrite: 'auto' });
+    };
 
     let raf: number | null = null;
     const ctx = gsap.context(() => {
-      gsap.set(nature, { opacity: 0, transformOrigin: '50% 55%' });
-      gsap.set(urban, { opacity: 0, transformOrigin: '50% 50%' });
+      // 1. Nature Zone: From ExitFlight to the START of NatureUrban
+      ScrollTrigger.create({
+        trigger: '#exitFlight',
+        endTrigger: '#natureUrban',
+        start: 'top bottom',
+        end: 'top top',
+        onEnter: setNature,
+        onEnterBack: setNature,
+        onLeave: () => {
+          // Handled by nuTl
+        },
+        onLeaveBack: setNone,
+        refreshPriority: -1, // Wait for all pins to settle
+      });
 
-      // Check for existence of trigger elements before creating ScrollTriggers
-      const hasNatureUrban = !!document.getElementById('natureUrban');
-      const hasTeam = !!document.getElementById('team');
-      const hasEvents = !!document.getElementById('events');
-
-      if (hasNatureUrban) {
-        // Deterministic transition during Nature→Urban pinned beat.
+      // 2. NatureUrban Transition Zone
+      const nuEl = document.getElementById('natureUrban');
+      if (nuEl) {
         const nuTl = gsap.timeline({
-          defaults: { ease: 'none' },
           scrollTrigger: {
-            trigger: '#natureUrban',
+            trigger: nuEl,
             start: 'top top',
-            end: '+=140%',
+            end: '+=300%',
             scrub: true,
-            refreshPriority: 2,
-            invalidateOnRefresh: true,
-          },
+            onEnter: () => {
+              // Ensure we start with nature visible
+              gsap.set(nature, { opacity: 1 });
+              gsap.set(urban, { opacity: 0 });
+            },
+            onLeave: () => {
+              // Ensure we end with urban visible
+              gsap.set(urban, { opacity: 1 });
+              gsap.set(nature, { opacity: 0 });
+            },
+            onEnterBack: () => {
+              // Entering back from gallery
+              gsap.set(urban, { opacity: 1 });
+              gsap.set(nature, { opacity: 0 });
+            },
+            onLeaveBack: () => {
+              // Leaving back to events
+              gsap.set(nature, { opacity: 1 });
+              gsap.set(urban, { opacity: 0 });
+            },
+            refreshPriority: -1,
+          }
         });
-        // Keep valley fully visible at the start of the beat; crossfade later.
+
+        // Crossfade
         nuTl
-          .set(nature, { opacity: 1 }, 0)
-          .set(urban, { opacity: 0 }, 0)
-          .to(nature, { opacity: 0, duration: 0.6 }, 0.18)
-          .to(urban, { opacity: 1, duration: 0.6 }, 0.18);
+          .to(nature, { opacity: 0, duration: 0.1 }, 0.05)
+          .to(urban, { opacity: 1, duration: 0.1 }, 0.85);
       }
 
-      if (hasTeam) {
-        // If user jumps directly to Team/Events via header, ensure the valley is visible.
-        ScrollTrigger.create({
-          trigger: '#team',
-          start: 'top bottom',
-          onEnter: showNature,
-          onEnterBack: showNature,
-          refreshPriority: 1,
-        });
-      }
+      // 3. Urban Zone: From end of NatureUrban to the end of site
+      ScrollTrigger.create({
+        trigger: '#gallery',
+        start: 'top bottom',
+        endTrigger: 'html',
+        end: 'bottom bottom',
+        onEnter: setUrban,
+        onEnterBack: setUrban,
+        refreshPriority: -1,
+      });
 
-      if (hasEvents) {
-        ScrollTrigger.create({
-          trigger: '#events',
-          start: 'top bottom',
-          onEnter: showNature,
-          onEnterBack: showNature,
-          refreshPriority: 1,
-        });
-      }
-
-      // General parallax for nature sections after the flight to keep it unified
-      if (hasTeam && hasEvents) {
-        gsap.timeline({
-          defaults: { ease: 'none' },
-          scrollTrigger: {
-            trigger: '#team',
-            start: 'top bottom',
-            endTrigger: '#events',
-            end: 'bottom top',
-            scrub: true,
-            refreshPriority: 1,
-          },
-        })
-        .fromTo(nature, 
-          // Start from the final scale of ExitFlight (approx 1.55)
-          { scale: 1.55, y: -35 }, 
-          { scale: 1.75, y: -100 }
-        );
-      }
-
-      // Initial sync (covers refresh while scrolled down, and avoids relying on callbacks firing on init).
+      // Initial sync
       raf = requestAnimationFrame(() => {
         ScrollTrigger.refresh();
         const y = window.scrollY;
         const galleryEl = document.getElementById('gallery');
         const nuEl = document.getElementById('natureUrban');
-        const teamEl = document.getElementById('team');
-        const exitEl = document.getElementById('exitFlight');
+        const natureStartEl = document.getElementById('exitFlight');
 
-        // 1. If we are already at/after Gallery (deep link), urban must be visible.
-        if (galleryEl && y >= getTop(galleryEl) - 2) {
-          gsap.set(nature, { opacity: 0 });
-          gsap.set(urban, { opacity: 1 });
-          return;
+        if (galleryEl && y >= getTop(galleryEl) - 10) {
+          setUrban();
+        } else if (nuEl && y >= getTop(nuEl) - 10) {
+          // Inside transition section, let scrub handle it
+          // But set a safe fallback state if scrub hasn't kicked in
+          if (y < getTop(nuEl) + (nuEl.offsetHeight * 0.1)) {
+             setNature();
+          } else if (y > getTop(nuEl) + (nuEl.offsetHeight * 0.9)) {
+             setUrban();
+          }
+        } else if (natureStartEl && y + window.innerHeight >= getTop(natureStartEl)) {
+          setNature();
+        } else {
+          setNone();
         }
-
-        // 2. If we are already past Nature→Urban, keep urban visible.
-        if (nuEl && y >= getTop(nuEl) - 2) {
-          // Let the Nature→Urban scrub control the exact state.
-          ScrollTrigger.update();
-          return;
-        }
-
-        // 3. Above Nature→Urban: check if we are in Nature sections (ExitFlight, Team, Events).
-        // Use exitEl as the primary start for Nature backdrop.
-        const natureStartEl = exitEl || teamEl;
-        if (natureStartEl && y + window.innerHeight >= getTop(natureStartEl) - 2) {
-          gsap.set(nature, { opacity: 1 });
-          gsap.set(urban, { opacity: 0 });
-          return;
-        }
-
-        // 4. Above ExitFlight: both off.
-        gsap.set(nature, { opacity: 0 });
-        gsap.set(urban, { opacity: 0 });
       });
     });
 
@@ -140,5 +131,3 @@ export function BackdropController() {
 
   return null;
 }
-
-

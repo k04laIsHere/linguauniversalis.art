@@ -1,9 +1,15 @@
 .root {
   position: relative;
-  min-height: 350vh; /* Made it even longer */
-  padding: 120px 18px 100px;
+  min-height: 400vh; /* Reduced from 500vh to tighten space */
+  padding: 120px 0 100px;
   overflow: hidden;
   background: #020305;
+  transition: visibility 0.3s;
+}
+
+.root:not([data-cave-active='1']) {
+  visibility: hidden; /* Hide the whole section when not active to prevent background leaking */
+  pointer-events: none;
 }
 
 /* Background wrapper to contain the cave environment */
@@ -16,240 +22,252 @@
 
 .bg {
   position: absolute;
-  inset: 0;
+  inset: -20% -20%; /* More headroom for parallax */
   background-image: url('/assets/images/backgrounds/cave-wall-texture.jpg');
-  background-size: 120% auto;
+  background-size: 2000px auto; /* Further increased to make rock details much larger */
+  background-repeat: repeat;
   background-position: center;
-  filter: saturate(0.8) contrast(1.1) brightness(0.5);
+  filter: saturate(0.6) contrast(1.2) brightness(0.6);
   opacity: 0;
-  transition: opacity 1.2s ease; /* Slightly slower fade */
   z-index: 0;
+  will-change: transform;
 }
 
 .vignette {
   position: absolute;
   inset: 0;
-  background: radial-gradient(circle at 50% 40%, rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.95));
+  background: radial-gradient(
+    circle at 50% 50%, 
+    rgba(0, 0, 0, 0) 0%, 
+    rgba(0, 0, 0, 0.4) 40%, 
+    rgba(0, 0, 0, 0.95) 100%
+  );
   opacity: 0;
-  transition: opacity 1.2s ease;
   z-index: 1;
 }
 
+/* Flashlight Shadow Mask - Faintly transparent as requested */
 .shadowMask {
-  position: fixed; /* Keep it fixed to the viewport for the flashlight effect */
+  position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.98);
+  background: rgba(0, 0, 0, 0.95);
   pointer-events: none;
   z-index: 3;
-  opacity: 0;
-  transition: opacity 1.2s ease;
+  opacity: 1; /* Start visible */
   
+  /* Increased mask radius as requested previously, keeping it broad */
   mask-image: radial-gradient(
-    circle var(--lu_r, 510px) at var(--lu_x, 50vw) var(--lu_y, 38vh),
+    circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
     transparent 0%,
-    rgba(0, 0, 0, 0.1) 40%,
-    rgba(0, 0, 0, 0.4) 60%,
-    black 85%
+    rgba(0, 0, 0, 0.01) 20%,
+    rgba(0, 0, 0, 0.4) 55%,
+    black 92%
   );
   -webkit-mask-image: radial-gradient(
-    circle var(--lu_r, 510px) at var(--lu_x, 50vw) var(--lu_y, 38vh),
+    circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
     transparent 0%,
-    rgba(0, 0, 0, 0.1) 40%,
-    rgba(0, 0, 0, 0.4) 60%,
-    black 85%
+    rgba(0, 0, 0, 0.01) 20%,
+    rgba(0, 0, 0, 0.4) 55%,
+    black 92%
   );
 }
 
 .root[data-cave-active='1'] .bg,
-.root[data-cave-active='1'] .vignette,
-.root[data-cave-active='1'] .shadowMask {
+.root[data-cave-active='1'] .vignette {
   opacity: 1;
+}
+
+/* shadowMask opacity is now controlled by GSAP */
+.root[data-cave-active='1'] .shadowMask {
+  /* opacity is 1 by default, GSAP will fade it out */
 }
 
 .inner {
   position: relative;
-  max-width: 1400px;
+  width: 100%;
+  max-width: 1600px;
   margin: 0 auto;
   z-index: 2;
 }
 
 .manifestoWrapper {
-  min-height: 120vh; /* Increased to allow more space */
-  padding: 160px 24px;
-  margin-bottom: 250px;
+  min-height: 100vh;
+  padding: 0 24px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: flex-start; /* Start from top to control centering via padding */
-  padding-top: 25vh; /* Initial title offset */
 }
 
 .hero {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
-  margin-bottom: 200px; /* More space before manifesto */
   position: relative;
+  z-index: 10; /* Above the mask always */
 }
 
 .title {
-  margin: 0 0 60px; /* Even more space for subtitle */
-  font-size: clamp(48px, 12vw, 140px);
-  letter-spacing: 0.35em;
+  margin: 0;
+  font-size: clamp(60px, 16vw, 220px);
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #fff;
-  font-weight: 200;
-  line-height: 0.85;
-  text-shadow: 0 0 40px rgba(255, 255, 255, 0.1);
+  font-weight: 400;
+  line-height: 1;
+  text-align: center;
+  font-family: var(--font-title);
+  filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.25));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.2em;
+}
+
+.titleWord {
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.titleChar {
+  display: inline-block;
+  will-change: transform, opacity, filter;
 }
 
 .subtitle {
-  margin: 0;
+  margin-top: 40px;
   color: var(--accent);
-  font-size: clamp(14px, 2.5vw, 24px);
-  letter-spacing: 0.8em; /* More letter spacing */
+  font-size: clamp(14px, 3.5vw, 28px);
+  letter-spacing: 0.8em;
   text-transform: uppercase;
-  opacity: 0.7;
+  opacity: 0.9;
+  font-weight: 400;
+  font-family: var(--font-title);
+  text-align: center;
+}
+
+.scrollHint {
+  position: absolute;
+  bottom: 22vh; /* Raised from 10vh */
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--font-title);
+  font-size: 12px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--muted);
+  opacity: 0.4;
+  animation: pulse 3s infinite ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.2; transform: translate(-50%, 0); }
+  50% { opacity: 0.6; transform: translate(-50%, 10px); }
 }
 
 .manifestoGrid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 160px 100px; /* Larger gap */
-  max-width: 1300px;
+  position: relative;
   width: 100%;
-  margin-top: 100px;
+  padding: 10vh 0;
+  display: flex;
+  flex-direction: column;
+  gap: 25vh; /* Tighter gap for manifesto items */
 }
 
 .manifestoItem {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-  padding: 50px; /* More padding */
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s ease;
-  opacity: 0.9;
-  will-change: transform, opacity;
+  max-width: 900px;
+  padding: 40px 60px;
+  z-index: 2;
+}
+
+.manifestoItem:nth-child(odd) {
+  align-self: flex-start;
+  margin-left: 5%;
 }
 
 .manifestoItem:nth-child(even) {
-  transform: translateY(100px);
-}
-
-.manifestoItem:hover {
-  opacity: 1;
-  text-shadow: 0 0 20px rgba(217, 192, 141, 0.3);
+  align-self: flex-end;
+  margin-right: 5%;
+  text-align: right;
 }
 
 .manifestoNumber {
   font-family: var(--font-title);
-  font-size: clamp(80px, 10vw, 140px);
+  font-size: clamp(160px, 18vw, 300px);
   color: var(--accent);
-  opacity: 0.05;
-  line-height: 0.8;
+  opacity: 0.25; /* Increased visibility further */
+  line-height: 0.5;
   font-weight: 200;
-  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   position: absolute;
-  top: 0;
-  left: 0;
+  top: -30px;
+  z-index: -1;
   pointer-events: none;
 }
 
-.manifestoItem:hover .manifestoNumber {
-  opacity: 0.15;
-  transform: scale(1.1);
+.manifestoItem:nth-child(odd) .manifestoNumber {
+  left: -40px;
+}
+
+.manifestoItem:nth-child(even) .manifestoNumber {
+  right: -40px;
 }
 
 .manifestoText {
   margin: 0;
-  font-size: clamp(18px, 2vw, 26px);
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: 300;
-  letter-spacing: 0.02em;
+  font-size: clamp(26px, 3.5vw, 56px);
+  line-height: 1.1;
+  color: #fff;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  font-family: var(--font-title);
+  text-transform: uppercase;
+  text-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
 }
 
-@media (max-width: 960px) {
-  .manifestoWrapper {
-    padding-top: 20vh;
-    margin-bottom: 120px;
-  }
+.manifestoItem::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  width: 120px;
+  height: 1px;
+  background: linear-gradient(to right, var(--accent), transparent);
+  opacity: 0.3;
+}
 
-  .manifestoGrid {
-    grid-template-columns: 1fr;
-    gap: 120px; /* Even more gap on mobile to prevent overlap */
-    padding: 0 15px;
-  }
+.manifestoItem:nth-child(odd)::after {
+  left: 60px;
+}
 
-  .manifestoItem, .manifestoItem:nth-child(even) {
-    transform: none !important; /* Reset Y offsets on mobile */
-    padding: 40px 25px;
-    text-align: center;
-    background: rgba(255, 255, 255, 0.03); /* Subtle background for visibility */
-    border-radius: 20px;
-  }
-
-  .manifestoNumber {
-    left: 50%;
-    transform: translateX(-50%) !important;
-    top: -30px;
-    font-size: 80px;
-  }
-
-  .title {
-    font-size: clamp(40px, 15vw, 80px);
-    letter-spacing: 0.15em;
-    margin-bottom: 40px;
-  }
-
-  .subtitle {
-    letter-spacing: 0.3em;
-    font-size: 14px;
-  }
-
-  .manifestoText {
-    font-size: 18px;
-  }
+.manifestoItem:nth-child(even)::after {
+  right: 60px;
+  background: linear-gradient(to left, var(--accent), transparent);
 }
 
 .artifactField {
   position: relative;
-  margin-top: 100px;
-  min-height: 280vh; /* Increased for more artifacts */
+  margin-top: 15vh; /* Tighter transition */
+  min-height: 80vh; /* Further reduced to minimize space after last artifact */
+  padding: 0 5vw;
 }
 
 .artifact {
   position: absolute;
-  width: min(640px, 75vw); /* Increased base size */
-  overflow: visible;
-  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  width: min(850px, 90vw);
+  z-index: 2;
   cursor: pointer;
-  z-index: 2; /* Keep below shadowMask (z-index 3) to enable flashlight interaction */
-}
-
-.large {
-  width: min(820px, 85vw); /* Increased large size */
-}
-
-.medium {
-  width: min(580px, 65vw); /* Increased medium size */
 }
 
 .artifactImgWrapper {
   position: relative;
-  /* Removed border-radius and overflow:hidden to keep feathered edges visible when expanded */
-  overflow: visible; 
-  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
-  transition: transform 1.2s cubic-bezier(0.15, 0.85, 0.35, 1), 
-              box-shadow 1.2s cubic-bezier(0.15, 0.85, 0.35, 1);
-}
-
-/* Beautiful zoom on long hover - expands more on desktop */
-.artifact:hover {
-  z-index: 10; /* Bring above shadowMask when hovered for full clarity */
-}
-
-.artifact:hover .artifactImgWrapper {
-  transform: scale(1.3) translateY(-40px); /* Even more dramatic expansion */
-  box-shadow: 0 80px 160px rgba(0, 0, 0, 1);
+  overflow: visible;
+  box-shadow: none; /* Removed sharp box-shadow */
+  background: transparent;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Added a base background to prevent sudden appearance while loading */
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .artifactImg {
@@ -258,77 +276,137 @@
   height: auto;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  filter: brightness(0.7) contrast(1.1) grayscale(0.3);
-  transition: filter 1.2s cubic-bezier(0.15, 0.85, 0.35, 1), 
-              transform 1.8s cubic-bezier(0.1, 0, 0.1, 1);
+  filter: brightness(0.7) contrast(1.1) grayscale(0.2);
+  transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s ease, opacity 0.8s ease;
+  /* Replaced box-shadow with drop-shadow that respects alpha for feathered edges */
+  filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
+  opacity: 0; /* Hidden initially for fade-in */
+}
+
+.artifactImg[src] {
+  opacity: 1; /* Fade in when src is assigned */
+}
+
+@media (min-width: 961px) {
+  .artifact:hover {
+    z-index: 20;
+  }
+  .artifact:hover .artifactImgWrapper {
+    transform: scale(1.5) translateY(-60px); /* Expanded even more for desktop */
+  }
 }
 
 .artifact:hover .artifactImg {
-  filter: brightness(1.2) contrast(1.05) grayscale(0);
-  transform: scale(1.1); /* Combined scale is ~1.43 */
+  filter: brightness(1.2) contrast(1) grayscale(0) drop-shadow(0 40px 80px rgba(0,0,0,0.8));
 }
 
 .artifactCap {
-  padding: 25px 20px;
-  text-align: center;
-  opacity: 0.4;
-  transform: translateY(10px);
-  transition: opacity 0.8s ease, transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+  padding: 30px 0;
+  text-align: left;
+  opacity: 0.6;
+  transition: opacity 0.8s ease;
 }
 
 .artifact:hover .artifactCap {
   opacity: 1;
-  transform: translateY(0);
+}
+
+.artifact:nth-child(even) .artifactCap {
+  text-align: right;
 }
 
 .artifactTitle {
   margin: 0;
-  font-size: 24px;
-  letter-spacing: 0.2em;
+  font-size: clamp(20px, 4vw, 36px);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--accent, #d9c08d);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+  color: var(--accent);
 }
 
 .artifactSub {
   margin: 10px 0 0;
-  font-size: 13px;
-  letter-spacing: 0.25em;
+  font-size: 12px;
+  letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--muted);
 }
 
+/* Mobile Optimizations */
 @media (max-width: 960px) {
+  .root {
+    min-height: 300vh;
+  }
+
+  .hero {
+    height: 85vh;
+  }
+
+  .title {
+    font-size: clamp(40px, 12vw, 80px);
+    letter-spacing: 0.1em;
+    padding: 0 10px;
+    gap: 0.1em;
+  }
+
+  .subtitle {
+    letter-spacing: 0.3em;
+    font-size: 12px;
+    margin-top: 30px;
+    padding: 0 20px;
+  }
+
+  .scrollHint {
+    bottom: 15vh;
+  }
+
+  .manifestoGrid {
+    gap: 15vh;
+    padding: 10vh 0;
+  }
+
+  .manifestoItem {
+    max-width: 100%;
+    padding: 30px 20px;
+    margin: 0 !important;
+    text-align: center !important;
+  }
+
+  .manifestoNumber {
+    left: 50% !important;
+    right: auto !important;
+    transform: translateX(-50%);
+    top: -60px;
+    font-size: 120px;
+  }
+
+  .manifestoText {
+    font-size: clamp(18px, 5.5vw, 26px);
+  }
+
   .artifactField {
-    min-height: auto;
+    margin-top: 10vh;
+    padding: 0 20px;
     display: flex;
     flex-direction: column;
     gap: 80px;
-    margin-top: 50px;
+    min-height: auto;
   }
+
   .artifact {
     position: relative;
     top: auto !important;
     left: auto !important;
     width: 100% !important;
-    max-width: 600px;
     margin: 0 auto;
+  }
+  
+  .artifact:hover .artifactImgWrapper {
+    transform: scale(1.1) translateY(-10px);
   }
 }
 
-.hint {
-  padding: 14px 14px;
-  border-radius: 16px;
-  border: 0;
-  background: rgba(0, 0, 0, 0.16);
-  backdrop-filter: blur(14px);
-  color: rgba(255, 255, 255, 0.68);
-  font-size: 13px;
-  margin-top: 18px;
-}
-
-@media (max-width: 860px) {
+@media (max-width: 380px) {
   .title {
-    font-size: 30px;
+    font-size: 38px;
   }
 }

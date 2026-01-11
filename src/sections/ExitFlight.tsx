@@ -9,7 +9,6 @@ export function ExitFlight() {
   const pinRef = useRef<HTMLDivElement | null>(null);
   const exitFillRef = useRef<HTMLDivElement | null>(null);
   const caveEdgesRef = useRef<HTMLDivElement | null>(null);
-  const lightMaskRef = useRef<HTMLDivElement | null>(null);
   const baseDarkRef = useRef<HTMLDivElement | null>(null);
   const edgesContainerRef = useRef<HTMLDivElement | null>(null);
 
@@ -24,86 +23,111 @@ export function ExitFlight() {
     const pin = pinRef.current;
     const exitFill = exitFillRef.current;
     const caveEdges = caveEdgesRef.current;
-    const lightMask = lightMaskRef.current;
     const baseDark = baseDarkRef.current;
     const edgesContainer = edgesContainerRef.current;
-    if (!root || !pin || !exitFill || !caveEdges || !lightMask || !baseDark || !edgesContainer) return;
+    if (!root || !pin || !exitFill || !caveEdges || !baseDark || !edgesContainer) return;
 
     initGsap();
 
     const ctx = gsap.context(() => {
       const nature = document.getElementById('natureBackdrop');
-      const urban = document.getElementById('urbanBackdrop');
 
-      const origin = '50% 55%';
+      const origin = '50% 45%';
       gsap.set([exitFill, caveEdges, baseDark, edgesContainer], { 
         transformOrigin: origin,
-        force3D: false, 
+        force3D: true, 
       });
 
-      // 1. Landscape starts EVEN HIGHER and LARGER to fill the hole at the beginning
-      gsap.set(exitFill, { opacity: 1, y: -280, scale: 1.45 });
-      gsap.set(baseDark, { opacity: 0, scale: 1 });
-
-      // 2. Separate ScrollTrigger for backdrop visibility to avoid jumps in scrubbed timeline
-      ScrollTrigger.create({
-        trigger: root,
-        start: 'top bottom',
-        onEnter: () => {
-          if (nature) gsap.set(nature, { opacity: 1 });
-          if (urban) gsap.set(urban, { opacity: 0 });
-        },
-        onEnterBack: () => {
-          if (nature) gsap.set(nature, { opacity: 1 });
-          if (urban) gsap.set(urban, { opacity: 0 });
-        },
-        onLeaveBack: () => {
-          if (nature) gsap.to(nature, { opacity: 0, duration: 0.5 });
-        },
-        refreshPriority: 5,
+      // 1. Initial State: Flashlight is OFF (gone by the end of Cave section).
+      // Sync baseDark with Cave section's end state
+      gsap.set(baseDark, { 
+        opacity: 1, 
+        yPercent: 0,
+        filter: 'brightness(1.2) contrast(1.1) saturate(1)' // Start bright
       });
+      
+      // Landscape starts HIGHER as requested
+      gsap.set(exitFill, { 
+        opacity: 1, 
+        y: -400, // Even higher initial position
+        scale: 1.2,
+        filter: 'brightness(0.8) contrast(1.1)'
+      });
+
+      // Nature backdrop should be ready and BRIGHT
+      if (nature) {
+        gsap.set(nature, { 
+          opacity: 1, // Start visible to avoid "darkness at first"
+          filter: 'brightness(1.1) contrast(1.05)', 
+          scale: 1.4, // Increased zoom for a stronger transition
+        });
+      }
 
       const tl = gsap.timeline({
-        defaults: { ease: 'none' },
+        defaults: { ease: 'power2.inOut' },
         scrollTrigger: {
           trigger: root,
           start: 'top top',
-          end: '+=250%',
-          scrub: true,
+          end: '+=450%', 
+          scrub: 1,
           pin: root,
           pinSpacing: true,
           anticipatePin: 1,
-          fastScrollEnd: true,
-          pinType: 'fixed',
-          refreshPriority: 10,
-          // Ensure we don't have jumps when entering/leaving
           invalidateOnRefresh: true,
+          onEnter: () => {
+            // Coordinator with BackdropController
+            if (nature) gsap.to(nature, { opacity: 1, duration: 0.3 });
+          }
         },
       });
 
-      // Anchoring the starting state of the transition to prevent jumps
+      // The transition:
+      // 1. First, make the cave walls bright
+      tl.to(baseDark, { 
+        filter: 'brightness(1.5) contrast(1.1) saturate(1)', 
+        duration: 0.8 
+      }, 0);
+
+      tl.to(exitFill, {
+        filter: 'brightness(1.2) contrast(1.1)',
+        duration: 0.8
+      }, 0);
+
+      // 2. Zoom out the nature backdrop from the very start
       if (nature) {
-        tl.set(nature, { scale: 1.02, y: 0, opacity: 1 }, 0);
+        tl.to(nature, {
+          scale: 1, // Final unzoomed state
+          y: 0,
+          duration: 4,
+          ease: 'power1.inOut'
+        }, 0);
       }
 
-      // Stage 1: Approach the exit.
-      // Move landscape down MUCH MORE significantly (y: 180)
-      tl.to(exitFill, { scale: 2.0, y: 180, duration: 0.5 }, 0);
-      tl.to(edgesContainer, { scale: 2.6, duration: 0.5 }, 0);
-      
-      if (nature) {
-        tl.to(nature, { scale: 1.3, duration: 0.5 }, 0);
-      }
+      // 3. Zoom in the wall and arch with parallax
+      tl.to(baseDark, { 
+        scale: 12, 
+        opacity: 0, 
+        yPercent: 15,
+        duration: 3,
+        ease: 'power2.in'
+      }, 0.2);
 
-      // Stage 2: Pass through the exit (foliage and cave edges fly past camera).
-      // Even greater final y (y: 600) and scale (8.0) for massive movement
-      tl.to(exitFill, { scale: 8.0, y: 600, opacity: 0, duration: 0.5 }, 0.5);
-      tl.to(edgesContainer, { scale: 9.0, opacity: 0, duration: 0.5 }, 0.5);
-      tl.to(lightMask, { opacity: 0, duration: 0.5 }, 0.5);
-      
-      if (nature) {
-        tl.to(nature, { scale: 1.6, duration: 0.5 }, 0.5);
-      }
+      tl.to(edgesContainer, {
+        scale: 20, 
+        opacity: 0,
+        duration: 2.5,
+        ease: 'power2.in'
+      }, 0.2);
+
+      // 4. The landscape (vegetation mask) zooms in and moves DOWN
+      tl.to(exitFill, { 
+        scale: 6, 
+        y: 800, 
+        opacity: 0,
+        duration: 3.5,
+        ease: 'power1.inOut'
+      }, 0.3);
+
     }, root);
 
     return () => ctx.revert();
@@ -117,16 +141,14 @@ export function ExitFlight() {
           className={`${styles.layer} ${styles.exitFill}`}
           aria-hidden="true"
         />
-        <div ref={baseDarkRef} className={styles.baseDark} aria-hidden="true" />
 
-        <div ref={edgesContainerRef} className={`${styles.layer} ${styles.edgesContainer}`}>
+        <div className={styles.wallsContainer} ref={edgesContainerRef}>
+          <div ref={baseDarkRef} className={styles.baseDark} aria-hidden="true" />
           <div
             ref={caveEdgesRef}
             className={styles.caveEdges}
             aria-hidden="true"
           />
-          {/* Flashlight that affects only the cave edges */}
-          <div ref={lightMaskRef} className={styles.edgesLightMask} aria-hidden="true" />
         </div>
 
         <div className={styles.ui}>

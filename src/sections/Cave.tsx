@@ -1,193 +1,165 @@
 import { useEffect, useRef } from 'react';
 import { useI18n } from '../i18n/useI18n';
 import styles from './Cave.module.css';
-import { gsap } from '../animation/gsap';
+import { gsap, ScrollTrigger } from '../animation/gsap';
 
 export function Cave() {
   const { t } = useI18n();
   const rootRef = useRef<HTMLElement | null>(null);
-  const artifactsRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
 
-    const io = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        // Use a more strict intersection check: hide cave effects as soon as it's mostly gone
-        if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
-          root.dataset.caveActive = '1';
-        } else {
-          delete root.dataset.caveActive;
-        }
-      },
-      { root: null, threshold: [0, 0.1, 0.2], rootMargin: '-10% 0px -20% 0px' },
-    );
-    io.observe(root);
-
     const ctx = gsap.context(() => {
-      // Background parallax: very subtle scroll
+      // Toggle active state for cave background activation
+      ScrollTrigger.create({
+        trigger: root,
+        start: 'top 80%',
+        end: 'bottom 100%', // Deactivate as soon as we reach the end of the section
+        onToggle: (self) => {
+          if (self.isActive) {
+            root.dataset.caveActive = '1';
+          } else {
+            delete root.dataset.caveActive;
+          }
+        },
+      });
+
+      // Flashlight Shadow Mask - Always visible in the section until the very end
+      gsap.set(`.${styles.shadowMask}`, { opacity: 1 });
+
+      // Ultra Slow Background Parallax - Move it slower than the content
       gsap.fromTo(
         `.${styles.bg}`,
-        { y: -15 },
+        { yPercent: -10 },
         {
-          y: 15,
+          yPercent: 10,
           ease: 'none',
           scrollTrigger: {
             trigger: root,
             start: 'top top',
-            end: 'bottom bottom',
+            end: 'bottom top',
             scrub: true,
           },
         }
       );
 
-      // Hero reveal
+      // Hero Title Animation: Individual characters
+      const titleChars = gsap.utils.toArray<HTMLElement>(`.${styles.titleChar}`);
       gsap.fromTo(
-        `.${styles.title}`,
-        { opacity: 0, letterSpacing: '0.8em', filter: 'blur(20px)' },
+        titleChars,
+        { 
+          opacity: 0, 
+          y: 40, 
+          filter: 'blur(15px)',
+          rotationX: -45 
+        },
         {
           opacity: 1,
-          letterSpacing: '0.35em',
+          y: 0,
           filter: 'blur(0px)',
-          duration: 3,
+          rotationX: 0,
+          duration: 2.5,
+          stagger: 0.08,
           ease: 'expo.out',
           scrollTrigger: {
             trigger: `.${styles.hero}`,
-            start: 'top 95%',
+            start: 'top 85%',
           },
         }
       );
 
-      gsap.fromTo(
-        `.${styles.subtitle}`,
-        { opacity: 0, y: 50 },
-        {
-          opacity: 0.7,
-          y: 0,
-          duration: 2,
-          delay: 0.8,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: `.${styles.hero}`,
-            start: 'top 95%',
-          },
-        }
-      );
-
-      // Manifesto items
-      const isMobile = window.innerWidth <= 960;
+      // Manifesto Discovery Animation
       const manifestoItems = gsap.utils.toArray<HTMLElement>(`.${styles.manifestoItem}`);
-
-      manifestoItems.forEach((item, i) => {
-        const baseRotation = i % 2 === 0 ? -4 : 3;
-        const initialY = isMobile ? 0 : (i % 2 === 0 ? 0 : 120);
-
-        // Initial entry animation
+      manifestoItems.forEach((item) => {
         gsap.fromTo(
           item,
           { 
             opacity: 0, 
-            x: isMobile ? 0 : (i % 2 === 0 ? -60 : 60),
-            y: initialY + 100,
-            rotation: baseRotation * 2,
+            y: 80,
+            scale: 0.98,
+            filter: 'blur(10px)'
           },
           {
             opacity: 1,
-            x: 0,
-            y: initialY,
-            rotation: baseRotation,
-            duration: 2,
-            ease: 'power3.out',
+            y: 0,
+            scale: 1,
+            filter: 'blur(0px)',
+            duration: 1.5,
+            ease: 'power2.out',
             scrollTrigger: {
               trigger: item,
-              start: 'top 100%',
-              end: 'bottom 80%',
-              scrub: 1.5,
+              start: 'top 95%',
+              end: 'top 50%',
+              scrub: 1,
             },
           }
         );
 
-        // Straighten on scroll (Sweet spot in center)
-        gsap.to(item, {
-          rotation: 0,
-          scale: isMobile ? 1.02 : 1.05,
-          ease: 'power1.inOut',
-          scrollTrigger: {
-            trigger: item,
-            start: 'top 70%',
-            end: 'top 30%',
-            scrub: 0.5,
-          },
-        });
-
-        // Mouse proximity straightening (Desktop)
-        if (!isMobile) {
-          const onMouseMove = (e: MouseEvent) => {
-            const rect = item.getBoundingClientRect();
-            const centerX = rect.left + rect.width / 2;
-            const centerY = rect.top + rect.height / 2;
-            const dist = Math.hypot(e.clientX - centerX, e.clientY - centerY);
-            
-            const maxDist = 800; /* Heavily enlarged hover area */
-            const proximity = Math.max(0, 1 - dist / maxDist);
-            
-            gsap.to(item, {
-              rotation: baseRotation * (1 - proximity),
-              scale: 1 + proximity * 0.08,
-              duration: 0.15, /* Very fast response */
-              overwrite: 'auto'
-            });
-          };
-
-          const onMouseLeave = () => {
-            gsap.to(item, {
-              rotation: baseRotation,
-              scale: 1,
-              duration: 0.4,
-              overwrite: 'auto'
-            });
-          };
-
-          item.addEventListener('mousemove', onMouseMove);
-          item.addEventListener('mouseleave', onMouseLeave);
+        const num = item.querySelector(`.${styles.manifestoNumber}`);
+        if (num) {
+          gsap.to(num, {
+            y: -150,
+            opacity: 0.3, // Increased visibility
+            ease: 'none',
+            scrollTrigger: {
+              trigger: item,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: true,
+            },
+          });
         }
       });
 
-      // Artifact parallax: move them at slightly different speeds
-      gsap.utils.toArray<HTMLElement>(`.${styles.artifact}`).forEach((art, i) => {
-        const speed = 40 + (i % 3) * 25; 
-        gsap.to(art, {
-          y: -speed,
-          ease: 'none',
+      // Artifacts Floating Parallax
+      const artifacts = gsap.utils.toArray<HTMLElement>(`.${styles.artifact}`);
+      artifacts.forEach((art, i) => {
+        const speed = 80 + (i % 3) * 50;
+        gsap.fromTo(
+          art,
+          { opacity: 0, y: 150 },
+          {
+            opacity: 1,
+            y: -speed,
+            duration: 2,
+            scrollTrigger: {
+              trigger: art,
+              start: 'top bottom',
+              end: 'bottom top',
+              scrub: 1,
+            },
+          }
+        );
+      });
+
+      // Transition out: Fade flashlight away as we reach the artifacts section
+      // Should be completely gone by the time we reach the last artifact
+      const lastArtifact = artifacts[artifacts.length - 1];
+      if (lastArtifact) {
+        gsap.to(`.${styles.shadowMask}`, {
+          opacity: 0,
+          ease: 'power1.inOut',
           scrollTrigger: {
-            trigger: art,
-            start: 'top bottom',
-            end: 'bottom top',
+            trigger: lastArtifact,
+            start: 'top bottom', // Start fading when the last artifact enters
+            end: 'top 30%',      // Completely gone when it reaches upper part of screen
             scrub: true,
           },
         });
-      });
+      }
+
     }, root);
 
-    return () => {
-      io.disconnect();
-      ctx.revert();
-    };
+    return () => ctx.revert();
   }, []);
 
   const artifactsData = [
-    { top: 15, left: 8, id: 1, size: 'large' },
-    { top: 35, left: 62, id: 2, size: 'medium' },
-    { top: 58, left: 12, id: 3, size: 'large' },
-    { top: 82, left: 68, id: 4, size: 'medium' },
-    { top: 110, left: 15, id: 1, size: 'medium' },
-    { top: 135, left: 55, id: 2, size: 'large' },
-    { top: 165, left: 10, id: 3, size: 'medium' },
-    { top: 195, left: 65, id: 4, size: 'large' },
-    { top: 225, left: 20, id: 1, size: 'medium' },
-    { top: 250, left: 58, id: 2, size: 'large' },
+    { top: 5, left: 10, id: 1, title: 'PALEOLITHIC ECHO', sub: 'ALTAMIRA SERIES • 2024' },
+    { top: 18, left: 55, id: 2, title: 'THE FIRST SYMBOL', sub: 'VOID FRAGMENT • 2024' },
+    { top: 32, left: 15, id: 3, title: 'ANCIENT FREQUENCY', sub: 'RESONANCE • 2024' },
+    { top: 48, left: 60, id: 4, title: 'ETERNAL HANDPRINT', sub: 'ORIGIN • 2024' },
   ];
 
   return (
@@ -201,8 +173,20 @@ export function Cave() {
       <div className={styles.inner}>
         <div className={styles.manifestoWrapper} id="manifesto">
           <header className={styles.hero}>
-            <h1 className={styles.title}>{t.cave.title}</h1>
+            <h1 className={styles.title}>
+              {t.cave.title.split(' ').map((word, wordIdx) => (
+                <span key={wordIdx} className={styles.titleWord}>
+                  {word.split('').map((char, charIdx) => (
+                    <span key={charIdx} className={styles.titleChar}>
+                      {char}
+                    </span>
+                  ))}
+                  {wordIdx < t.cave.title.split(' ').length - 1 && '\u00A0'}
+                </span>
+              ))}
+            </h1>
             <p className={styles.subtitle}>{t.cave.subtitle}</p>
+            <div className={styles.scrollHint}>{t.cave.flashlightHint2}</div>
           </header>
 
           <div className={styles.manifestoGrid}>
@@ -221,37 +205,30 @@ export function Cave() {
 
         <div
           id="ancient"
-          ref={artifactsRef}
           className={styles.artifactField}
           aria-label="Ancient cave artifacts"
         >
-          {artifactsData.map((art, i) => {
-            const n = art.id;
-            const title = 'PALEOLITHIC ECHO';
-            const sub = 'ALTAMIRA SERIES • 2024';
-            return (
-              <div
-                key={i}
-                className={`${styles.artifact} ${styles[art.size]}`}
-                data-artifact="1"
-                style={{ top: `${art.top}%`, left: `${art.left}%` }}
-              >
-                <div className={styles.artifactImgWrapper}>
-                  <img
-                    className={`${styles.artifactImg} featherRect`}
-                    src={`/assets/art/art-${n}.jpg`}
-                    alt={`Cave art ${n}`}
-                    loading="lazy"
-                    decoding="async"
-                  />
-                </div>
-                <div className={styles.artifactCap}>
-                  <h3 className={styles.artifactTitle}>{title}</h3>
-                  <p className={styles.artifactSub}>{sub}</p>
-                </div>
+          {artifactsData.map((art, i) => (
+            <div
+              key={i}
+              className={styles.artifact}
+              style={{ top: `${art.top}%`, left: `${art.left}%` } as React.CSSProperties}
+            >
+              <div className={styles.artifactImgWrapper}>
+                <img
+                  className={`${styles.artifactImg} featherRect`}
+                  src={`/assets/art/art-${art.id}.jpg`}
+                  alt={art.title}
+                  loading="lazy"
+                  decoding="async"
+                />
               </div>
-            );
-          })}
+              <div className={styles.artifactCap}>
+                <h3 className={styles.artifactTitle}>{art.title}</h3>
+                <p className={styles.artifactSub}>{art.sub}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </section>

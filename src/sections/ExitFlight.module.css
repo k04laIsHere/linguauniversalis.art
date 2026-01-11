@@ -19,71 +19,45 @@
   -webkit-backface-visibility: hidden;
 }
 
-/* Changed baseDark to look like the cave wall we are leaving */
 .baseDark {
+  display: none; /* User requested only arch mask, landscape and backdrop to be visible */
+}
+
+.wallsContainer {
   position: absolute;
   inset: 0;
-  z-index: 0;
-  background-image: url('/assets/images/backgrounds/cave-wall-texture.jpg');
-  background-size: cover;
-  background-position: center;
-  filter: brightness(0.4) contrast(1.1);
-  pointer-events: none;
-  will-change: opacity, transform;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
+  z-index: 2;
+  will-change: transform, opacity;
 }
 
 .exitFill {
+  position: absolute;
+  inset: -25% -25%; /* Increased from -10% to ensure no edges are visible during zoom/parallax */
   background-image: url('/assets/images/backgrounds/cave-exit-landscape.png');
   background-size: cover;
   background-position: center;
-  z-index: 4; /* Above Cave's shadowMask (z-index 3) */
+  background-repeat: no-repeat; /* Prevent tiling artifacts */
+  z-index: 0; /* Behind the walls container */
+  filter: brightness(1.1);
 }
 
 .edgesContainer {
+  /* This class is now applied to wallsContainer in TSX, but keeping for reference if needed */
   position: absolute;
   inset: 0;
-  z-index: 5; /* Above exitFill and shadowMask */
+  z-index: 2;
   pointer-events: none;
-  /* Use the arch image as a mask for the whole container (arch + flashlight) */
-  -webkit-mask-image: url('/assets/images/backgrounds/cave-arch-mask.png');
-  mask-image: url('/assets/images/backgrounds/cave-arch-mask.png');
-  -webkit-mask-size: cover;
-  mask-size: cover;
-  -webkit-mask-position: center;
-  mask-position: center;
-  /* Removed will-change to avoid layer thrashing with masks */
 }
 
 .caveEdges {
   position: absolute;
   inset: 0;
+  z-index: 2; /* On top of baseDark */
   background-image: url('/assets/images/backgrounds/cave-arch-mask.png');
   background-size: cover;
+  background-repeat: no-repeat;
   background-position: center;
-  filter: contrast(1.03) brightness(0.92);
-}
-
-.edgesLightMask {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  background: rgba(0, 0, 0, 0.65); /* Reduced from 0.88 for better visibility without flashlight */
-  -webkit-mask-image: radial-gradient(
-    circle var(--lu_r, 520px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
-    transparent 0%,
-    rgba(0, 0, 0, 0.1) 45%,
-    rgba(0, 0, 0, 0.4) 70%,
-    black 90%
-  );
-  mask-image: radial-gradient(
-    circle var(--lu_r, 520px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
-    transparent 0%,
-    rgba(0, 0, 0, 0.1) 45%,
-    rgba(0, 0, 0, 0.4) 70%,
-    black 90%
-  );
+  filter: contrast(1.1) brightness(0.8);
 }
 
 .ui {
@@ -91,7 +65,7 @@
   left: 18px;
   right: 18px;
   bottom: 18px;
-  z-index: 2;
+  z-index: 10; /* Topmost */
   display: flex;
   justify-content: space-between;
   align-items: flex-end;

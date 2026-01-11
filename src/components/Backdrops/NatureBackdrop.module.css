@@ -1,25 +1,18 @@
 .root {
   position: fixed;
   inset: 0;
-  z-index: 0; /* Changed from -1 to 0 to ensure visibility over body bg */
+  z-index: 0;
   opacity: 0;
   pointer-events: none;
-  will-change: transform, opacity, filter;
-  background-image: url('/assets/images/backgrounds/valley-distance.jpg');
+  will-change: opacity;
+  background-image: url('/assets/videos/background_video_frames/background_video_000048.webp');
   background-size: cover;
   background-position: center;
-  transform: scale(1.02);
-  filter: saturate(1.02) contrast(1.02);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
 
-.veil {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at 55% 18%, rgba(255, 255, 255, 0.02), rgba(0, 0, 0, 0));
-  opacity: 0.7;
-}
+/* Removed .veil to match canvas frames perfectly */
 
 
 

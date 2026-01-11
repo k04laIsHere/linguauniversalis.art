@@ -48,7 +48,7 @@ export const en: I18nDict = {
   },
   natureUrban: {
     title: 'Nature → Urban',
-    lede: 'A short transition video will live here later. For now we use a pinned visual beat.',
+    lede: 'A journey from primal origins to the architecture of the future.',
   },
   contact: {
     title: 'Signal',
