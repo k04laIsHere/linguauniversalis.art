@@ -39,6 +39,7 @@
   background-repeat: no-repeat; /* Prevent tiling artifacts */
   z-index: 0; /* Behind the walls container */
   filter: brightness(1.1);
+  will-change: transform, opacity;
 }
 
 .edgesContainer {

@@ -16,7 +16,7 @@ export function Cave() {
       ScrollTrigger.create({
         trigger: root,
         start: 'top 80%',
-        end: 'bottom 100%', // Deactivate as soon as we reach the end of the section
+        end: 'bottom top', // Keep active until the section is fully scrolled out
         onToggle: (self) => {
           if (self.isActive) {
             root.dataset.caveActive = '1';
@@ -32,9 +32,9 @@ export function Cave() {
       // Ultra Slow Background Parallax - Move it slower than the content
       gsap.fromTo(
         `.${styles.bg}`,
-        { yPercent: -10 },
+        { y: 0 }, // Changed from yPercent to y for better performance
         {
-          yPercent: 10,
+          y: window.innerHeight * 0.2, // Move in pixels
           ease: 'none',
           scrollTrigger: {
             trigger: root,
@@ -100,8 +100,7 @@ export function Cave() {
         const num = item.querySelector(`.${styles.manifestoNumber}`);
         if (num) {
           gsap.to(num, {
-            y: -150,
-            opacity: 0.3, // Increased visibility
+            y: -80, // Reduced distance for smoother mobile performance
             ease: 'none',
             scrollTrigger: {
               trigger: item,
@@ -143,8 +142,8 @@ export function Cave() {
           ease: 'power1.inOut',
           scrollTrigger: {
             trigger: lastArtifact,
-            start: 'top bottom', // Start fading when the last artifact enters
-            end: 'top 30%',      // Completely gone when it reaches upper part of screen
+            start: 'top 80%', // Start fading earlier
+            end: 'bottom 50%', // Finish when artifact is in view
             scrub: true,
           },
         });

@@ -46,7 +46,7 @@ export function ExitFlight() {
         filter: 'brightness(1.2) contrast(1.1) saturate(1)' // Start bright
       });
       
-      // Landscape starts HIGHER as requested
+      // Ensure exit fill is visible from start
       gsap.set(exitFill, { 
         opacity: 1, 
         y: -400, // Even higher initial position
@@ -104,7 +104,13 @@ export function ExitFlight() {
       }
 
       // 3. Zoom in the wall and arch with parallax
-      tl.to(baseDark, { 
+      tl.fromTo([baseDark, caveEdges, edgesContainer], 
+      {
+         scale: 1,
+         opacity: 1,
+         yPercent: 0
+      },
+      { 
         scale: 12, 
         opacity: 0, 
         yPercent: 15,
@@ -112,15 +118,10 @@ export function ExitFlight() {
         ease: 'power2.in'
       }, 0.2);
 
-      tl.to(edgesContainer, {
-        scale: 20, 
-        opacity: 0,
-        duration: 2.5,
-        ease: 'power2.in'
-      }, 0.2);
-
       // 4. The landscape (vegetation mask) zooms in and moves DOWN
-      tl.to(exitFill, { 
+      // Make sure it stays visible longer before fading
+      tl.to(exitFill,
+      { 
         scale: 6, 
         y: 800, 
         opacity: 0,
