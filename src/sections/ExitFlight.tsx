@@ -115,7 +115,8 @@ export function ExitFlight() {
         opacity: 0, 
         yPercent: 15,
         duration: 3,
-        ease: 'power2.in'
+        ease: 'power2.in',
+        immediateRender: false // Prevent conflict with initial set
       }, 0.2);
 
       // 4. The landscape (vegetation mask) zooms in and moves DOWN
@@ -126,7 +127,8 @@ export function ExitFlight() {
         y: 800, 
         opacity: 0,
         duration: 3.5,
-        ease: 'power1.inOut'
+        ease: 'power1.inOut',
+        immediateRender: false // Prevent conflict with initial set
       }, 0.3);
 
     }, root);

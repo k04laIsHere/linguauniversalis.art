@@ -16,7 +16,7 @@ export function Cave() {
       ScrollTrigger.create({
         trigger: root,
         start: 'top 80%',
-        end: 'bottom top', // Keep active until the section is fully scrolled out
+        end: 'bottom+=50% top', // Keep active WELL past the section end to handle fast scrolls
         onToggle: (self) => {
           if (self.isActive) {
             root.dataset.caveActive = '1';
