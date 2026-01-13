@@ -250,7 +250,7 @@
 .artifactField {
   position: relative;
   margin-top: 15vh; /* Tighter transition */
-  min-height: 80vh; /* Further reduced to minimize space after last artifact */
+  min-height: 300vh; /* Increased to accommodate artifacts without overlap */
   padding: 0 5vw;
 }
 
