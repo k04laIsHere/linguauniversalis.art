@@ -156,9 +156,9 @@ export function Cave() {
 
   const artifactsData = [
     { top: 5, left: 10, id: 1, title: 'PALEOLITHIC ECHO', sub: 'ALTAMIRA SERIES • 2024' },
-    { top: 18, left: 55, id: 2, title: 'THE FIRST SYMBOL', sub: 'VOID FRAGMENT • 2024' },
-    { top: 32, left: 15, id: 3, title: 'ANCIENT FREQUENCY', sub: 'RESONANCE • 2024' },
-    { top: 48, left: 60, id: 4, title: 'ETERNAL HANDPRINT', sub: 'ORIGIN • 2024' },
+    { top: 30, left: 55, id: 2, title: 'THE FIRST SYMBOL', sub: 'VOID FRAGMENT • 2024' },
+    { top: 55, left: 15, id: 3, title: 'ANCIENT FREQUENCY', sub: 'RESONANCE • 2024' },
+    { top: 80, left: 60, id: 4, title: 'ETERNAL HANDPRINT', sub: 'ORIGIN • 2024' },
   ];
 
   return (
