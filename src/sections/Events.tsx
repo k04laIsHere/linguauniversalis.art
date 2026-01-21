@@ -10,38 +10,13 @@ export function Events() {
   const pinRef = useRef<HTMLDivElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [selectedEvent, setSelectedEvent] = useState<EventItem | null>(null);
-  const [showScrollHint, setShowScrollHint] = useState(false);
-  const scrollTimeoutRef = useRef<number | null>(null);
 
   const reduced = useMemo(
     () => window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false,
     [],
   );
 
-  // Scroll hint logic
-  useEffect(() => {
-    const resetTimeout = () => {
-      setShowScrollHint(false);
-      if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
-      scrollTimeoutRef.current = window.setTimeout(() => {
-        setShowScrollHint(true);
-      }, 5000);
-    };
-
-    window.addEventListener('scroll', resetTimeout, { passive: true });
-    window.addEventListener('wheel', resetTimeout, { passive: true });
-    window.addEventListener('touchstart', resetTimeout, { passive: true });
-    
-    resetTimeout();
-
-    return () => {
-      window.removeEventListener('scroll', resetTimeout);
-      window.removeEventListener('wheel', resetTimeout);
-      window.removeEventListener('touchstart', resetTimeout);
-      if (scrollTimeoutRef.current) window.clearTimeout(scrollTimeoutRef.current);
-    };
-  }, []);
-
+  // Scroll Trigger setup
   useEffect(() => {
     if (reduced) return;
     const root = rootRef.current;
@@ -72,15 +47,15 @@ export function Events() {
 
       sections.forEach((section, i) => {
         const infoBox = section.querySelector(`.${styles.infoBox}`);
-        const mediaContainer = section.querySelector(`.${styles.mediaContainer}`);
+        const hoverTarget = section.querySelector(`.${styles.hoverTarget}`);
         const images = Array.from(section.querySelectorAll<HTMLElement>(`.${styles.imageWrapper}`));
         
         const sectionStartTime = i * 2;
         
         // Mouse tilt effect
-        if (mediaContainer) {
-          mediaContainer.addEventListener('mousemove', (e: any) => {
-            const rect = mediaContainer.getBoundingClientRect();
+        if (hoverTarget) {
+          hoverTarget.addEventListener('mousemove', (e: any) => {
+            const rect = hoverTarget.getBoundingClientRect();
             const x = e.clientX - rect.left;
             const y = e.clientY - rect.top;
             const xc = rect.width / 2;
@@ -89,19 +64,22 @@ export function Events() {
             const dy = y - yc;
 
             images.forEach((img, idx) => {
-              const factor = (idx + 1) * 0.05;
+              // Extremely subtle factors for very low sensitivity
+              const rotateFactor = (idx + 1) * 0.005;
+              const moveFactor = 2; // Low multiplier for movement
+
               gsap.to(img, {
-                rotateY: dx * factor,
-                rotateX: -dy * factor,
-                x: dx * factor * 10,
-                y: dy * factor * 10,
+                rotateY: dx * rotateFactor,
+                rotateX: -dy * rotateFactor,
+                x: dx * rotateFactor * moveFactor,
+                y: dy * rotateFactor * moveFactor,
                 duration: 0.8,
                 ease: 'power2.out'
               });
             });
           });
 
-          mediaContainer.addEventListener('mouseleave', () => {
+          hoverTarget.addEventListener('mouseleave', () => {
             images.forEach((img) => {
               gsap.to(img, {
                 rotateY: 0,
@@ -117,14 +95,13 @@ export function Events() {
 
         // Initial hidden state
         gsap.set(section, { opacity: 0, pointerEvents: 'none' });
-        // Images reveal from slightly "in front" (positive Z) to their base position
-        gsap.set(images, { opacity: 0, scale: 1.1, z: 100 });
+        // Images reveal from further "in front" (positive Z) to their base position
+        gsap.set(images, { opacity: 0, scale: 1.1, z: 200 });
         gsap.set(infoBox, { opacity: 0, y: 50 });
 
         // Section Fade In
         tl.to(section, { 
           opacity: 1, 
-          pointerEvents: 'auto',
           duration: 0.2
         }, sectionStartTime);
 
@@ -134,7 +111,8 @@ export function Events() {
           tl.to(img, {
             opacity: 1,
             scale: 1,
-            z: 0,
+            // Increased Z separation to prevent intersection on rotation
+            z: (imgIdx - 1) * 80,
             duration: 0.8,
             ease: 'expo.out'
           }, imgRevealStart);
@@ -152,7 +130,6 @@ export function Events() {
         if (i < sections.length - 1) {
           tl.to(section, {
             opacity: 0,
-            pointerEvents: 'none',
             y: -80, // Increased for clearer movement
             scale: 0.9,
             duration: 0.8, // Increased duration for smoother exit
@@ -189,15 +166,17 @@ export function Events() {
               data-event-section
             >
               <div className={styles.mediaContainer}>
-                {event.images.map((img, imgIdx) => (
-                  <div 
-                    key={`${event.id}-img-${imgIdx}`} 
-                    className={styles.imageWrapper}
-                    data-image-index={imgIdx}
-                  >
-                    <img src={img} alt="" className={styles.eventImage} loading="lazy" />
-                  </div>
-                ))}
+                <div className={styles.hoverTarget}>
+                  {event.images.map((img, imgIdx) => (
+                    <div 
+                      key={`${event.id}-img-${imgIdx}`} 
+                      className={styles.imageWrapper}
+                      data-image-index={imgIdx}
+                    >
+                      <img src={img} alt="" className={styles.eventImage} loading="lazy" />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className={styles.infoBox}>
@@ -228,13 +207,6 @@ export function Events() {
               </div>
             </div>
           ))}
-        </div>
-
-        <div className={`${styles.scrollHint} ${showScrollHint ? styles.visible : ''}`}>
-          <div className={styles.mouse}>
-            <div className={styles.wheel} />
-          </div>
-          <span className={styles.scrollText}>{t.events.scrollDiscover}</span>
         </div>
       </div>
 

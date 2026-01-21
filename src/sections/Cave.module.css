@@ -1,6 +1,6 @@
 .root {
   position: relative;
-  min-height: 400vh; /* Reduced from 500vh to tighten space */
+  min-height: 500vh; /* Increased from 400vh to accommodate scattered artifacts */
   padding: 120px 0 100px;
   overflow: hidden;
   background: #020305;
@@ -50,7 +50,7 @@
 .shadowMask {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.95);
+  background: rgba(0, 0, 0, 0.65); /* Reduced from 0.75 to make artifacts more visible */
   pointer-events: none;
   z-index: 3;
   opacity: 1; /* Start visible */
@@ -250,13 +250,13 @@
 .artifactField {
   position: relative;
   margin-top: 15vh; /* Tighter transition */
-  min-height: 80vh; /* Further reduced to minimize space after last artifact */
+  min-height: 200vh; /* Increased to allow for scattered layout without overlap */
   padding: 0 5vw;
 }
 
 .artifact {
   position: absolute;
-  width: min(850px, 90vw);
+  width: min(700px, 80vw); /* Slightly reduced to prevent tight overlaps */
   z-index: 2;
   cursor: pointer;
 }
@@ -277,7 +277,7 @@
   height: auto;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  filter: brightness(0.7) contrast(1.1) grayscale(0.2);
+  filter: brightness(0.85) contrast(1.1) grayscale(0.2); /* Increased from 0.7 */
   transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s ease, opacity 0.8s ease;
   /* Replaced box-shadow with drop-shadow that respects alpha for feathered edges */
   filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
@@ -303,7 +303,7 @@
 
 .artifactCap {
   padding: 30px 0;
-  text-align: left;
+  text-align: right; /* Changed to match 1st artifact on Right */
   opacity: 0.6;
   transition: opacity 0.8s ease;
 }
@@ -313,7 +313,7 @@
 }
 
 .artifact:nth-child(even) .artifactCap {
-  text-align: right;
+  text-align: left; /* Changed to match 2nd artifact on Left */
 }
 
 .artifactTitle {
@@ -399,6 +399,10 @@
     left: auto !important;
     width: 100% !important;
     margin: 0 auto;
+  }
+
+  .artifactCap {
+    text-align: center !important;
   }
   
   .artifact:hover .artifactImgWrapper {

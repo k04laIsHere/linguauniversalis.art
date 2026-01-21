@@ -58,14 +58,16 @@ export type I18nDict = {
   };
   contact: {
     title: string;
-    hint: string;
-    revealedHint: string;
-    emailLabel: string;
-    telegramLabel: string;
-    open: string;
-    mail: string;
-    copy: string;
-    copied: string;
+    subtitle: string;
+    coreHint: string;
+    formName: string;
+    formEmail: string;
+    formMessage: string;
+    formSubmit: string;
+    sending: string;
+    success: string;
+    error: string;
+    back: string;
   };
 };
 

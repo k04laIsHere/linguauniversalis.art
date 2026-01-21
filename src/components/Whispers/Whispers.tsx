@@ -89,3 +89,7 @@ export function Whispers({ lang }: { lang: 'ru' | 'en' }) {
 
 
 
+
+
+
+

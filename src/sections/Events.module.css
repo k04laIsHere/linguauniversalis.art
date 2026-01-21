@@ -3,7 +3,8 @@
   width: 100%;
   background: transparent !important;
   color: #fff;
-  overflow: hidden;
+  /* overflow: hidden removed to prevent shadow clipping */
+  z-index: 10;
 }
 
 .pin {
@@ -66,6 +67,27 @@
   perspective: 2000px;
 }
 
+.hoverTarget {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  /* Stable trigger area slightly larger than the image cluster footprint */
+  width: min(1000px, 92vw);
+  height: 90%;
+  /* High enough to be above images but below infoBox if they overlap */
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-style: preserve-3d;
+  pointer-events: none; /* Disabled by default to prevent blocking other sections */
+}
+
+.eventSection.active .hoverTarget {
+  pointer-events: auto; /* Enabled only for the active section */
+}
+
 .imageWrapper {
   position: absolute;
   /* 2x larger on desktop */
@@ -78,7 +100,12 @@
   transform-style: preserve-3d;
   transition: filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), transform 0.1s linear;
   filter: brightness(0.8) contrast(1.05) saturate(0.9);
-  cursor: pointer;
+  pointer-events: none; /* Let events pass to hoverTarget */
+}
+
+/* Hover effect for the whole cluster when target is hovered */
+.hoverTarget:hover .imageWrapper {
+  filter: brightness(1.0) contrast(1.05) saturate(1.1);
 }
 
 .imageWrapper:hover {
@@ -122,17 +149,16 @@
 
 .infoBox {
   position: relative;
-  z-index: 10;
+  z-index: 100; /* Ensure infoBox is above hoverTarget and images */
   margin-top: 2rem;
   max-width: 600px;
   text-align: center;
   padding: 2.5rem;
-  /* Persistent glass background */
-  background: rgba(10, 12, 15, 0.65);
-  backdrop-filter: blur(25px) saturate(150%);
+  /* Persistent semi-transparent darker background without blur */
+  background: rgba(5, 7, 9, 0.85);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8);
   /* Smooth transitions for opacity/transform reveals */
   transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1),
               transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
@@ -182,7 +208,6 @@
   letter-spacing: 0.2em;
   cursor: pointer;
   transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-  backdrop-filter: blur(5px);
 }
 
 .exploreBtn:hover {
@@ -193,60 +218,7 @@
   box-shadow: 0 10px 20px rgba(0,0,0,0.3);
 }
 
-/* Scroll Hint */
-.scrollHint {
-  position: absolute;
-  bottom: 1.5rem; /* Moved further down */
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.5rem; /* Reduced gap */
-  opacity: 0;
-  visibility: hidden;
-  transition: opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1), visibility 1.5s;
-  z-index: 5; /* Lowered z-index to stay below infoBox if they overlap */
-  pointer-events: none;
-}
-
-.scrollHint.visible {
-  opacity: 0.4;
-  visibility: visible;
-}
-
-.scrollText {
-  font-size: 9px;
-  text-transform: uppercase;
-  letter-spacing: 0.5em;
-  color: #d9c08d;
-  font-weight: 300;
-}
-
-.mouse {
-  width: 1px;
-  height: 60px;
-  background: linear-gradient(to bottom, transparent, #d9c08d, transparent);
-  position: relative;
-  overflow: hidden;
-}
-
-.wheel {
-  width: 100%;
-  height: 20px;
-  background: #fff;
-  position: absolute;
-  top: -20px;
-  left: 0;
-  animation: scrollAnim 2.5s infinite;
-}
-
-@keyframes scrollAnim {
-  0% { transform: translateY(0); opacity: 0; }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
-  100% { transform: translateY(80px); opacity: 0; }
-}
+/* Scroll Hint removed as requested */
 
 /* Overlay / Modal */
 .overlay {

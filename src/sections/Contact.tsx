@@ -1,152 +1,147 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { contactData } from '../content/contactData';
+import { useRef, useState, useEffect } from 'react';
 import { useI18n } from '../i18n/useI18n';
 import styles from './Contact.module.css';
+import { gsap } from '../animation/gsap';
+import emailjs from '@emailjs/browser';
+
+type SectionState = 'idle' | 'active' | 'sending' | 'success' | 'error';
 
 export function Contact() {
   const { t } = useI18n();
+  const [state, setState] = useState<SectionState>('idle');
   const stageRef = useRef<HTMLDivElement | null>(null);
-  const rafRef = useRef<number | null>(null);
-  const startRef = useRef<number | null>(null);
+  const coreRef = useRef<HTMLButtonElement | null>(null);
+  const formRef = useRef<HTMLFormElement | null>(null);
 
-  const [progress, setProgress] = useState(0);
-  const [revealed, setRevealed] = useState(false);
-  const [copied, setCopied] = useState<string | null>(null);
-
-  const reduced = useMemo(
-    () => window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false,
-    [],
-  );
-
-  const HOLD_MS = reduced ? 200 : 650;
-
-  useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    stage.style.setProperty('--p', String(progress));
-  }, [progress]);
-
-  useEffect(() => {
-    if (!copied) return;
-    const to = window.setTimeout(() => setCopied(null), 1200);
-    return () => window.clearTimeout(to);
-  }, [copied]);
-
-  const stop = (snapBackIfNotRevealed = false) => {
-    if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
-    rafRef.current = null;
-    startRef.current = null;
-    if (snapBackIfNotRevealed && !revealed) setProgress((p) => Math.min(p, 0.12));
-  };
-
-  const tick = (now: number) => {
-    const start = startRef.current ?? now;
-    startRef.current = start;
-    const p = Math.min(1, (now - start) / HOLD_MS);
-    setProgress(p);
-    if (p >= 1) {
-      setRevealed(true);
-      stop(false);
-      return;
+  const handleCoreClick = () => {
+    if (state !== 'idle') return;
+    
+    setState('active');
+    
+    // GSAP Expansion Animation
+    if (coreRef.current && stageRef.current) {
+      const tl = gsap.timeline();
+      tl.to(coreRef.current, {
+        scale: 15,
+        opacity: 0.1,
+        duration: 0.8,
+        ease: 'power2.inOut',
+      });
     }
-    rafRef.current = requestAnimationFrame(tick);
   };
 
-  const begin = () => {
-    if (revealed) return;
-    if (rafRef.current != null) return;
-    startRef.current = null;
-    rafRef.current = requestAnimationFrame(tick);
-  };
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (state === 'sending') return;
 
-  const copy = async (key: 'email' | 'telegram', value: string) => {
+    setState('sending');
+
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      from_name: formData.get('user_name'),
+      user_email: formData.get('user_email'),
+      message: formData.get('message'),
+    };
+
     try {
-      await navigator.clipboard.writeText(value);
-      setCopied(key);
-    } catch {
-      // Fallback: try selection
-      try {
-        window.prompt(t.contact.copy, value);
-      } catch {
-        // ignore
-      }
+      // NOTE: Go to https://www.emailjs.com/ to get these IDs
+      // Target email (linguauniversalis@gmail.com) is configured in your EmailJS Template.
+      // await emailjs.send('YOUR_SERVICE_ID', 'YOUR_TEMPLATE_ID', data, 'YOUR_PUBLIC_KEY');
+      
+      await new Promise(resolve => setTimeout(resolve, 2000)); // Simulate delay
+      setState('success');
+      
+      // Beam animation would trigger here
+    } catch (err) {
+      console.error('Signal transmission failed:', err);
+      setState('error');
     }
   };
 
-  const email = contactData.email;
-  const telegram = `@${contactData.telegramHandle}`;
-  const telegramUrl = `https://t.me/${encodeURIComponent(contactData.telegramHandle)}`;
+  const handleBack = () => {
+    setState('idle');
+    if (coreRef.current) {
+      gsap.to(coreRef.current, {
+        scale: 1,
+        opacity: 1,
+        duration: 0.5,
+        ease: 'power2.out',
+      });
+    }
+  };
 
   return (
     <section id="contact" className={styles.root} aria-label="Contact">
       <div className={styles.inner}>
-        <h2 className={styles.title}>{t.contact.title}</h2>
-        <p className={styles.lede}>{t.contact.hint}</p>
-
-        <div ref={stageRef} className={styles.stage}>
-          <button
-            type="button"
-            className={styles.signalBtn}
-            onPointerDown={begin}
-            onPointerUp={() => stop(true)}
-            onPointerCancel={() => stop(true)}
-            onPointerLeave={() => stop(true)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' || e.key === ' ') {
-                e.preventDefault();
-                setRevealed((v) => {
-                  const next = !v;
-                  setProgress(next ? 1 : 0);
-                  return next;
-                });
-              }
-            }}
-            aria-label={t.contact.hint}
-          >
-            <div className={styles.spark} aria-hidden="true" />
-            <p className={styles.signalTitle}>{t.contact.title}</p>
-            <p className={styles.signalHint}>{revealed ? t.contact.revealedHint : t.contact.hint}</p>
-          </button>
-
-          <div className={`${styles.channels} ${revealed ? styles.channelsVisible : ''}`}>
-            <div className={styles.card} aria-label={t.contact.emailLabel}>
-              <div className={styles.cardTop}>
-                <div className={styles.label}>{t.contact.emailLabel}</div>
-                <div className={styles.value} title={email}>
-                  {email}
-                </div>
+        <div ref={stageRef} className={`${styles.stage} ${styles[state]}`}>
+          {state === 'idle' && (
+            <>
+              <div className={styles.idleHeader}>
+                <h2 className={styles.title}>{t.contact.title}</h2>
+                <p className={styles.lede}>{t.contact.subtitle}</p>
               </div>
-              <div className={styles.actions}>
-                <a className={`${styles.btn} ${styles.btnPrimary}`} href={`mailto:${email}`}>
-                  {t.contact.mail}
-                </a>
-                <button className={styles.btn} type="button" onClick={() => copy('email', email)}>
-                  {copied === 'email' ? t.contact.copied : t.contact.copy}
+              <button
+                ref={coreRef}
+                type="button"
+                className={styles.core}
+                onClick={handleCoreClick}
+                aria-label={t.contact.coreHint}
+              >
+                <div className={styles.coreInner} />
+                <div className={styles.corePulse} />
+                <span className={styles.coreText}>{t.contact.title}</span>
+              </button>
+            </>
+          )}
+
+          {(state === 'active' || state === 'sending' || state === 'error') && (
+            <form 
+              ref={formRef}
+              className={styles.form} 
+              onSubmit={handleSubmit}
+            >
+              <div className={styles.formHeader}>
+                <h2 className={styles.title}>{t.contact.title}</h2>
+                <p className={styles.lede}>{t.contact.subtitle}</p>
+              </div>
+              
+              <div className={styles.inputGroup}>
+                <label htmlFor="user_name">{t.contact.formName}</label>
+                <input type="text" id="user_name" name="user_name" required placeholder="..." />
+              </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="user_email">{t.contact.formEmail}</label>
+                <input type="email" id="user_email" name="user_email" required placeholder="..." />
+              </div>
+              <div className={styles.inputGroup}>
+                <label htmlFor="message">{t.contact.formMessage}</label>
+                <textarea id="message" name="message" required rows={4} placeholder="..." />
+              </div>
+              
+              <div className={styles.formActions}>
+                <button type="submit" className={styles.submitBtn} disabled={state === 'sending'}>
+                  {state === 'sending' ? t.contact.sending : t.contact.formSubmit}
+                </button>
+                <button type="button" className={styles.backBtn} onClick={handleBack}>
+                  {t.contact.back}
                 </button>
               </div>
-            </div>
+              
+              {state === 'error' && <p className={styles.errorMessage}>{t.contact.error}</p>}
+            </form>
+          )}
 
-            <div className={styles.card} aria-label={t.contact.telegramLabel}>
-              <div className={styles.cardTop}>
-                <div className={styles.label}>{t.contact.telegramLabel}</div>
-                <div className={styles.value} title={telegram}>
-                  {telegram}
-                </div>
-              </div>
-              <div className={styles.actions}>
-                <a className={`${styles.btn} ${styles.btnPrimary}`} href={telegramUrl} target="_blank" rel="noreferrer">
-                  {t.contact.open}
-                </a>
-                <button className={styles.btn} type="button" onClick={() => copy('telegram', telegram)}>
-                  {copied === 'telegram' ? t.contact.copied : t.contact.copy}
-                </button>
-              </div>
+          {state === 'success' && (
+            <div className={styles.successMessage}>
+              <div className={styles.beam} />
+              <p>{t.contact.success}</p>
+              <button type="button" className={styles.backBtn} onClick={handleBack}>
+                {t.contact.back}
+              </button>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </section>
   );
 }
-
-
