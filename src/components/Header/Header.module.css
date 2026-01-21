@@ -205,7 +205,7 @@
 
 @media (max-width: 820px) {
   .header {
-    padding: env(safe-area-inset-top, 0) 0 0; /* Respect safe area on mobile */
+    padding: 0; /* Respect safe area on mobile - user asked to remove padding */
     height: auto;
     min-height: 80px;
     top: 0; /* Align to top on mobile for full-width look */

@@ -59,7 +59,7 @@ export function Team() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: card,
-            start: 'top 85%',
+            start: index < 2 ? 'top bottom' : 'top 90%', // First row reveals immediately, others slightly later
             toggleActions: 'play reverse play reverse' // Plays backwards when scrolling up
           }
         });

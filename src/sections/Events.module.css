@@ -336,46 +336,41 @@
 }
 
 @media (max-width: 768px) {
-  .infoBox {
-    padding: 2rem 1.5rem;
-    width: 92vw;
-    margin-top: 0;
+  .backgroundText {
+    font-size: 20vw;
+    opacity: 0.02;
   }
-  
+
   .mediaContainer {
-    height: 45vh;
+    height: 50vh;
+    perspective: 1000px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
-  
+
   .imageWrapper {
-    width: 75vw;
+    width: min(320px, 80vw);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Re-introducing slight offsets for mobile reveal depth */
+  .imageWrapper[data-image-index="0"] { transform: translate(-55%, -55%) rotate(-3deg); }
+  .imageWrapper[data-image-index="1"] { transform: translate(-45%, -45%) rotate(2deg); }
+  .imageWrapper[data-image-index="2"] { transform: translate(-50%, -50%) rotate(-1deg); }
+
+  .infoBox {
+    padding: 24px 20px;
+    width: 94vw;
+    margin-top: 10px;
+    background: rgba(10, 12, 14, 0.9);
   }
 
   .modalContent {
     padding: 3rem 1.5rem;
-  }
-  
-  .backgroundText {
-    font-size: 20vw; /* Reduced from 25vw to avoid extreme overflow */
-    opacity: 0.02; /* Even fainter on mobile */
-  }
-
-  .imageWrapper[data-image-index="0"],
-  .imageWrapper[data-image-index="1"],
-  .imageWrapper[data-image-index="2"] {
-    transform: translate(0, 0) rotate(0); /* Reset transforms on mobile to prevent overflow */
-    width: 85vw;
-    position: relative;
-    margin-bottom: -20vh; /* Stack them vertically with overlap */
-  }
-
-  .imageWrapper[data-image-index="0"] { z-index: 3; }
-  .imageWrapper[data-image-index="1"] { z-index: 2; }
-  .imageWrapper[data-image-index="2"] { z-index: 1; }
-
-  .mediaContainer {
-    height: auto;
-    flex-direction: column;
-    padding-top: 5vh;
   }
 }
 
