@@ -47,7 +47,7 @@ export function Team() {
         gsap.set(card, { zIndex: index + 1 });
 
         // Initial state for the fly-in
-        gsap.set(card, { opacity: 0, scale: 0.1, z: -1000, y: 150 });
+        gsap.set(card, { opacity: 0, scale: 0.1, z: -1000, y: 0 }); // Removed y: 150 to keep it centered
         gsap.set(textBack, { opacity: 0, z: -150 });
         gsap.set(textFront, { opacity: 0, z: 150, y: 0 }); 
         
