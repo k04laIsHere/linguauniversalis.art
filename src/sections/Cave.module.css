@@ -335,7 +335,8 @@
 /* Mobile Optimizations */
 @media (max-width: 960px) {
   .root {
-    min-height: 300vh;
+    min-height: 350vh; /* Slightly more to accommodate items */
+    padding-top: 80px;
   }
 
   .hero {

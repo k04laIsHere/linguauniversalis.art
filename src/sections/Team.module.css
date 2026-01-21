@@ -208,7 +208,10 @@
   }
 
   .textBack {
-    font-size: clamp(60px, 25vw, 100px);
+    font-size: clamp(60px, 20vw, 90px);
+    white-space: normal;
+    width: 90%;
+    line-height: 0.8;
   }
 
   .photoWrapper {
