@@ -5,6 +5,9 @@ export type GalleryWork = {
   titleRu: string;
   src: string;
   tags: string[];
+  dimensions?: string; // e.g. "60x70"
+  material?: string; // e.g. "холст" (canvas)
+  medium?: string; // e.g. "масло" (oil)
 };
 
 const enc = (path: string) => encodeURI(path);

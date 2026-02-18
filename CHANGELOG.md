@@ -48,10 +48,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile scroll - separate sticky header instead of column pinning
 - Scroll distance - now adaptive based on actual number of works
 - Mobile artist info - now visible on mobile (photo, name, bio)
-- Mobile sticky name - properly pinned using single fixed header + GSAP updates
+- Mobile sticky name - removed entirely (name now in image caption)
 - Image fade issues - removed all fade animations, works now always visible
 - Manifesto fade animations - removed all fade animations from manifesto too
 - Images not appearing - fixed by removing all scroll animations from works
+- **Too much empty space** - reduced gaps between works (4rem → 2rem) and artist blocks (4rem → 1rem)
+- **Image names bad on desktop** - added gallery-like metadata display (dimensions, material, medium)
+- **Image names on mobile** - added metadata in caption (dimensions, material, medium)
 
 ---
 

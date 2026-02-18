@@ -130,9 +130,9 @@ export function GalleryMode() {
         }
       }
 
-      // Mobile: No GSAP needed - CSS sticky handles everything
+      // Mobile: No GSAP needed - everything displays naturally
       if (isMobile) {
-        // Mobile sticky header is pure CSS, no JavaScript needed
+        // No pinning needed
       }
 
     }, collectionSection);
@@ -208,7 +208,16 @@ export function GalleryMode() {
                         decoding="async"
                       />
                       <figcaption className={styles.workCaption}>
-                        <h3 className={styles.workTitle}>{lang === 'ru' ? work.titleRu : work.titleEn}</h3>
+                        <h3 className={styles.workTitle}>
+                          {lang === 'ru' ? work.titleRu : work.titleEn}
+                        </h3>
+                        {(work.dimensions || work.material || work.medium) && (
+                          <div className={styles.workMeta}>
+                            {work.dimensions && <span className={styles.workMetaItem}>{work.dimensions}</span>}
+                            {work.material && <span className={styles.workMetaItem}>{work.material}</span>}
+                            {work.medium && <span className={styles.workMetaItem}>{work.medium}</span>}
+                          </div>
+                        )}
                       </figcaption>
                     </figure>
                   ))}
@@ -218,11 +227,6 @@ export function GalleryMode() {
           })}
         </div>
       </section>
-
-      {/* Mobile: Fixed Artist Name Header - Single global header */}
-      <div className={styles.mobileFixedHeader}>
-        <span className={styles.mobileHeaderName}></span>
-      </div>
 
       {/* Contact - Use existing component */}
       <Contact />
