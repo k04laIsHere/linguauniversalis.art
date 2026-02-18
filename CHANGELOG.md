@@ -52,9 +52,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Image fade issues - removed all fade animations, works now always visible
 - Manifesto fade animations - removed all fade animations from manifesto too
 - Images not appearing - fixed by removing all scroll animations from works
-- **Too much empty space** - reduced gaps between works (4rem → 2rem) and artist blocks (4rem → 1rem)
-- **Image names bad on desktop** - added gallery-like metadata display (dimensions, material, medium)
-- **Image names on mobile** - added metadata in caption (dimensions, material, medium)
+- **Too much empty space** - drastically reduced gaps (artist blocks: 1rem, works: 3rem)
+- **No metadata** - populated all works with year, medium, size
+- **Bad typography** - redesigned with elegant hierarchy and proper spacing
+
+Design improvements:
+- Work title: 1.5rem, font-weight 600, prominent display
+- Metadata: Stacked vertically with border separator, smaller readable font
+- Font hierarchy: Title → Metadata (year, medium, size)
+- Clean spacing: Reduced all gaps for tighter, more professional look
 
 ---
 

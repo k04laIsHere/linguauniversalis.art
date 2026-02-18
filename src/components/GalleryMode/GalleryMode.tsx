@@ -211,13 +211,11 @@ export function GalleryMode() {
                         <h3 className={styles.workTitle}>
                           {lang === 'ru' ? work.titleRu : work.titleEn}
                         </h3>
-                        {(work.dimensions || work.material || work.medium) && (
-                          <div className={styles.workMeta}>
-                            {work.dimensions && <span className={styles.workMetaItem}>{work.dimensions}</span>}
-                            {work.material && <span className={styles.workMetaItem}>{work.material}</span>}
-                            {work.medium && <span className={styles.workMetaItem}>{work.medium}</span>}
-                          </div>
-                        )}
+                        <div className={styles.workMeta}>
+                          {work.year && <span className={styles.workMetaItem}>{work.year}</span>}
+                          {work.medium && <span className={styles.workMetaItem}>{work.medium}</span>}
+                          {work.size && <span className={styles.workMetaItem}>{work.size}</span>}
+                        </div>
                       </figcaption>
                     </figure>
                   ))}
