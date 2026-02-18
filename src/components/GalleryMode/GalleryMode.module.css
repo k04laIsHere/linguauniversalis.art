@@ -188,8 +188,6 @@
   margin: 0;
   position: relative;
   display: block;
-  /* Initial state for animation */
-  opacity: 0;
 }
 
 .workImage {
@@ -276,14 +274,20 @@
 
   .mobileArtistHeader {
     display: block;
-    position: sticky;
+    position: fixed;
     top: 0;
+    left: 0;
+    right: 0;
     z-index: 100;
     background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
     padding: 0.75rem 1rem;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    pointer-events: none;
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
   }
 
   .mobileArtistName {
@@ -299,10 +303,6 @@
   .worksCol {
     gap: 2rem;
     padding: 0 1rem 2rem;
-  }
-
-  .workItem {
-    opacity: 0;
   }
 
   .workImage {

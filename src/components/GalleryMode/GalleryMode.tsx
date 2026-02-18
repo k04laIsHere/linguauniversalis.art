@@ -131,33 +131,7 @@ export function GalleryMode() {
             invalidateOnRefresh: true,
           });
 
-          // Animate works appearing as we scroll through
-          works.forEach((work, i) => {
-            const progressStart = i / works.length;
-            const progressEnd = (i + 1) / works.length;
-
-            // Fade in work as it comes into view
-            gsap.fromTo(work,
-              {
-                opacity: 0,
-                y: 80,
-                scale: 0.95
-              },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 1,
-                ease: 'power3.out',
-                scrollTrigger: {
-                  trigger: work,
-                  start: 'top bottom-=100',
-                  end: 'top center',
-                  scrub: 0.5,
-                }
-              }
-
-          });
+          // No animations on works - they appear naturally
         });
 
         // Scroll up from first artist returns to manifesto
@@ -173,7 +147,7 @@ export function GalleryMode() {
         }
       }
 
-      // Mobile: Animate works as they enter viewport and pin artist name
+      // Mobile: Pin artist name header while scrolling through works
       if (isMobile) {
         const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
 
@@ -187,37 +161,44 @@ export function GalleryMode() {
           // Calculate scroll distance for mobile
           const scrollDistance = works.length * (window.innerHeight * 0.6);
 
-          // Pin mobile artist header while scrolling through works
+          // Hide header initially
+          gsap.set(mobileHeader, { opacity: 0, visibility: 'hidden' });
+
+          // Show header when artist block enters view
           ScrollTrigger.create({
             trigger: block,
-            start: 'top 0',
-            end: `+=${scrollDistance}`,
-            pin: mobileHeader,
-            pinSpacing: true,
-            scrub: 0.5,
+            start: 'top center',
+            onEnter: () => {
+              gsap.to(mobileHeader, {
+                opacity: 1,
+                visibility: 'visible',
+                duration: 0.3,
+              });
+            },
+            onLeave: () => {
+              gsap.to(mobileHeader, {
+                opacity: 0,
+                visibility: 'hidden',
+                duration: 0.3,
+              });
+            },
+            onEnterBack: () => {
+              gsap.to(mobileHeader, {
+                opacity: 1,
+                visibility: 'visible',
+                duration: 0.3,
+              });
+            },
+            onLeaveBack: () => {
+              gsap.to(mobileHeader, {
+                opacity: 0,
+                visibility: 'hidden',
+                duration: 0.3,
+              });
+            }
           });
 
-          // Animate works as they enter viewport
-          works.forEach((work) => {
-            gsap.fromTo(work,
-              {
-                opacity: 0,
-                y: 40,
-                scale: 0.95
-              },
-              {
-                opacity: 1,
-                y: 0,
-                scale: 1,
-                duration: 0.8,
-                ease: 'power3.out',
-                scrollTrigger: {
-                  trigger: work,
-                  start: 'top bottom-=50',
-                }
-              }
-            );
-          });
+          // No animations on works - they appear naturally
         });
       }
 
