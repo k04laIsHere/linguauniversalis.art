@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../../i18n/useI18n';
 import { useViewMode } from '../../contexts/ViewModeContext';
 import { teamMembers } from '../../content/teamData';
@@ -13,6 +13,15 @@ export function GalleryMode() {
   const { toggleMode } = useViewMode();
   const collectionSectionRef = useRef<HTMLElement | null>(null);
   const manifestoSectionRef = useRef<HTMLElement | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Detect mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   // Group works by artist
   const worksByArtist = galleryWorks.reduce((acc, work) => {
@@ -34,89 +43,13 @@ export function GalleryMode() {
     };
   };
 
-  // Check if we're on mobile
-  const isMobile = () => window.innerWidth <= 768;
-
-  // Setup scroll animations (desktop only)
+  // Setup scroll orchestration
   useEffect(() => {
     const collectionSection = collectionSectionRef.current;
     const manifestoSection = manifestoSectionRef.current;
     if (!collectionSection || !manifestoSection) return;
 
     const ctx = gsap.context(() => {
-      // Only setup animations on desktop
-      if (isMobile()) return;
-
-      const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
-
-      artistBlocks.forEach((block, index) => {
-        const worksCol = block.querySelector(`.${styles.worksCol}`) as HTMLElement;
-        const works = gsap.utils.toArray<HTMLElement>(worksCol.querySelectorAll(`.${styles.workItem}`));
-        const artistInfo = block.querySelector(`.${styles.artistInfo}`) as HTMLElement;
-
-        if (!works.length) return;
-
-        // Animate artist info on enter/leave
-        ScrollTrigger.create({
-          trigger: block,
-          start: 'top center',
-          end: 'bottom center',
-          onEnter: () => {
-            gsap.to(artistInfo, {
-              opacity: 1,
-              y: 0,
-              duration: 0.8,
-              ease: 'power3.out'
-            });
-          },
-          onLeave: () => {
-            gsap.to(artistInfo, {
-              opacity: 0.5,
-              duration: 0.6,
-              ease: 'power3.in'
-            });
-          },
-          onEnterBack: () => {
-            gsap.to(artistInfo, {
-              opacity: 1,
-              duration: 0.8,
-              ease: 'power3.out'
-            });
-          },
-          onLeaveBack: () => {
-            gsap.to(artistInfo, {
-              opacity: 0.5,
-              duration: 0.6,
-              ease: 'power3.in'
-            });
-          }
-        });
-
-        // Animate works appearing as they scroll into view
-        works.forEach((work) => {
-          gsap.fromTo(work,
-            {
-              opacity: 0,
-              y: 60,
-              scale: 0.95
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 1,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: work,
-                start: 'top bottom-=100',
-                end: 'top center',
-                scrub: 0.5
-              }
-            }
-          );
-        });
-      });
-
       // Manifesto section animations
       const manifestoTitle = manifestoSection.querySelector(`.${styles.manifestoTitle}`);
       const manifestoLines = gsap.utils.toArray<HTMLElement>(
@@ -173,10 +106,116 @@ export function GalleryMode() {
         }
       });
 
+      // Desktop: Pin artist columns while scrolling through works
+      if (!isMobile) {
+        const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
+
+        artistBlocks.forEach((block) => {
+          const worksCol = block.querySelector(`.${styles.worksCol}`) as HTMLElement;
+          const works = gsap.utils.toArray<HTMLElement>(worksCol.querySelectorAll(`.${styles.workItem}`));
+          const artistCol = block.querySelector(`.${styles.artistCol}`) as HTMLElement;
+
+          if (!works.length) return;
+
+          // Calculate scroll distance: each work gets 80vh of scroll space
+          const scrollDistance = works.length * (window.innerHeight * 0.8);
+
+          // Pin the artist column while scrolling through works
+          ScrollTrigger.create({
+            trigger: block,
+            start: 'top 100px', // Start pinning when block reaches 100px from top
+            end: `+=${scrollDistance}`,
+            pin: artistCol, // Pin ONLY the artist column
+            pinSpacing: true,
+            scrub: 1,
+            invalidateOnRefresh: true,
+          });
+
+          // Animate works appearing as we scroll through
+          works.forEach((work, i) => {
+            const progressStart = i / works.length;
+            const progressEnd = (i + 1) / works.length;
+
+            // Fade in work as it comes into view
+            gsap.fromTo(work,
+              {
+                opacity: 0,
+                y: 80,
+                scale: 0.95
+              },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 1,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: block,
+                  start: () => `top+=${progressStart * scrollDistance + 100}px top`,
+                  end: () => `top+=${progressEnd * scrollDistance} top`,
+                  scrub: 0.5,
+                }
+              }
+            );
+
+            // Fade out work as we scroll past it
+            gsap.to(work, {
+              opacity: 0.3,
+              scale: 0.95,
+              duration: 1,
+              ease: 'power3.in',
+              scrollTrigger: {
+                trigger: block,
+                start: () => `top+=${(progressEnd - 0.2) * scrollDistance} top`,
+                end: () => `top+=${progressEnd * scrollDistance} top`,
+                scrub: 0.5,
+              }
+            });
+          });
+        });
+
+        // Scroll up from first artist returns to manifesto
+        const firstBlock = document.querySelector(`.${styles.artistBlock}`) as HTMLElement;
+        if (firstBlock) {
+          ScrollTrigger.create({
+            trigger: firstBlock,
+            start: 'top top',
+            onLeaveBack: () => {
+              setTimeout(() => scrollToId('manifesto'), 100);
+            }
+          });
+        }
+      }
+
+      // Mobile: Animate works as they enter viewport
+      if (isMobile) {
+        const works = gsap.utils.toArray<HTMLElement>(`.${styles.workItem}`);
+        works.forEach((work) => {
+          gsap.fromTo(work,
+            {
+              opacity: 0,
+              y: 40,
+              scale: 0.95
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 0.8,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: work,
+                start: 'top bottom-=50',
+              }
+            }
+          );
+        });
+      }
+
     }, collectionSection);
 
     return () => ctx.revert();
-  }, [artistEntries.length]);
+  }, [isMobile, artistEntries.length]);
 
   return (
     <div className={styles.root}>
@@ -204,22 +243,12 @@ export function GalleryMode() {
             ))}
           </div>
         </div>
-
-        {/* Scroll Hint */}
-        <div className={styles.scrollHint}>
-          <span className={styles.scrollHintText}>Scroll to explore</span>
-          <div className={styles.scrollHintIcon}>
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M12 5v14M5 12l7 7 7-7"/>
-            </svg>
-          </div>
-        </div>
       </section>
 
-      {/* Collection - Desktop: Sticky artist column, Mobile: Normal scroll */}
+      {/* Collection - Desktop: Pinned artist, Mobile: Sticky name header */}
       <section ref={collectionSectionRef} className={styles.collectionSection}>
         <div className={styles.collectionInner}>
-          {artistEntries.map(([artistName, works], idx) => {
+          {artistEntries.map(([artistName, works]) => {
             const artistData = getArtistData(artistName);
             return (
               <div
@@ -227,7 +256,7 @@ export function GalleryMode() {
                 className={styles.artistBlock}
                 data-artist={artistName}
               >
-                {/* Artist Column - Sticky on desktop via CSS */}
+                {/* Desktop: Artist Column */}
                 <div className={styles.artistCol}>
                   <div className={styles.artistInfo}>
                     {artistData.photo && (
@@ -244,7 +273,12 @@ export function GalleryMode() {
                   </div>
                 </div>
 
-                {/* Works Column - Normal scroll */}
+                {/* Mobile: Sticky Name Header */}
+                <div className={styles.mobileArtistHeader}>
+                  <h2 className={styles.mobileArtistName}>{artistName}</h2>
+                </div>
+
+                {/* Works Column */}
                 <div className={styles.worksCol}>
                   {works.map((work) => (
                     <figure key={work.id} className={styles.workItem}>

@@ -15,15 +15,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gallery Mode**: Complete "White Cube" gallery layout
   - Minimalist header with sticky positioning
   - Manifesto section with large serif typography
-  - **Sticky artist column on desktop**: Artist info stays fixed while browsing works
-    - CSS-based sticky positioning (no scroll locking)
-    - Artist column stays fixed on left while works scroll naturally
-    - Mobile: no sticky positioning, normal vertical scroll
-    - Works animate in with GSAP as they enter viewport
-    - Preserves existing scroll-based effects
-  - Scroll hint indicator in manifesto section
+  - **Author pinning on desktop**: Artist column pins while scrolling through their works
+    - GSAP ScrollTrigger with `pin: artistCol` - pins only the column, not the whole page
+    - Adaptive scroll distance based on number of works (80vh per work)
+    - Works animate in/out as you scroll through the pinned section
+    - Scroll up from first artist returns to manifesto
+  - **Mobile experience**: Sticky artist name header
+    - Artist name stays at top of screen when scrolling their works
+    - Clean white background with subtle blur
+    - Works animate in as they enter viewport
   - Minimalist contact form with border-bottom inputs
-  - Mobile responsive variant (artist name above artworks)
 - **Navigation Enhancements**:
   - "View as List" button in Header (immersive mode only)
   - "Enter Immersion" button in GalleryMode header
@@ -35,15 +36,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Team section**: Added thin border around photos consistent with site design
 - **Vite config**: Added ngrok domains to allowedHosts for remote development
 - **App Architecture**: Conditional rendering based on view mode (preserves existing immersive experience)
-- **Gallery Mode**: Fixed scroll locking issue
-  - Removed GSAP pinning (was locking entire page scroll)
-  - Replaced with CSS sticky positioning for artist column
-  - Added mobile detection to skip GSAP animations on mobile
-  - Works now scroll naturally without any locking
+- **Gallery Mode**: Refactored scroll orchestration
+  - Desktop: GSAP pinning of artist column only (not whole page)
+  - Mobile: Separate sticky header for artist name
+  - Removed "scroll to explore" hint
+  - Increased works gap for better breathing room
+  - Made scroll distance adaptive to work count
 
 ### Fixed
-- Gallery mode scroll locking issue - entire page was locking instead of just artist column
-- Mobile scroll not working correctly - sticky positioning now disabled on mobile via media query
+- Gallery mode scroll locking - now pins only artist column, not whole page
+- Mobile scroll - separate sticky header instead of column pinning
+- Scroll distance - now adaptive based on actual number of works
 
 ---
 
