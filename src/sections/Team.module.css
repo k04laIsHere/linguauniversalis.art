@@ -113,6 +113,8 @@
   aspect-ratio: 4/5;
   z-index: 1;
   border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
   transform-style: preserve-3d;
   /* Ensure the image doesn't push the absolute text too far */
   flex-shrink: 0;
@@ -124,15 +126,6 @@
   object-fit: cover;
   display: block;
   filter: contrast(1.1) brightness(0.85);
-  
-  mask-image: 
-    linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-  -webkit-mask-image: 
-    linear-gradient(to right, transparent 0%, black 15%, black 85%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
-  mask-composite: intersect;
-  -webkit-mask-composite: source-in;
 }
 
 .textFront {

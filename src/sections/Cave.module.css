@@ -176,6 +176,11 @@
   gap: 25vh; /* Tighter gap for manifesto items */
 }
 
+.manifestoEnd {
+  height: 1px;
+  margin-top: 10vh;
+}
+
 .manifestoItem {
   position: relative;
   max-width: 900px;

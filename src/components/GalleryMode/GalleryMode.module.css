@@ -1,0 +1,296 @@
+.root {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #000000;
+  font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Header */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+  font-size: 1.125rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.enterButton {
+  padding: 0.75rem 1.5rem;
+  background: #000000;
+  color: #ffffff;
+  border: none;
+  font-size: 0.875rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.enterButton:hover {
+  background: #333333;
+}
+
+/* Manifesto Section */
+.manifestoSection {
+  position: relative;
+  padding: 6rem 2rem 8rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.manifestoContent {
+  max-width: 900px;
+  margin: 0 auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.manifestoTitle {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: clamp(2.5rem, 6vw, 4rem);
+  font-weight: 400;
+  margin: 0 0 1.5rem 0;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.manifestoSubtitle {
+  font-size: 1.125rem;
+  font-weight: 400;
+  margin: 0 0 4rem 0;
+  text-align: center;
+  color: #666666;
+  letter-spacing: 0.02em;
+}
+
+.manifestoText {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.manifestoLine {
+  font-family: 'Georgia', 'Times New Roman', serif;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 400;
+  margin: 0;
+  line-height: 1.5;
+  color: #111111;
+}
+
+/* Scroll Hint */
+.scrollHint {
+  position: absolute;
+  bottom: 3rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  opacity: 0;
+  animation: fadeInUp 1s ease 2s forwards;
+}
+
+.scrollHintText {
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #666666;
+}
+
+.scrollHintIcon {
+  animation: bounce 2s ease-in-out infinite;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Collection Section */
+.collectionSection {
+  padding: 0;
+  min-height: 100vh;
+}
+
+.collectionInner {
+  display: flex;
+  flex-direction: column;
+}
+
+.artistBlock {
+  display: grid;
+  grid-template-columns: 350px 1fr;
+  gap: 4rem;
+  padding: 4rem 2rem;
+  min-height: 100vh;
+  /* Will be pinned by GSAP */
+}
+
+/* Artist Column - Fixed during pin */
+.artistCol {
+  display: flex;
+  align-items: flex-start;
+  height: 100%;
+}
+
+.artistInfo {
+  padding-right: 2rem;
+  /* Initial state for animation */
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.artistPhoto {
+  width: 100%;
+  max-width: 280px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  margin-bottom: 1.5rem;
+  display: block;
+  filter: grayscale(0.1) contrast(1.05);
+}
+
+.artistName {
+  font-size: 1.75rem;
+  font-weight: 400;
+  margin: 0 0 1rem 0;
+  letter-spacing: -0.01em;
+  line-height: 1.2;
+}
+
+.artistBio {
+  font-size: 0.9375rem;
+  line-height: 1.7;
+  color: #444444;
+  margin: 0;
+}
+
+/* Works Column - Scroll through pinned */
+.worksCol {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+  padding: 2rem 0;
+}
+
+.workItem {
+  margin: 0;
+  position: relative;
+  /* Make each work item take significant space for scroll-through */
+  min-height: 70vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  /* Initial state for animation */
+  opacity: 0;
+  transform: translateY(100px) scale(0.95);
+}
+
+.workImage {
+  width: 100%;
+  max-height: 55vh;
+  object-fit: contain;
+  display: block;
+  transition: filter 0.3s ease;
+}
+
+.workItem:hover .workImage {
+  filter: brightness(0.95);
+}
+
+.workCaption {
+  margin: 1rem 0 0 0;
+  padding: 0;
+}
+
+.workTitle {
+  font-size: 1rem;
+  font-weight: 400;
+  margin: 0;
+  color: #333333;
+  letter-spacing: 0.02em;
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .header {
+    padding: 1rem;
+  }
+
+  .logo {
+    font-size: 0.875rem;
+  }
+
+  .enterButton {
+    padding: 0.5rem 1rem;
+    font-size: 0.75rem;
+  }
+
+  .manifestoSection {
+    padding: 4rem 1rem;
+  }
+
+  .artistBlock {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    padding: 0 1rem;
+  }
+
+  .artistCol {
+    position: static;
+    padding-right: 0;
+  }
+
+  .artistName {
+    font-size: 1.5rem;
+  }
+
+  .worksCol {
+    gap: 2rem;
+  }
+
+  .contactSection {
+    padding: 4rem 1rem;
+  }
+}

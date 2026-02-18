@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react';
 import { useI18n } from '../../i18n/useI18n';
+import { useViewMode } from '../../contexts/ViewModeContext';
 import { scrollToId } from '../../utils/scroll';
 import { useActiveSection } from './useActiveSection';
 import { gsap, ScrollTrigger } from '../../animation/gsap';
@@ -9,6 +10,7 @@ type NavItem = { id: string; label: string };
 
 export function Header() {
   const { lang, setLang, t } = useI18n();
+  const { mode, toggleMode } = useViewMode();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
@@ -83,6 +85,18 @@ export function Header() {
         </nav>
 
         <div className={styles.desktopRight}>
+          {/* View as List Button - Only in immersive mode */}
+          {mode === 'immersive' && (
+            <button
+              type="button"
+              className={styles.viewListBtn}
+              onClick={toggleMode}
+              aria-label="View as list"
+            >
+              View as List
+            </button>
+          )}
+
           <button
             type="button"
             className={styles.langToggleSingle}
@@ -97,8 +111,8 @@ export function Header() {
             <span className={styles.langCode}>{lang.toUpperCase()}</span>
           </button>
 
-          <button 
-            className={styles.menuToggle} 
+          <button
+            className={styles.menuToggle}
             onClick={toggleMenu}
             aria-label="Toggle Navigation"
           >

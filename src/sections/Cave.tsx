@@ -1,11 +1,23 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n/useI18n';
+import { useViewMode } from '../contexts/ViewModeContext';
+import { PrismNavigation } from '../components/PrismNavigation/PrismNavigation';
 import styles from './Cave.module.css';
 import { gsap, ScrollTrigger } from '../animation/gsap';
 
 export function Cave() {
   const { t } = useI18n();
+  const { mode } = useViewMode();
   const rootRef = useRef<HTMLElement | null>(null);
+  const [showPrism, setShowPrism] = useState(false);
+  const prismTriggered = useRef(false);
+  const manifestEndRef = useRef<HTMLDivElement | null>(null);
+
+  const handleContinueImmersive = () => {
+    setShowPrism(false);
+    // Allow scrolling to continue
+    document.body.style.overflow = '';
+  };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -149,6 +161,23 @@ export function Cave() {
         });
       }
 
+      // Prism Navigation Trigger - Show at end of manifesto (before artifacts)
+      // Only trigger once and only in immersive mode
+      if (mode === 'immersive' && !prismTriggered.current) {
+        ScrollTrigger.create({
+          trigger: `.${styles.manifestoWrapper}`,
+          start: 'bottom-=10% bottom',
+          end: 'bottom bottom',
+          onEnter: () => {
+            if (!prismTriggered.current) {
+              prismTriggered.current = true;
+              setShowPrism(true);
+              document.body.style.overflow = 'hidden'; // Pause scrolling
+            }
+          },
+        });
+      }
+
     }, root);
 
     return () => ctx.revert();
@@ -202,6 +231,9 @@ export function Cave() {
           </div>
         </div>
 
+        {/* Prism Navigation Trigger Point */}
+        <div ref={manifestEndRef} className={styles.manifestoEnd} aria-hidden="true" />
+
         <div
           id="ancient"
           className={styles.artifactField}
@@ -230,6 +262,11 @@ export function Cave() {
           ))}
         </div>
       </div>
+
+      {/* Prism Navigation Overlay */}
+      {showPrism && mode === 'immersive' && (
+        <PrismNavigation onWander={handleContinueImmersive} />
+      )}
     </section>
   );
 }
