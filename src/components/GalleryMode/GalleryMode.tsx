@@ -150,13 +150,12 @@ export function GalleryMode() {
                 duration: 1,
                 ease: 'power3.out',
                 scrollTrigger: {
-                  trigger: block,
-                  start: () => `top+=${progressStart * scrollDistance + 100}px top`,
-                  end: () => `top+=${progressEnd * scrollDistance} top`,
+                  trigger: work,
+                  start: 'top bottom-=100',
+                  end: 'top center',
                   scrub: 0.5,
                 }
               }
-            );
 
           });
         });
@@ -174,28 +173,51 @@ export function GalleryMode() {
         }
       }
 
-      // Mobile: Animate works as they enter viewport
+      // Mobile: Animate works as they enter viewport and pin artist name
       if (isMobile) {
-        const works = gsap.utils.toArray<HTMLElement>(`.${styles.workItem}`);
-        works.forEach((work) => {
-          gsap.fromTo(work,
-            {
-              opacity: 0,
-              y: 40,
-              scale: 0.95
-            },
-            {
-              opacity: 1,
-              y: 0,
-              scale: 1,
-              duration: 0.8,
-              ease: 'power3.out',
-              scrollTrigger: {
-                trigger: work,
-                start: 'top bottom-=50',
+        const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
+
+        artistBlocks.forEach((block) => {
+          const worksCol = block.querySelector(`.${styles.worksCol}`) as HTMLElement;
+          const works = gsap.utils.toArray<HTMLElement>(worksCol.querySelectorAll(`.${styles.workItem}`));
+          const mobileHeader = block.querySelector(`.${styles.mobileArtistHeader}`) as HTMLElement;
+
+          if (!works.length || !mobileHeader) return;
+
+          // Calculate scroll distance for mobile
+          const scrollDistance = works.length * (window.innerHeight * 0.6);
+
+          // Pin mobile artist header while scrolling through works
+          ScrollTrigger.create({
+            trigger: block,
+            start: 'top 0',
+            end: `+=${scrollDistance}`,
+            pin: mobileHeader,
+            pinSpacing: true,
+            scrub: 0.5,
+          });
+
+          // Animate works as they enter viewport
+          works.forEach((work) => {
+            gsap.fromTo(work,
+              {
+                opacity: 0,
+                y: 40,
+                scale: 0.95
+              },
+              {
+                opacity: 1,
+                y: 0,
+                scale: 1,
+                duration: 0.8,
+                ease: 'power3.out',
+                scrollTrigger: {
+                  trigger: work,
+                  start: 'top bottom-=50',
+                }
               }
-            }
-          );
+            );
+          });
         });
       }
 

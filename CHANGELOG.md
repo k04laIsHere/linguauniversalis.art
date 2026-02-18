@@ -48,9 +48,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mobile scroll - separate sticky header instead of column pinning
 - Scroll distance - now adaptive based on actual number of works
 - Mobile artist info - now visible on mobile (photo, name, bio)
-- Mobile sticky name - properly pinned at top while scrolling works
+- Mobile sticky name - properly pinned using GSAP ScrollTrigger on mobile
 - Image fade issues - removed fade-out animations, works now stay visible
 - Images not appearing - fixed by removing conflicting scroll animations
+- Desktop fade timing - works now animate in as soon as they enter viewport (top bottom-=100)
 
 ---
 
