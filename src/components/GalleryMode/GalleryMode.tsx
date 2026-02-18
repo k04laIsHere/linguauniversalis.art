@@ -34,39 +34,34 @@ export function GalleryMode() {
     };
   };
 
-  // Setup scroll orchestration
+  // Check if we're on mobile
+  const isMobile = () => window.innerWidth <= 768;
+
+  // Setup scroll animations (desktop only)
   useEffect(() => {
     const collectionSection = collectionSectionRef.current;
     const manifestoSection = manifestoSectionRef.current;
     if (!collectionSection || !manifestoSection) return;
 
     const ctx = gsap.context(() => {
+      // Only setup animations on desktop
+      if (isMobile()) return;
+
       const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
-      
+
       artistBlocks.forEach((block, index) => {
         const worksCol = block.querySelector(`.${styles.worksCol}`) as HTMLElement;
         const works = gsap.utils.toArray<HTMLElement>(worksCol.querySelectorAll(`.${styles.workItem}`));
-        const artistName = block.dataset.artist;
         const artistInfo = block.querySelector(`.${styles.artistInfo}`) as HTMLElement;
 
         if (!works.length) return;
 
-        // Calculate the scroll distance for this artist's works
-        // Give each work ~80vh of scroll space for comfortable viewing
-        const scrollDistance = works.length * (window.innerHeight * 0.85);
-
-        // Create pinned scroll for this artist block
-        const pinTrigger = ScrollTrigger.create({
+        // Animate artist info on enter/leave
+        ScrollTrigger.create({
           trigger: block,
-          start: 'top top',
-          end: `+=${scrollDistance}`,
-          pin: true,
-          pinSpacing: true,
-          scrub: 0.5, // Smoother scrubbing
-          invalidateOnRefresh: true,
-          id: `artist-pin-${index}`,
+          start: 'top center',
+          end: 'bottom center',
           onEnter: () => {
-            // Artist comes into focus
             gsap.to(artistInfo, {
               opacity: 1,
               y: 0,
@@ -75,72 +70,50 @@ export function GalleryMode() {
             });
           },
           onLeave: () => {
-            // Artist fades out as we move to next
             gsap.to(artistInfo, {
-              opacity: 0,
-              y: -30,
+              opacity: 0.5,
               duration: 0.6,
               ease: 'power3.in'
             });
           },
           onEnterBack: () => {
-            // Artist reappears when scrolling back
             gsap.to(artistInfo, {
               opacity: 1,
-              y: 0,
               duration: 0.8,
               ease: 'power3.out'
             });
           },
           onLeaveBack: () => {
-            // Artist fades out when scrolling to previous
             gsap.to(artistInfo, {
-              opacity: 0,
-              y: 30,
+              opacity: 0.5,
               duration: 0.6,
               ease: 'power3.in'
             });
           }
         });
 
-        // Animate works appearing as we scroll through the pinned block
-        works.forEach((work, i) => {
-          const progressStart = i / works.length;
-          const progressEnd = (i + 0.8) / works.length; // Slight overlap
-
-          // Work item reveal animation - based on scroll progress within pin
-          const workTrigger = ScrollTrigger.create({
-            trigger: block,
-            start: () => `top+=${progressStart * scrollDistance} top`,
-            end: () => `top+=${progressEnd * scrollDistance} top`,
-            scrub: 0.5,
-            onUpdate: (self) => {
-              const progress = self.progress;
-              // Fade in and move up
-              gsap.set(work, {
-                opacity: Math.min(progress * 1.5, 1),
-                y: (1 - progress) * 100,
-                scale: 0.95 + (progress * 0.05)
-              });
+        // Animate works appearing as they scroll into view
+        works.forEach((work) => {
+          gsap.fromTo(work,
+            {
+              opacity: 0,
+              y: 60,
+              scale: 0.95
+            },
+            {
+              opacity: 1,
+              y: 0,
+              scale: 1,
+              duration: 1,
+              ease: 'power3.out',
+              scrollTrigger: {
+                trigger: work,
+                start: 'top bottom-=100',
+                end: 'top center',
+                scrub: 0.5
+              }
             }
-          });
-
-          // Work item fade out as we scroll past it
-          ScrollTrigger.create({
-            trigger: block,
-            start: () => `top+=${(progressEnd - 0.15) * scrollDistance} top`,
-            end: () => `top+=${progressEnd * scrollDistance} top`,
-            scrub: 0.5,
-            onUpdate: (self) => {
-              const progress = self.progress;
-              // Fade out and scale down slightly
-              const opacity = 1 - (progress * 0.7);
-              gsap.set(work, {
-                opacity: Math.max(opacity, 0.3),
-                scale: 1 - (progress * 0.1)
-              });
-            }
-          });
+          );
         });
       });
 
@@ -243,18 +216,18 @@ export function GalleryMode() {
         </div>
       </section>
 
-      {/* Collection - Pinned Artist Scroller */}
+      {/* Collection - Desktop: Sticky artist column, Mobile: Normal scroll */}
       <section ref={collectionSectionRef} className={styles.collectionSection}>
         <div className={styles.collectionInner}>
           {artistEntries.map(([artistName, works], idx) => {
             const artistData = getArtistData(artistName);
             return (
-              <div 
-                key={artistName} 
+              <div
+                key={artistName}
                 className={styles.artistBlock}
                 data-artist={artistName}
               >
-                {/* Artist Column - Fixed during pin */}
+                {/* Artist Column - Sticky on desktop via CSS */}
                 <div className={styles.artistCol}>
                   <div className={styles.artistInfo}>
                     {artistData.photo && (
@@ -271,7 +244,7 @@ export function GalleryMode() {
                   </div>
                 </div>
 
-                {/* Works Column - Scroll through pinned */}
+                {/* Works Column - Normal scroll */}
                 <div className={styles.worksCol}>
                   {works.map((work) => (
                     <figure key={work.id} className={styles.workItem}>

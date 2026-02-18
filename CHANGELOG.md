@@ -15,15 +15,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Gallery Mode**: Complete "White Cube" gallery layout
   - Minimalist header with sticky positioning
   - Manifesto section with large serif typography
-  - **Pinned scroll orchestration**: Artist blocks pin while scrolling through their works
-    - Each artist stays fixed on the left while user browses their works on the right
-    - Smooth, frictionless scroll transitions between artists
-    - Scroll up from first artist returns to manifesto/prism
-    - Works animate in and out with GSAP scrubbing
+  - **Sticky artist column on desktop**: Artist info stays fixed while browsing works
+    - CSS-based sticky positioning (no scroll locking)
+    - Artist column stays fixed on left while works scroll naturally
+    - Mobile: no sticky positioning, normal vertical scroll
+    - Works animate in with GSAP as they enter viewport
     - Preserves existing scroll-based effects
   - Scroll hint indicator in manifesto section
   - Minimalist contact form with border-bottom inputs
-  - Mobile responsive variant (artist name above artworks, no sticky columns)
+  - Mobile responsive variant (artist name above artworks)
 - **Navigation Enhancements**:
   - "View as List" button in Header (immersive mode only)
   - "Enter Immersion" button in GalleryMode header
@@ -35,6 +35,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Team section**: Added thin border around photos consistent with site design
 - **Vite config**: Added ngrok domains to allowedHosts for remote development
 - **App Architecture**: Conditional rendering based on view mode (preserves existing immersive experience)
+- **Gallery Mode**: Fixed scroll locking issue
+  - Removed GSAP pinning (was locking entire page scroll)
+  - Replaced with CSS sticky positioning for artist column
+  - Added mobile detection to skip GSAP animations on mobile
+  - Works now scroll naturally without any locking
+
+### Fixed
+- Gallery mode scroll locking issue - entire page was locking instead of just artist column
+- Mobile scroll not working correctly - sticky positioning now disabled on mobile via media query
 
 ---
 
