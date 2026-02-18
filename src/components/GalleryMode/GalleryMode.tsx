@@ -158,19 +158,6 @@ export function GalleryMode() {
               }
             );
 
-            // Fade out work as we scroll past it
-            gsap.to(work, {
-              opacity: 0.3,
-              scale: 0.95,
-              duration: 1,
-              ease: 'power3.in',
-              scrollTrigger: {
-                trigger: block,
-                start: () => `top+=${(progressEnd - 0.2) * scrollDistance} top`,
-                end: () => `top+=${progressEnd * scrollDistance} top`,
-                scrub: 0.5,
-              }
-            });
           });
         });
 
