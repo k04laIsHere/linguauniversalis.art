@@ -50,61 +50,44 @@ export function GalleryMode() {
     if (!collectionSection || !manifestoSection) return;
 
     const ctx = gsap.context(() => {
-      // Manifesto section animations
-      const manifestoTitle = manifestoSection.querySelector(`.${styles.manifestoTitle}`);
-      const manifestoLines = gsap.utils.toArray<HTMLElement>(
-        manifestoSection.querySelectorAll(`.${styles.manifestoLine}`)
-      );
+      // Mobile: Update fixed artist name header as we scroll through artists
+      if (isMobile) {
+        const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
+        const mobileHeaderName = document.querySelector(`.${styles.mobileHeaderName}`) as HTMLElement;
+        const mobileHeader = document.querySelector(`.${styles.mobileFixedHeader}`) as HTMLElement;
 
-      // Animate manifesto title on scroll
-      gsap.fromTo(manifestoTitle,
-        {
-          opacity: 0,
-          y: 50
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1.2,
-          ease: 'power3.out',
-          scrollTrigger: {
-            trigger: manifestoSection,
-            start: 'top 80%',
-          }
-        }
-      );
+        if (!artistBlocks.length || !mobileHeaderName) return;
 
-      // Animate manifesto lines with stagger
-      gsap.fromTo(manifestoLines,
-        {
-          opacity: 0,
-          y: 40
-        },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 1,
-          stagger: 0.15,
-          ease: 'power2.out',
-          scrollTrigger: {
-            trigger: manifestoSection,
-            start: 'top 70%',
-          }
-        }
-      );
+        artistBlocks.forEach((block) => {
+          const artistName = block.dataset.artist;
 
-      // Fade out manifesto as we scroll into collection
-      gsap.to(manifestoSection, {
-        opacity: 0,
-        duration: 1,
-        ease: 'power2.in',
-        scrollTrigger: {
-          trigger: collectionSection,
-          start: 'top 60%',
-          end: 'top 20%',
-          scrub: true
-        }
-      });
+          if (!artistName) return;
+
+          ScrollTrigger.create({
+            trigger: block,
+            start: 'top center',
+            end: 'bottom center',
+            onEnter: () => {
+              mobileHeaderName.textContent = artistName;
+              mobileHeader.style.opacity = '1';
+              mobileHeader.style.visibility = 'visible';
+            },
+            onLeave: () => {
+              mobileHeader.style.opacity = '0';
+              mobileHeader.style.visibility = 'hidden';
+            },
+            onEnterBack: () => {
+              mobileHeaderName.textContent = artistName;
+              mobileHeader.style.opacity = '1';
+              mobileHeader.style.visibility = 'visible';
+            },
+            onLeaveBack: () => {
+              mobileHeader.style.opacity = '0';
+              mobileHeader.style.visibility = 'hidden';
+            }
+          });
+        });
+      }
 
       // Desktop: Pin artist columns while scrolling through works
       if (!isMobile) {
@@ -147,59 +130,9 @@ export function GalleryMode() {
         }
       }
 
-      // Mobile: Pin artist name header while scrolling through works
+      // Mobile: No GSAP needed - CSS sticky handles everything
       if (isMobile) {
-        const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
-
-        artistBlocks.forEach((block) => {
-          const worksCol = block.querySelector(`.${styles.worksCol}`) as HTMLElement;
-          const works = gsap.utils.toArray<HTMLElement>(worksCol.querySelectorAll(`.${styles.workItem}`));
-          const mobileHeader = block.querySelector(`.${styles.mobileArtistHeader}`) as HTMLElement;
-
-          if (!works.length || !mobileHeader) return;
-
-          // Calculate scroll distance for mobile
-          const scrollDistance = works.length * (window.innerHeight * 0.6);
-
-          // Hide header initially
-          gsap.set(mobileHeader, { opacity: 0, visibility: 'hidden' });
-
-          // Show header when artist block enters view
-          ScrollTrigger.create({
-            trigger: block,
-            start: 'top center',
-            onEnter: () => {
-              gsap.to(mobileHeader, {
-                opacity: 1,
-                visibility: 'visible',
-                duration: 0.3,
-              });
-            },
-            onLeave: () => {
-              gsap.to(mobileHeader, {
-                opacity: 0,
-                visibility: 'hidden',
-                duration: 0.3,
-              });
-            },
-            onEnterBack: () => {
-              gsap.to(mobileHeader, {
-                opacity: 1,
-                visibility: 'visible',
-                duration: 0.3,
-              });
-            },
-            onLeaveBack: () => {
-              gsap.to(mobileHeader, {
-                opacity: 0,
-                visibility: 'hidden',
-                duration: 0.3,
-              });
-            }
-          });
-
-          // No animations on works - they appear naturally
-        });
+        // Mobile sticky header is pure CSS, no JavaScript needed
       }
 
     }, collectionSection);
@@ -263,11 +196,6 @@ export function GalleryMode() {
                   </div>
                 </div>
 
-                {/* Mobile: Sticky Name Header */}
-                <div className={styles.mobileArtistHeader}>
-                  <h2 className={styles.mobileArtistName}>{artistName}</h2>
-                </div>
-
                 {/* Works Column */}
                 <div className={styles.worksCol}>
                   {works.map((work) => (
@@ -290,6 +218,11 @@ export function GalleryMode() {
           })}
         </div>
       </section>
+
+      {/* Mobile: Fixed Artist Name Header - Single global header */}
+      <div className={styles.mobileFixedHeader}>
+        <span className={styles.mobileHeaderName}></span>
+      </div>
 
       {/* Contact - Use existing component */}
       <Contact />
