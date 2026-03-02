@@ -166,7 +166,7 @@
 
 .mediumHeader {
   position: absolute;
-  top: 4rem;
+  top: 5rem;
   left: 4rem;
   right: 4rem;
   z-index: 50;
@@ -352,7 +352,7 @@
   .mediumHeader {
     left: 1.5rem;
     right: 1.5rem;
-    top: 8.5rem; /* Increased to avoid occlusion by the larger header */
+    top: 10.5rem; /* Increased to avoid occlusion by the larger header */
   }
 
   .workItem {

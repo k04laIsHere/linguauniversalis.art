@@ -22,7 +22,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['andreyvaganov'],
     year: '2024',
     size: '100×100 cm',
-    medium: 'холст',
+    medium: 'Digital Art',
   },
   {
     id: 'andreyvaganov-tellings',
@@ -33,7 +33,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['andreyvaganov'],
     year: '2024',
     size: '80×100 cm',
-    medium: 'масло',
+    medium: 'Digital Art',
   },
   {
     id: 'andreyvaganov-thepath',
@@ -44,7 +44,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['andreyvaganov'],
     year: '2024',
     size: '120×80 cm',
-    medium: 'акрил',
+    medium: 'Digital Art',
   },
   {
     id: 'andreyvaganov-theunityoftheuniverse',
@@ -55,7 +55,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['andreyvaganov'],
     year: '2024',
     size: '150×120 cm',
-    medium: 'смешанная техника',
+    medium: 'Digital Art',
   },
   {
     id: 'evgenyglobenko-1',
@@ -66,7 +66,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['evgenyglobenko'],
     year: '2024',
     size: '70×70 cm',
-    medium: 'холст',
+    medium: 'Oil',
   },
   {
     id: 'evgenyglobenko-2',
@@ -77,7 +77,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['evgenyglobenko'],
     year: '2024',
     size: '60×80 cm',
-    medium: 'холст',
+    medium: 'Oil',
   },
   {
     id: 'evgenyglobenko-cup-of-silence',
@@ -88,7 +88,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['evgenyglobenko'],
     year: '2024',
     size: '80×80 cm',
-    medium: 'акрил',
+    medium: 'Oil',
   },
   {
     id: 'evgenyglobenko-silence',
@@ -99,7 +99,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['evgenyglobenko'],
     year: '2024',
     size: '90×90 cm',
-    medium: 'смешанная техника',
+    medium: 'Oil',
   },
   {
     id: 'joslen-orsini-1',
@@ -110,7 +110,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['joslenorsini'],
     year: '2024',
     size: '100×80 cm',
-    medium: 'цифровое искусство',
+    medium: 'Sculpture',
   },
   {
     id: 'joslenorsini-fairytales',
@@ -121,7 +121,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['joslenorsini'],
     year: '2024',
     size: '120×100 cm',
-    medium: 'инсталляция',
+    medium: 'Sculpture',
   },
   {
     id: 'joslenorsini-language',
@@ -132,7 +132,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['joslenorsini'],
     year: '2024',
     size: '80×120 cm',
-    medium: 'коллаж',
+    medium: 'Sculpture',
   },
   {
     id: 'joslenorsini-the-amazon-1',
@@ -143,7 +143,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['joslenorsini'],
     year: '2024',
     size: '100×100 cm',
-    medium: 'акрил',
+    medium: 'Oil',
   },
   {
     id: 'joslenorsini-theuniverse',
@@ -154,7 +154,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['joslenorsini'],
     year: '2024',
     size: '130×110 cm',
-    medium: 'смешанная техника',
+    medium: 'Oil',
   },
   {
     id: 'omargodines-kantantab',
@@ -165,7 +165,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['omargodines'],
     year: '2024',
     size: '70×90 cm',
-    medium: 'акрил',
+    medium: 'Oil',
   },
   {
     id: 'omargodines-serenada-i',
@@ -176,7 +176,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['omargodines'],
     year: '2024',
     size: '80×100 cm',
-    medium: 'масло',
+    medium: 'Oil',
   },
   {
     id: 'omargodines-serenada-ii',
@@ -187,7 +187,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['omargodines'],
     year: '2024',
     size: '100×100 cm',
-    medium: 'смешанная техника',
+    medium: 'Oil',
   },
   {
     id: 'omargodines-serenada-iii',
@@ -198,7 +198,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['omargodines'],
     year: '2024',
     size: '90×80 cm',
-    medium: 'акрил',
+    medium: 'Oil',
   },
   {
     id: 'petertsvetkov-1',
@@ -209,7 +209,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['petrtstvetkov'],
     year: '2024',
     size: '80×120 cm',
-    medium: 'акрил',
+    medium: 'Oil',
   },
   {
     id: 'petertsvetkov-2',
@@ -220,7 +220,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['petrtstvetkov'],
     year: '2024',
     size: '100×100 cm',
-    medium: 'акрил',
+    medium: 'Oil',
   },
   {
     id: 'petertsvetkov-3',
@@ -231,7 +231,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['petrtstvetkov'],
     year: '2024',
     size: '90×110 cm',
-    medium: 'масло',
+    medium: 'Oil',
   },
   {
     id: 'petertsvetkov-4',
@@ -242,7 +242,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['petrtstvetkov'],
     year: '2024',
     size: '110×80 cm',
-    medium: 'смешанная техника',
+    medium: 'Oil',
   },
   {
     id: 'thomasharutunyan-coldcorner',
@@ -253,7 +253,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['thomasharutunyan'],
     year: '2024',
     size: '80×100 cm',
-    medium: 'акрил',
+    medium: 'Acrylic',
   },
   {
     id: 'thomasharutunyan-romeoandjuliet',
@@ -264,7 +264,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['thomasharutunyan'],
     year: '2024',
     size: '100×120 cm',
-    medium: 'смешанная техника',
+    medium: 'Mixed Media',
   },
   {
     id: 'thomasharutunyan-spontaniousresult',
@@ -275,7 +275,7 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['thomasharutunyan'],
     year: '2024',
     size: '90×90 cm',
-    medium: 'акрил',
+    medium: 'Acrylic',
   },
   {
     id: 'thomasharutunyan-theeclipse',
@@ -286,6 +286,6 @@ export const galleryWorks: GalleryWork[] = [
     tags: ['thomasharutunyan'],
     year: '2024',
     size: '110×100 cm',
-    medium: 'масло',
+    medium: 'Mixed Media',
   },
 ];

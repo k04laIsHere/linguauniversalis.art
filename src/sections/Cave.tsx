@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n/useI18n';
 import { useViewMode } from '../contexts/ViewModeContext';
-import { PrismNavigation } from '../components/PrismNavigation/PrismNavigation';
 import styles from './Cave.module.css';
 import { gsap, ScrollTrigger } from '../animation/gsap';
 
@@ -9,15 +8,7 @@ export function Cave() {
   const { t } = useI18n();
   const { mode } = useViewMode();
   const rootRef = useRef<HTMLElement | null>(null);
-  const [showPrism, setShowPrism] = useState(false);
-  const prismTriggered = useRef(false);
   const manifestEndRef = useRef<HTMLDivElement | null>(null);
-
-  const handleContinueImmersive = () => {
-    setShowPrism(false);
-    // Allow scrolling to continue
-    document.body.style.overflow = '';
-  };
 
   useEffect(() => {
     const root = rootRef.current;
@@ -28,7 +19,7 @@ export function Cave() {
       ScrollTrigger.create({
         trigger: root,
         start: 'top 80%',
-        end: 'bottom+=50% top', // Keep active WELL past the section end to handle fast scrolls
+        end: 'bottom+=50% top',
         onToggle: (self) => {
           if (self.isActive) {
             root.dataset.caveActive = '1';
@@ -41,12 +32,12 @@ export function Cave() {
       // Flashlight Shadow Mask - Always visible in the section until the very end
       gsap.set(`.${styles.shadowMask}`, { opacity: 1 });
 
-      // Ultra Slow Background Parallax - Move it slower than the content
+      // Ultra Slow Background Parallax
       gsap.fromTo(
         `.${styles.bg}`,
-        { y: 0 }, // Changed from yPercent to y for better performance
+        { y: 0 },
         {
-          y: window.innerHeight * 0.2, // Move in pixels
+          y: window.innerHeight * 0.2,
           ease: 'none',
           scrollTrigger: {
             trigger: root,
@@ -112,7 +103,7 @@ export function Cave() {
         const num = item.querySelector(`.${styles.manifestoNumber}`);
         if (num) {
           gsap.to(num, {
-            y: -80, // Reduced distance for smoother mobile performance
+            y: -80,
             ease: 'none',
             scrollTrigger: {
               trigger: item,
@@ -145,8 +136,7 @@ export function Cave() {
         );
       });
 
-      // Transition out: Fade flashlight away as we reach the artifacts section
-      // Should be completely gone by the time we reach the last artifact
+      // Transition out: Fade flashlight away
       const lastArtifact = artifacts[artifacts.length - 1];
       if (lastArtifact) {
         gsap.to(`.${styles.shadowMask}`, {
@@ -154,26 +144,9 @@ export function Cave() {
           ease: 'power1.inOut',
           scrollTrigger: {
             trigger: lastArtifact,
-            start: 'top 80%', // Start fading earlier
-            end: 'bottom 50%', // Finish when artifact is in view
+            start: 'top 80%',
+            end: 'bottom 50%',
             scrub: true,
-          },
-        });
-      }
-
-      // Prism Navigation Trigger - Show at end of manifesto (before artifacts)
-      // Only trigger once and only in immersive mode
-      if (mode === 'immersive' && !prismTriggered.current) {
-        ScrollTrigger.create({
-          trigger: `.${styles.manifestoWrapper}`,
-          start: 'bottom-=10% bottom',
-          end: 'bottom bottom',
-          onEnter: () => {
-            if (!prismTriggered.current) {
-              prismTriggered.current = true;
-              setShowPrism(true);
-              document.body.style.overflow = 'hidden'; // Pause scrolling
-            }
           },
         });
       }
@@ -181,7 +154,7 @@ export function Cave() {
     }, root);
 
     return () => ctx.revert();
-  }, []);
+  }, [mode]);
 
   const artifactsData = [
     { top: 0, left: 55, id: 1, title: 'PALEOLITHIC ECHO', sub: 'ALTAMIRA SERIES • 2024' },
@@ -231,7 +204,6 @@ export function Cave() {
           </div>
         </div>
 
-        {/* Prism Navigation Trigger Point */}
         <div ref={manifestEndRef} className={styles.manifestoEnd} aria-hidden="true" />
 
         <div
@@ -262,11 +234,6 @@ export function Cave() {
           ))}
         </div>
       </div>
-
-      {/* Prism Navigation Overlay */}
-      {showPrism && mode === 'immersive' && (
-        <PrismNavigation onWander={handleContinueImmersive} />
-      )}
     </section>
   );
 }
