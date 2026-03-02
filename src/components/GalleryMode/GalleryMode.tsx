@@ -52,6 +52,7 @@ export function GalleryMode() {
   };
 
   // Get team member by name for bio and photo
+  const getArtistData = (artistName: string) => {
     const member = teamMembers.find(m => m.name === artistName);
     return {
       bio: lang === 'ru' ? member?.blurbRu : member?.blurbEn,
