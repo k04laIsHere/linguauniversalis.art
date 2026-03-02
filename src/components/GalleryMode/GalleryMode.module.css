@@ -28,8 +28,7 @@
 
 /* Header */
 .header {
-  position: sticky;
-  top: 0;
+  position: relative; /* Remove sticky to allow artistCol to hit true top */
   z-index: 1000;
   display: flex;
   justify-content: space-between;
@@ -65,7 +64,7 @@
 .langToggleFixed {
   position: fixed;
   bottom: 2rem;
-  left: 2rem;
+  right: 2rem;
   z-index: 2000;
   display: flex;
   align-items: center;
@@ -360,16 +359,15 @@
   
   .artistCol {
     height: auto;
-    padding: 0.75rem 1.5rem; /* Tighter padding */
+    padding: 1.25rem 1.5rem; 
     border-right: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.05);
     align-items: center;
     text-align: left;
     position: sticky;
-    top: 3.5rem; /* Below main header */
+    top: 0; /* Align to the very top */
     z-index: 500;
-    background: rgba(252, 252, 249, 0.98);
-    backdrop-filter: blur(15px);
+    background: #fcfcf9; /* Solid background for stickiness */
     flex-direction: column;
     justify-content: flex-start;
     gap: 0.25rem;
@@ -379,26 +377,26 @@
   .artistInfo {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
+    gap: 1.5rem;
     justify-content: flex-start;
     width: 100%;
   }
 
   .artistPhotoWrapper {
-    width: 60px; /* Smaller photo for stickiness */
-    height: 60px;
+    width: 70px; 
+    height: 70px;
     margin-bottom: 0;
     flex-shrink: 0;
   }
 
   .artistName {
-    font-size: 1.25rem; /* More compact */
+    font-size: 1.5rem; 
     margin: 0 0 0.1rem 0;
   }
 
   .artistBio {
     display: block;
-    font-size: 0.75rem; /* More compact */
+    font-size: 0.8rem; 
     line-height: 1.3;
     max-width: 100%;
     color: #666666;
@@ -409,11 +407,16 @@
   .mediumHeader {
     left: 1.5rem;
     right: 1.5rem;
-    top: 8rem; /* Adjusted for tighter artistCol */
+    top: 7rem; 
+  }
+
+  .mediumTitle {
+    font-size: 0.9rem; /* Bigger style name */
+    font-weight: 700;
   }
 
   .workItem {
-    padding: 10rem 1.5rem 2.5rem; /* Adjusted for tighter header */
+    padding: 10rem 1.5rem 2.5rem; 
   }
 
   .workImageWrapper {
@@ -426,7 +429,8 @@
 
   .langToggleFixed {
     bottom: 1.5rem;
-    left: 1.5rem;
+    right: 1.5rem; /* Consistent right placement */
+    left: auto;
     padding: 0.5rem 0.8rem;
   }
 }

@@ -54,7 +54,18 @@ export function GalleryMode() {
   // Get team member by name for bio and photo
   const getArtistData = (artistName: string) => {
     const member = teamMembers.find(m => m.name === artistName);
+    const translatedName = lang === 'ru' ? (
+      member?.name === 'Andrey Vaganov' ? 'Андрей Ваганов' :
+      member?.name === 'Evgeny Globenko' ? 'Евгений Глобенко' :
+      member?.name === 'Petr Tsvetkov' ? 'Петр Цветков' :
+      member?.name === 'Omar Godines' ? 'Омар Годинес' :
+      member?.name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
+      member?.name === 'Joslen Orsini' ? 'Жослен Орсини' :
+      member?.name
+    ) : member?.name;
+
     return {
+      name: translatedName || artistName,
       bio: lang === 'ru' ? member?.blurbRu : member?.blurbEn,
       photo: member?.photoSrc,
     };
@@ -231,7 +242,7 @@ export function GalleryMode() {
                       </div>
                     )}
                     <div className={styles.artistText}>
-                      <h2 className={styles.artistName}>{artistName}</h2>
+                      <h2 className={styles.artistName}>{artistData.name}</h2>
                       <p className={styles.artistBio}>{artistData.bio}</p>
                     </div>
                   </div>
