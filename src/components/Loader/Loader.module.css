@@ -1,17 +1,17 @@
 .root {
   position: fixed;
   inset: 0;
-  z-index: 9999;
-  background: #050608;
+  background-color: #fcfcf9;
+  z-index: 10000;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
-  color: white;
+  align-items: center;
   transition: opacity 0.8s ease-in-out;
+  overflow: hidden;
 }
 
 .rootHidden {
-  opacity: 0;
   pointer-events: none;
 }
 
@@ -19,78 +19,215 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 40px;
-  width: min(400px, 80vw);
+  width: 100%;
+  max-width: 400px;
+  padding: 2rem;
+  transition: opacity 0.5s ease;
 }
 
 .brand {
   text-align: center;
-  animation: fadeIn 1.2s ease-out forwards;
+  margin-bottom: 4rem;
 }
 
 .brandTitle {
   font-family: var(--font-title);
-  font-size: clamp(24px, 6vw, 36px);
-  letter-spacing: 0.3em;
+  font-size: 1.5rem;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 8px;
-  text-shadow: 0 0 20px rgba(212, 175, 55, 0.3);
+  color: #1a1a1a;
+  margin-bottom: 0.5rem;
 }
 
 .brandHint {
-  font-size: 11px;
-  letter-spacing: 0.2em;
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  color: #888;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.4);
 }
 
 .progressContainer {
   width: 100%;
+  height: 1px;
+  background: rgba(0, 0, 0, 0.05);
   position: relative;
-  height: 2px;
-  background: rgba(255, 255, 255, 0.05);
-  overflow: visible;
+  margin-bottom: 1.5rem;
 }
 
 .progressBar {
-  position: absolute;
-  top: 0;
-  left: 0;
   height: 100%;
-  background: var(--accent);
-  box-shadow: 0 0 10px var(--accent);
-  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  background: #1a1a1a;
+  transition: width 0.3s ease-out;
 }
 
 .progressText {
   position: absolute;
   top: 10px;
   right: 0;
-  font-size: 10px;
-  font-family: var(--font-title);
-  letter-spacing: 0.1em;
-  color: rgba(217, 192, 141, 0.8);
+  font-size: 0.65rem;
+  color: #888;
+  font-family: var(--font-mono);
 }
 
 .loadingPulse {
   width: 4px;
   height: 4px;
-  background: var(--accent);
+  background: #d4af37;
   border-radius: 50%;
-  box-shadow: 0 0 15px var(--accent);
-  animation: pulse 2s infinite ease-in-out;
-  margin-top: 20px;
+  margin-top: 2rem;
+  animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 10px var(--accent); }
-  50% { transform: scale(2); opacity: 0.4; box-shadow: 0 0 25px var(--accent); }
-  100% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 10px var(--accent); }
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(3); opacity: 0; }
+  100% { transform: scale(1); opacity: 0; }
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(10px); }
+/* Choice Overlay */
+.choiceOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  background: #fcfcf9;
+  z-index: 10;
+  animation: choiceFadeIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+}
+
+.choiceSplit {
+  display: flex;
+  width: 100%;
+  max-width: 1200px;
+  height: 70vh;
+  gap: 1px;
+  padding: 0;
+  background: rgba(0, 0, 0, 0.03); /* Thin divider line */
+}
+
+.choiceCard {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  padding: 4rem;
+  text-align: center;
+  overflow: hidden;
+}
+
+.choiceBg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(1) brightness(1.1);
+  opacity: 0.07; /* Increased default visibility as requested */
+  transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(1.05);
+  z-index: 0;
+}
+
+.choiceCard:hover .choiceBg {
+  opacity: 0.15;
+  transform: scale(1);
+  filter: grayscale(0.5) brightness(1);
+}
+
+.choiceContent {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.choiceTitle {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 4rem);
+  color: #1a1a1a;
+  margin-bottom: 1.5rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.choiceDesc {
+  font-size: 0.8rem;
+  color: #666;
+  max-width: 280px;
+  line-height: 1.6;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.6s ease;
+}
+
+.choiceCard:hover .choiceDesc {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.choiceAction {
+  margin-top: 2rem;
+  padding: 0.75rem 2rem;
+  border: 1px solid #1a1a1a;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #1a1a1a;
+  opacity: 0.4;
+  transition: all 0.4s ease;
+}
+
+.choiceCard:hover .choiceAction {
+  opacity: 1;
+  background: #1a1a1a;
+  color: #fcfcf9;
+}
+
+.choiceHint {
+  position: absolute;
+  bottom: 4rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #d4af37;
+  opacity: 0.6;
+  animation: hintBounce 2s infinite;
+}
+
+@keyframes choiceFadeIn {
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes hintBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(10px); }
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .choiceSplit {
+    flex-direction: column;
+    height: auto;
+    padding: 0 2rem;
+    gap: 1rem;
+  }
+
+  .choiceCard {
+    padding: 2.5rem;
+  }
+
+  .choiceTitle {
+    font-size: 2rem;
+  }
+
+  .choiceHint {
+    bottom: 2rem;
+  }
+}

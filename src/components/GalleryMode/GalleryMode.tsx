@@ -5,7 +5,6 @@ import { teamMembers } from '../../content/teamData';
 import { galleryWorks } from '../../content/galleryManifest';
 import { Contact } from '../../sections/Contact';
 import { gsap, ScrollTrigger } from '../../animation/gsap';
-import { scrollToId } from '../../utils/scroll';
 import styles from './GalleryMode.module.css';
 
 export function GalleryMode() {
@@ -17,20 +16,24 @@ export function GalleryMode() {
 
   // Detect mobile on mount and resize
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 768);
+    const checkMobile = () => setIsMobile(window.innerWidth <= 1024);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
-  // Group works by artist
+  // Group works by artist and then by medium
   const worksByArtist = galleryWorks.reduce((acc, work) => {
     if (!acc[work.artist]) {
-      acc[work.artist] = [];
+      acc[work.artist] = {};
     }
-    acc[work.artist].push(work);
+    const medium = work.medium || 'Other';
+    if (!acc[work.artist][medium]) {
+      acc[work.artist][medium] = [];
+    }
+    acc[work.artist][medium].push(work);
     return acc;
-  }, {} as Record<string, typeof galleryWorks>);
+  }, {} as Record<string, Record<string, typeof galleryWorks>>);
 
   const artistEntries = Object.entries(worksByArtist);
 
@@ -46,99 +49,102 @@ export function GalleryMode() {
   // Setup scroll orchestration
   useEffect(() => {
     const collectionSection = collectionSectionRef.current;
-    const manifestoSection = manifestoSectionRef.current;
-    if (!collectionSection || !manifestoSection) return;
+    if (!collectionSection) return;
 
     const ctx = gsap.context(() => {
-      // Mobile: Update fixed artist name header as we scroll through artists
-      if (isMobile) {
-        const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
-        const mobileHeaderName = document.querySelector(`.${styles.mobileHeaderName}`) as HTMLElement;
-        const mobileHeader = document.querySelector(`.${styles.mobileFixedHeader}`) as HTMLElement;
+      const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
 
-        if (!artistBlocks.length || !mobileHeaderName) return;
-
-        artistBlocks.forEach((block) => {
-          const artistName = block.dataset.artist;
-
-          if (!artistName) return;
-
-          ScrollTrigger.create({
-            trigger: block,
-            start: 'top center',
-            end: 'bottom center',
-            onEnter: () => {
-              mobileHeaderName.textContent = artistName;
-              mobileHeader.style.opacity = '1';
-              mobileHeader.style.visibility = 'visible';
-            },
-            onLeave: () => {
-              mobileHeader.style.opacity = '0';
-              mobileHeader.style.visibility = 'hidden';
-            },
-            onEnterBack: () => {
-              mobileHeaderName.textContent = artistName;
-              mobileHeader.style.opacity = '1';
-              mobileHeader.style.visibility = 'visible';
-            },
-            onLeaveBack: () => {
-              mobileHeader.style.opacity = '0';
-              mobileHeader.style.visibility = 'hidden';
-            }
-          });
-        });
-      }
-
-      // Desktop: Pin artist columns while scrolling through works
-      if (!isMobile) {
-        const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
-
-        artistBlocks.forEach((block) => {
-          const worksCol = block.querySelector(`.${styles.worksCol}`) as HTMLElement;
-          const works = gsap.utils.toArray<HTMLElement>(worksCol.querySelectorAll(`.${styles.workItem}`));
-          const artistCol = block.querySelector(`.${styles.artistCol}`) as HTMLElement;
-
-          if (!works.length) return;
-
-          // Calculate scroll distance: each work gets 80vh of scroll space
-          const scrollDistance = works.length * (window.innerHeight * 0.8);
-
-          // Pin the artist column while scrolling through works
-          ScrollTrigger.create({
-            trigger: block,
-            start: 'top 100px', // Start pinning when block reaches 100px from top
-            end: `+=${scrollDistance}`,
-            pin: artistCol, // Pin ONLY the artist column
-            pinSpacing: true,
-            scrub: 1,
-            invalidateOnRefresh: true,
-          });
-
-          // No animations on works - they appear naturally
+      artistBlocks.forEach((block) => {
+        const artistCol = block.querySelector(`.${styles.artistCol}`) as HTMLElement;
+        const mediumGroups = gsap.utils.toArray<HTMLElement>(block.querySelectorAll(`.${styles.mediumGroup}`));
+        
+        // 1. Pin the Artist Info Column
+        ScrollTrigger.create({
+          trigger: block,
+          start: 'top top',
+          end: 'bottom bottom',
+          pin: artistCol,
+          pinSpacing: false,
+          invalidateOnRefresh: true,
+          refreshPriority: -1,
         });
 
-        // Scroll up from first artist returns to manifesto
-        const firstBlock = document.querySelector(`.${styles.artistBlock}`) as HTMLElement;
-        if (firstBlock) {
-          ScrollTrigger.create({
-            trigger: firstBlock,
-            start: 'top top',
-            onLeaveBack: () => {
-              setTimeout(() => scrollToId('manifesto'), 100);
-            }
+        // 2. Handle Medium Groups and their Flipping Works
+        mediumGroups.forEach((group) => {
+          const works = gsap.utils.toArray<HTMLElement>(group.querySelectorAll(`.${styles.workItem}`));
+          const progressLabel = group.querySelector(`.${styles.progressLabel}`) as HTMLElement;
+          const groupWorksCount = works.length;
+          
+          const groupDistance = (groupWorksCount - 1) * window.innerHeight;
+
+          if (groupWorksCount > 1) {
+            let lastIndex = 0;
+
+            ScrollTrigger.create({
+              trigger: group,
+              start: 'top top',
+              end: `+=${groupDistance}`,
+              pin: true,
+              pinSpacing: true,
+              invalidateOnRefresh: true,
+              refreshPriority: 1,
+              onUpdate: (self) => {
+                const currentIndex = Math.round(self.progress * (groupWorksCount - 1));
+                if (currentIndex !== lastIndex) {
+                  // Hide previous
+                  gsap.to(works[lastIndex], { 
+                    opacity: 0, 
+                    visibility: 'hidden', 
+                    duration: 0.3,
+                    overwrite: 'auto'
+                  });
+                  // Show current
+                  gsap.to(works[currentIndex], { 
+                    opacity: 1, 
+                    visibility: 'visible', 
+                    duration: 0.3,
+                    overwrite: 'auto'
+                  });
+                  
+                  // Update Label with animation
+                  if (progressLabel) {
+                    const currentStr = (currentIndex + 1).toString().padStart(2, '0');
+                    progressLabel.innerText = `${currentStr} / ${groupWorksCount.toString().padStart(2, '0')}`;
+                    gsap.fromTo(progressLabel, 
+                      { y: 5, opacity: 0 }, 
+                      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
+                    );
+                  }
+                  
+                  lastIndex = currentIndex;
+                }
+              },
+              onLeaveBack: () => {
+                gsap.set(works[0], { opacity: 1, visibility: 'visible' });
+                for(let i = 1; i < works.length; i++) {
+                  gsap.set(works[i], { opacity: 0, visibility: 'hidden' });
+                }
+                if (progressLabel) {
+                  progressLabel.innerText = `01 / ${groupWorksCount.toString().padStart(2, '0')}`;
+                }
+                lastIndex = 0;
+              }
+            });
+          }
+
+          // Initial setup
+          works.forEach((work, i) => {
+            gsap.set(work, { 
+              opacity: i === 0 ? 1 : 0,
+              visibility: i === 0 ? 'visible' : 'hidden'
+            });
           });
-        }
-      }
-
-      // Mobile: No GSAP needed - everything displays naturally
-      if (isMobile) {
-        // No pinning needed
-      }
-
+        });
+      });
     }, collectionSection);
 
     return () => ctx.revert();
-  }, [isMobile, artistEntries.length]);
+  }, [artistEntries.length]);
 
   return (
     <div className={styles.root}>
@@ -154,7 +160,7 @@ export function GalleryMode() {
         </button>
       </header>
 
-      {/* Manifesto Section - Large Serif */}
+      {/* Manifesto Section */}
       <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
         <div className={styles.manifestoContent}>
           <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
@@ -168,56 +174,82 @@ export function GalleryMode() {
         </div>
       </section>
 
-      {/* Collection - Desktop: Pinned artist, Mobile: Sticky name header */}
+      {/* Collection - The Stationary Flip Architecture */}
       <section ref={collectionSectionRef} className={styles.collectionSection}>
         <div className={styles.collectionInner}>
-          {artistEntries.map(([artistName, works]) => {
+          {artistEntries.map(([artistName, mediums]) => {
             const artistData = getArtistData(artistName);
+            const mediumEntries = Object.entries(mediums);
+
             return (
               <div
                 key={artistName}
                 className={styles.artistBlock}
                 data-artist={artistName}
               >
-                {/* Desktop: Artist Column */}
+                {/* Artist Info - Pinned on Left (Desktop) / Top (Mobile) */}
                 <div className={styles.artistCol}>
                   <div className={styles.artistInfo}>
                     {artistData.photo && (
-                      <img
-                        src={artistData.photo}
-                        alt={artistName}
-                        className={styles.artistPhoto}
-                        loading="lazy"
-                        decoding="async"
-                      />
+                      <div className={styles.artistPhotoWrapper}>
+                        <img
+                          src={artistData.photo}
+                          alt={artistName}
+                          className={styles.artistPhoto}
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
                     )}
-                    <h2 className={styles.artistName}>{artistName}</h2>
-                    <p className={styles.artistBio}>{artistData.bio}</p>
+                    <div className={styles.artistText}>
+                      <h2 className={styles.artistName}>{artistName}</h2>
+                      <p className={styles.artistBio}>{artistData.bio}</p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Works Column */}
+                {/* Works Column - Stacks works for the Flip Effect */}
                 <div className={styles.worksCol}>
-                  {works.map((work) => (
-                    <figure key={work.id} className={styles.workItem}>
-                      <img
-                        src={work.src}
-                        alt={lang === 'ru' ? work.titleRu : work.titleEn}
-                        className={styles.workImage}
-                        loading="lazy"
-                        decoding="async"
-                      />
-                      <figcaption className={styles.workCaption}>
-                        <h3 className={styles.workTitle}>
-                          {lang === 'ru' ? work.titleRu : work.titleEn}
-                        </h3>
-                        <div className={styles.workMeta}>
-                          {work.year && <span className={styles.workMetaItem}>{work.year}</span>}
-                          {work.medium && <span className={styles.workMetaItem}>{work.medium}</span>}
-                          {work.size && <span className={styles.workMetaItem}>{work.size}</span>}
+                  {mediumEntries.map(([medium, works]) => (
+                    <div key={medium} className={styles.mediumGroup}>
+                      <div className={styles.mediumHeader}>
+                        <h3 className={styles.mediumTitle}>{medium}</h3>
+                        <div className={styles.scrollProgress}>
+                          <div className={styles.progressLabel}>01 / {works.length}</div>
                         </div>
-                      </figcaption>
-                    </figure>
+                      </div>
+                      
+                      <div className={styles.worksStack}>
+                        {works.map((work, idx) => (
+                          <figure key={work.id} className={styles.workItem} style={{ zIndex: works.length - idx }}>
+                            <div className={styles.workImageWrapper}>
+                              <img
+                                src={work.src}
+                                alt={lang === 'ru' ? work.titleRu : work.titleEn}
+                                className={styles.workImage}
+                                loading="lazy"
+                                decoding="async"
+                              />
+                            </div>
+                            <figcaption className={styles.workCaption}>
+                              <div className={styles.captionHeader}>
+                                <div className={styles.captionTitleArea}>
+                                  <span className={styles.workMediumTag}>{work.medium}</span>
+                                  <h4 className={styles.workTitle}>
+                                    {lang === 'ru' ? work.titleRu : work.titleEn}
+                                  </h4>
+                                </div>
+                                <span className={styles.workIndex}>{(idx + 1).toString().padStart(2, '0')}</span>
+                              </div>
+                              <div className={styles.workMeta}>
+                                {work.year && <span className={styles.workMetaItem}>{work.year}</span>}
+                                {work.size && <span className={styles.workMetaItem}>{work.size}</span>}
+                              </div>
+                            </figcaption>
+                          </figure>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -226,8 +258,10 @@ export function GalleryMode() {
         </div>
       </section>
 
-      {/* Contact - Use existing component */}
-      <Contact />
+      {/* Contact */}
+      <div className={styles.contactWrapper}>
+        <Contact />
+      </div>
     </div>
   );
 }
