@@ -49,8 +49,8 @@ export function ExitFlight() {
       // Ensure exit fill is visible from start
       gsap.set(exitFill, { 
         opacity: 1, 
-        y: -400, // Even higher initial position
-        scale: 1.2,
+        y: -200, // Lowered default position (was -400)
+        scale: 1, // Keep it zoomed out (1:1)
         filter: 'brightness(0.8) contrast(1.1)'
       });
 
@@ -119,17 +119,15 @@ export function ExitFlight() {
         immediateRender: false // Prevent conflict with initial set
       }, 0.2);
 
-      // 4. The landscape (vegetation mask) zooms in and moves DOWN
-      // Make sure it stays visible longer before fading
+      // 4. The landscape (vegetation mask) moves DOWN
+      // Removed scale zoom and opacity fade; moving much lower
       tl.to(exitFill,
       { 
-        scale: 6, 
-        y: 800, 
-        opacity: 0,
-        duration: 3.5,
-        ease: 'power1.inOut',
-        immediateRender: false // Prevent conflict with initial set
-      }, 0.3);
+        y: 2800, // Even lower to ensure clearance
+        duration: 2.5, 
+        ease: 'power2.inOut',
+        immediateRender: false 
+      }, 0);
 
     }, root);
 

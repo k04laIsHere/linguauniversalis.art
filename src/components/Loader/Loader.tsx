@@ -9,7 +9,7 @@ const ASSETS_TO_LOAD = [
   '/assets/videos/background_video_frames/background_video_000048.webp',
   '/assets/images/backgrounds/cave-wall-texture.jpg',
   '/assets/images/backgrounds/skyscraper-rooftop.jpg',
-  '/assets/images/backgrounds/cave-exit-landscape.png',
+  '/assets/images/backgrounds/cave-exit-landscape.webp',
   '/assets/images/backgrounds/cave-arch-mask.png',
   ...teamMembers.map(m => m.photoSrc),
   ...events.flatMap(e => e.images),
@@ -123,7 +123,7 @@ export function Loader({ onLoaded }: { onLoaded: () => void }) {
             >
               <div 
                 className={styles.choiceBg} 
-                style={{ backgroundImage: 'url(/assets/images/backgrounds/cave-exit-landscape.png)' }} 
+                style={{ backgroundImage: 'url(/assets/images/backgrounds/cave-exit-landscape.webp)' }} 
               />
               <div className={styles.content}>
                 <h2 className={styles.choiceTitle}>Journey</h2>
