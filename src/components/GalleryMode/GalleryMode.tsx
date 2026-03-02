@@ -8,7 +8,7 @@ import { gsap, ScrollTrigger } from '../../animation/gsap';
 import styles from './GalleryMode.module.css';
 
 export function GalleryMode() {
-  const { t, lang } = useI18n();
+  const { t, lang, setLang } = useI18n();
   const { toggleMode } = useViewMode();
   const collectionSectionRef = useRef<HTMLElement | null>(null);
   const manifestoSectionRef = useRef<HTMLElement | null>(null);
@@ -37,8 +37,21 @@ export function GalleryMode() {
 
   const artistEntries = Object.entries(worksByArtist);
 
+  // Translation map for mediums
+  const mediumTranslations: Record<string, { en: string; ru: string }> = {
+    'Digital Art': { en: 'Digital Art', ru: 'Цифровое искусство' },
+    'Oil': { en: 'Oil', ru: 'Масло' },
+    'Sculpture': { en: 'Sculpture', ru: 'Скульптура' },
+    'Acrylic': { en: 'Acrylic', ru: 'Акрил' },
+    'Mixed Media': { en: 'Mixed Media', ru: 'Смешанная техника' },
+    'Other': { en: 'Other', ru: 'Прочее' }
+  };
+
+  const getTranslatedMedium = (medium: string) => {
+    return mediumTranslations[medium]?.[lang] || medium;
+  };
+
   // Get team member by name for bio and photo
-  const getArtistData = (artistName: string) => {
     const member = teamMembers.find(m => m.name === artistName);
     return {
       bio: lang === 'ru' ? member?.blurbRu : member?.blurbEn,
@@ -156,9 +169,24 @@ export function GalleryMode() {
           onClick={toggleMode}
           aria-label="Enter immersive mode"
         >
-          Enter Immersion
+          {lang === 'ru' ? 'Войти в Иммерсию' : 'Enter Immersion'}
         </button>
       </header>
+
+      {/* Persistent Language Toggle */}
+      <button
+        type="button"
+        className={styles.langToggleFixed}
+        onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
+        aria-label="Toggle Language"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={styles.globeIcon}>
+          <circle cx="12" cy="12" r="10" />
+          <line x1="2" y1="12" x2="22" y2="12" />
+          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+        </svg>
+        <span className={styles.langCode}>{lang.toUpperCase()}</span>
+      </button>
 
       {/* Manifesto Section */}
       <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
@@ -213,7 +241,7 @@ export function GalleryMode() {
                   {mediumEntries.map(([medium, works]) => (
                     <div key={medium} className={styles.mediumGroup}>
                       <div className={styles.mediumHeader}>
-                        <h3 className={styles.mediumTitle}>{medium}</h3>
+                        <h3 className={styles.mediumTitle}>{getTranslatedMedium(medium)}</h3>
                         <div className={styles.scrollProgress}>
                           <div className={styles.progressLabel}>01 / {works.length}</div>
                         </div>
@@ -234,7 +262,7 @@ export function GalleryMode() {
                             <figcaption className={styles.workCaption}>
                               <div className={styles.captionHeader}>
                                 <div className={styles.captionTitleArea}>
-                                  <span className={styles.workMediumTag}>{work.medium}</span>
+                                  <span className={styles.workMediumTag}>{getTranslatedMedium(work.medium || 'Other')}</span>
                                   <h4 className={styles.workTitle}>
                                     {lang === 'ru' ? work.titleRu : work.titleEn}
                                   </h4>
