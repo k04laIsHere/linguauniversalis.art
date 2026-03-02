@@ -12,6 +12,7 @@ export default defineConfig({
       '.ngrok-free.dev',
       '.ngrok-free.app',
       '.ngrok.io',
+      '.trycloudflare.com',
       '192.168.1.23',
       '.local',
     ],

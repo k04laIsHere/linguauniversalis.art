@@ -230,7 +230,7 @@
 }
 
 .workCaption {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   width: 100%;
   max-width: 80vh;
   text-align: left;
@@ -257,6 +257,7 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 600;
+  margin-bottom: 0.5rem;
 }
 
 .workTitle {
