@@ -172,9 +172,44 @@ export function Cave() {
     return () => ctx.revert();
   }, [mode]);
 
+  const navigate = (newMode: 'immersive' | 'gallery') => {
+    // iris-like transition starting from white inside the breach
+    const iris = document.createElement('div');
+    iris.style.position = 'fixed';
+    iris.style.top = '0';
+    iris.style.left = '0';
+    iris.style.width = '100vw';
+    iris.style.height = '100vh';
+    iris.style.zIndex = '999999';
+    iris.style.background = '#fcfcf9';
+    
+    // Starting position: center of the breach
+    const rect = document.querySelector(`.${styles.archiveBreach}`)?.getBoundingClientRect();
+    const cx = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
+    const cy = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
+    
+    iris.style.clipPath = `circle(0% at ${cx}px ${cy}px)`;
+    document.body.appendChild(iris);
+
+    gsap.to(iris, {
+      clipPath: `circle(150% at ${cx}px ${cy}px)`,
+      duration: 1.2,
+      ease: 'expo.inOut',
+      onComplete: () => {
+        setMode(newMode);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+        gsap.to(iris, {
+          opacity: 0,
+          duration: 0.8,
+          delay: 0.2,
+          onComplete: () => iris.remove()
+        });
+      }
+    });
+  };
+
   const handleArchiveClick = () => {
-    setMode('gallery');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    navigate('gallery');
   };
 
   const artifactsData = [
@@ -210,7 +245,7 @@ export function Cave() {
           <div className={styles.breachContent}>
             <span className={styles.breachLabel}>Archive</span>
             <p className={styles.breachDesc}>
-              Direct access to the results.<br />View the portfolio and curated artifacts
+              Direct access to the results. View the portfolio and curated artifacts
             </p>
           </div>
         </div>
