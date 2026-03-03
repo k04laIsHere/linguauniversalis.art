@@ -427,9 +427,9 @@
 
 .archiveBreach {
   position: absolute;
-  top: -50px; /* Shifted up slightly to counter the increased scale/height */
-  right: -50px; /* Shifted right to bleed off the edge slightly for a more organic feel */
-  width: 2400px; /* 1.7x increase (from 1400px) */
+  top: -100px; /* Shifted up more to prevent clipping */
+  right: -100px; /* Shifted right to prevent clipping */
+  width: 4000px; /* 1.7x increase (from 2400px) */
   z-index: 101; 
   cursor: pointer;
   pointer-events: auto;
@@ -446,13 +446,13 @@
   inset: 0;
   overflow: hidden;
   border-radius: 2px;
-  /* Softened and expanded the glow to be more atmospheric and less like a harsh drop-shadow */
+  /* Removed harsh glow, using a much larger, softer atmospheric spread */
   box-shadow: 
-    0 0 150px rgba(255, 255, 255, 0.1),
-    0 0 300px rgba(255, 255, 255, 0.05);
-  /* Adjusted mask to be more panoramic and less circular, helping it feel less "cut off" */
-  mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 85%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 85%);
+    0 0 200px rgba(255, 255, 255, 0.08),
+    0 0 500px rgba(255, 255, 255, 0.04);
+  /* Adjusted mask for the massive scale */
+  mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 90%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 90%);
   background: #fcfcf9;
 }
 
