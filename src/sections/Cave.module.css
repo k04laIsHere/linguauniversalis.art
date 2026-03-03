@@ -427,9 +427,9 @@
 
 .archiveBreach {
   position: absolute;
-  top: -100px; /* Shifted up more to prevent clipping */
-  right: -100px; /* Shifted right to prevent clipping */
-  width: 4000px; /* 1.7x increase (from 2400px) */
+  top: -120px;
+  right: -120px;
+  width: 1600px;
   z-index: 101; 
   cursor: pointer;
   pointer-events: auto;
@@ -444,25 +444,16 @@
 .breachVisual {
   position: absolute;
   inset: 0;
-  overflow: hidden;
-  border-radius: 2px;
-  /* Removed harsh glow, using a much larger, softer atmospheric spread */
-  box-shadow: 
-    0 0 200px rgba(255, 255, 255, 0.08),
-    0 0 500px rgba(255, 255, 255, 0.04);
-  /* Adjusted mask for the massive scale */
-  mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 90%);
-  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 90%);
-  background: #fcfcf9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .breachImg {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   filter: brightness(1) contrast(1.05);
-  transform: scale(1.1);
-  opacity: 0.75;
 }
 
 .breachContent {
@@ -471,51 +462,49 @@
   text-align: center;
   font-family: var(--font-title);
   color: #000000;
-  padding: 120px; /* Increased padding for the massive scale */
+  padding: 0;
+  max-width: 60%;
 }
 
 .breachLabel {
-  font-size: 32px; /* Scaled up again */
-  letter-spacing: 0.9em;
+  font-size: 26px;
+  letter-spacing: 0.8em;
   text-transform: uppercase;
   color: #000000;
-  margin-bottom: 28px;
+  margin-bottom: 16px;
   display: block;
   font-weight: 500;
-  opacity: 0.85;
 }
 
 .breachDesc {
-  font-size: 18px; /* Scaled up again */
+  font-size: 15px;
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #000000;
   line-height: 1.6;
-  max-width: 900px;
   margin: 0 auto;
   font-weight: 400;
-  opacity: 0.7;
 }
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 0;
-    right: 0;
-    left: 0;
-    width: 100%;
+    top: -40px;
+    right: -20px;
+    left: -20px;
+    width: 120%;
     padding: 0;
     margin: 0 auto;
     z-index: 101;
   }
 
   .breachVisual {
-    aspect-ratio: 16/12;
-    mask-image: radial-gradient(ellipse at center, black 15%, transparent 85%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 15%, transparent 85%);
+    position: relative;
+    aspect-ratio: 16/10;
   }
 
   .breachContent {
-    padding: 60px 20px;
+    max-width: 80%;
+    padding: 0;
   }
 
   .breachLabel {
