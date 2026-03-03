@@ -245,7 +245,8 @@ export function Cave() {
           <div className={styles.breachContent}>
             <span className={styles.breachLabel}>Archive</span>
             <p className={styles.breachDesc}>
-              Direct access to the results. View the portfolio and curated artifacts
+              Direct access to the results.<br />
+              View the portfolio and curated artifacts
             </p>
           </div>
         </div>

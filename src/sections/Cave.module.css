@@ -427,9 +427,10 @@
 
 .archiveBreach {
   position: absolute;
-  top: 40px; /* Moved down from -120px to sit lower and more balanced */
-  right: -8vw; /* Uses vw to scale horizontally with the screen width */
-  width: min(1600px, 100vw); /* Ensure it doesn't exceed small screen widths */
+  top: 15vh; /* Relative to viewport height to avoid header text */
+  right: -10vw;
+  width: clamp(800px, 80vw, 1800px); /* Dynamic scale: min 800px, up to 80% viewport, max 1800px */
+  aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
   pointer-events: auto;
@@ -451,7 +452,7 @@
 
 .breachImg {
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
   filter: brightness(1) contrast(1.05);
 }
@@ -463,58 +464,60 @@
   font-family: var(--font-title);
   color: #000000;
   padding: 0;
-  max-width: 60%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
 
 .breachLabel {
-  font-size: 26px;
+  font-size: clamp(18px, 2.5vw, 32px); /* Dynamic label size */
   letter-spacing: 0.8em;
   text-transform: uppercase;
   color: #000000;
-  margin-bottom: 16px;
+  margin-bottom: 1.5vh;
   display: block;
   font-weight: 500;
 }
 
 .breachDesc {
-  font-size: 15px;
+  font-size: clamp(11px, 1.2vw, 18px); /* Dynamic description size */
   letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #000000;
   line-height: 1.6;
   margin: 0 auto;
   font-weight: 400;
+  max-width: 60%;
 }
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: -40px;
-    right: -20px;
-    left: -20px;
-    width: 120%;
+    top: 5vh;
+    right: -10%;
+    left: -10%;
+    width: 120%; /* Large on mobile */
     padding: 0;
     margin: 0 auto;
-    z-index: 101;
+    aspect-ratio: 4/3; /* Taller on mobile for better text fitting */
   }
 
   .breachVisual {
     position: relative;
-    aspect-ratio: 16/10;
   }
 
   .breachContent {
-    max-width: 80%;
-    padding: 0;
+    max-width: 90%;
   }
 
   .breachLabel {
-    font-size: 18px;
-    margin-bottom: 12px;
+    font-size: 22px;
+    margin-bottom: 10px;
   }
 
   .breachDesc {
-    font-size: 12px;
-    max-width: 100%;
-    padding: 0 15px;
+    font-size: 13px;
+    max-width: 80%;
   }
 }
