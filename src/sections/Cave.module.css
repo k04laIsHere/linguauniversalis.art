@@ -2,7 +2,6 @@
   position: relative;
   min-height: 500vh; /* Increased from 400vh to accommodate scattered artifacts */
   padding: 120px 0 100px;
-  overflow: hidden;
   background: #020305;
   transition: visibility 0.3s;
 }
@@ -428,10 +427,10 @@
 
 .archiveBreach {
   position: absolute;
-  top: 100px;
+  top: 60px; /* Moved slightly up to avoid clipping */
   right: 60px;
-  width: 1000px; /* 3x bigger (was 440ish) */
-  z-index: 100; /* Above flashlight mask (z-index 3) */
+  width: 1400px; /* Increased significantly to ~3x larger again */
+  z-index: 101; /* Explicitly above shadowMask (z-index 3) and any other hero elements */
   cursor: pointer;
   pointer-events: auto;
   user-select: none;
@@ -439,56 +438,58 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: visible; /* Prevent any clipping from the container itself */
 }
 
 .breachVisual {
   position: absolute;
   inset: 0;
   overflow: hidden;
-  border-radius: 1px;
-  box-shadow: 0 0 100px rgba(255, 255, 255, 0.1);
-  mask-image: radial-gradient(ellipse at center, black 40%, transparent 95%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 95%);
+  border-radius: 2px;
+  box-shadow: 0 0 120px rgba(255, 255, 255, 0.15);
+  mask-image: radial-gradient(ellipse at center, black 40%, transparent 98%);
+  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 98%);
+  background: #fcfcf9; /* Base background to ensure it's "lit" even without the image */
 }
 
 .breachImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.6) contrast(1.1);
+  filter: brightness(1) contrast(1.1); /* Brighter base */
   transform: scale(1.1);
+  opacity: 0.8; /* Let the light shine through */
 }
 
 .breachContent {
   position: relative;
   z-index: 2;
-  text-align: center; /* Centered content */
+  text-align: center;
   font-family: var(--font-title);
-  color: #fff;
-  padding: 40px;
+  color: #000000; /* Black text for the light portal */
+  padding: 80px; /* More internal padding to push text to the center */
 }
 
 .breachLabel {
-  font-size: 14px; /* Scaled up */
+  font-size: 24px; /* Scaled up for the larger breach */
   letter-spacing: 0.8em;
   text-transform: uppercase;
-  color: #fcfcf9;
-  margin-bottom: 12px;
+  color: #000000;
+  margin-bottom: 24px;
   display: block;
-  opacity: 1;
+  font-weight: 500;
 }
 
 .breachDesc {
-  font-size: 13px; /* Scaled up */
-  letter-spacing: 0.25em;
+  font-size: 16px; /* Scaled up */
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #fcfcf9;
-  line-height: 1.8;
-  max-width: 500px;
+  color: #000000;
+  line-height: 1.6;
+  max-width: 700px;
   margin: 0 auto;
+  font-weight: 400;
 }
-
-/* Removed all hover animations as requested */
 
 @media (max-width: 960px) {
   .archiveBreach {
@@ -498,26 +499,27 @@
     width: 100%;
     padding: 0 10px;
     margin: 0 auto;
+    z-index: 101;
   }
 
   .breachVisual {
-    aspect-ratio: 16/9;
-    mask-image: radial-gradient(ellipse at center, black 20%, transparent 90%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 20%, transparent 90%);
+    aspect-ratio: 16/10;
+    mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
   }
 
   .breachContent {
-    padding: 20px;
+    padding: 40px;
   }
 
   .breachLabel {
-    font-size: 12px;
-    margin-bottom: 8px;
+    font-size: 16px;
+    margin-bottom: 12px;
   }
 
   .breachDesc {
-    font-size: 11px;
+    font-size: 12px;
     max-width: 100%;
-    padding: 0 10px;
+    padding: 0 20px;
   }
 }
