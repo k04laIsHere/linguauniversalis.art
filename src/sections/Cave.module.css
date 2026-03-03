@@ -427,10 +427,10 @@
 
 .archiveBreach {
   position: absolute;
-  top: 60px; /* Moved slightly up to avoid clipping */
-  right: 60px;
-  width: 1400px; /* Increased significantly to ~3x larger again */
-  z-index: 101; /* Explicitly above shadowMask (z-index 3) and any other hero elements */
+  top: -50px; /* Shifted up slightly to counter the increased scale/height */
+  right: -50px; /* Shifted right to bleed off the edge slightly for a more organic feel */
+  width: 2400px; /* 1.7x increase (from 1400px) */
+  z-index: 101; 
   cursor: pointer;
   pointer-events: auto;
   user-select: none;
@@ -438,7 +438,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: visible; /* Prevent any clipping from the container itself */
+  overflow: visible;
 }
 
 .breachVisual {
@@ -446,19 +446,23 @@
   inset: 0;
   overflow: hidden;
   border-radius: 2px;
-  box-shadow: 0 0 120px rgba(255, 255, 255, 0.15);
-  mask-image: radial-gradient(ellipse at center, black 40%, transparent 98%);
-  -webkit-mask-image: radial-gradient(ellipse at center, black 40%, transparent 98%);
-  background: #fcfcf9; /* Base background to ensure it's "lit" even without the image */
+  /* Softened and expanded the glow to be more atmospheric and less like a harsh drop-shadow */
+  box-shadow: 
+    0 0 150px rgba(255, 255, 255, 0.1),
+    0 0 300px rgba(255, 255, 255, 0.05);
+  /* Adjusted mask to be more panoramic and less circular, helping it feel less "cut off" */
+  mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 85%);
+  -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 20%, transparent 85%);
+  background: #fcfcf9;
 }
 
 .breachImg {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(1) contrast(1.1); /* Brighter base */
+  filter: brightness(1) contrast(1.05);
   transform: scale(1.1);
-  opacity: 0.8; /* Let the light shine through */
+  opacity: 0.75;
 }
 
 .breachContent {
@@ -466,60 +470,62 @@
   z-index: 2;
   text-align: center;
   font-family: var(--font-title);
-  color: #000000; /* Black text for the light portal */
-  padding: 80px; /* More internal padding to push text to the center */
+  color: #000000;
+  padding: 120px; /* Increased padding for the massive scale */
 }
 
 .breachLabel {
-  font-size: 24px; /* Scaled up for the larger breach */
-  letter-spacing: 0.8em;
+  font-size: 32px; /* Scaled up again */
+  letter-spacing: 0.9em;
   text-transform: uppercase;
   color: #000000;
-  margin-bottom: 24px;
+  margin-bottom: 28px;
   display: block;
   font-weight: 500;
+  opacity: 0.85;
 }
 
 .breachDesc {
-  font-size: 16px; /* Scaled up */
-  letter-spacing: 0.2em;
+  font-size: 18px; /* Scaled up again */
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #000000;
   line-height: 1.6;
-  max-width: 700px;
+  max-width: 900px;
   margin: 0 auto;
   font-weight: 400;
+  opacity: 0.7;
 }
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 40px;
+    top: 0;
     right: 0;
     left: 0;
     width: 100%;
-    padding: 0 10px;
+    padding: 0;
     margin: 0 auto;
     z-index: 101;
   }
 
   .breachVisual {
-    aspect-ratio: 16/10;
-    mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
-    -webkit-mask-image: radial-gradient(ellipse at center, black 30%, transparent 95%);
+    aspect-ratio: 16/12;
+    mask-image: radial-gradient(ellipse at center, black 15%, transparent 85%);
+    -webkit-mask-image: radial-gradient(ellipse at center, black 15%, transparent 85%);
   }
 
   .breachContent {
-    padding: 40px;
+    padding: 60px 20px;
   }
 
   .breachLabel {
-    font-size: 16px;
+    font-size: 18px;
     margin-bottom: 12px;
   }
 
   .breachDesc {
     font-size: 12px;
     max-width: 100%;
-    padding: 0 20px;
+    padding: 0 15px;
   }
 }
