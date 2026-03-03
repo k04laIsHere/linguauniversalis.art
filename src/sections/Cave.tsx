@@ -6,7 +6,7 @@ import { gsap, ScrollTrigger } from '../animation/gsap';
 
 export function Cave() {
   const { t } = useI18n();
-  const { mode } = useViewMode();
+  const { mode, setMode } = useViewMode();
   const rootRef = useRef<HTMLElement | null>(null);
   const manifestEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -151,10 +151,31 @@ export function Cave() {
         });
       }
 
+      // Archive Breach parallax and appearance
+      gsap.fromTo(
+        `.${styles.archiveBreach}`,
+        { opacity: 0, y: -20 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 2,
+          ease: 'power2.out',
+          scrollTrigger: {
+            trigger: root,
+            start: 'top 20%',
+          },
+        }
+      );
+
     }, root);
 
     return () => ctx.revert();
   }, [mode]);
+
+  const handleArchiveClick = () => {
+    setMode('gallery');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const artifactsData = [
     { top: 0, left: 55, id: 1, title: 'PALEOLITHIC ECHO', sub: 'ALTAMIRA SERIES • 2024' },
@@ -172,6 +193,28 @@ export function Cave() {
       <div className={styles.shadowMask} aria-hidden="true" />
 
       <div className={styles.inner}>
+        <div 
+          className={styles.archiveBreach}
+          onClick={handleArchiveClick}
+          role="button"
+          tabIndex={0}
+          aria-label="Enter Archive"
+        >
+          <div className={styles.breachVisual}>
+            <img 
+              src="/assets/images/backgrounds/archive-breach.webp" 
+              alt="" 
+              className={styles.breachImg} 
+            />
+          </div>
+          <div className={styles.breachContent}>
+            <span className={styles.breachLabel}>Archive</span>
+            <p className={styles.breachDesc}>
+              Direct access to the results.<br />View the portfolio and curated artifacts
+            </p>
+          </div>
+        </div>
+
         <div className={styles.manifestoWrapper} id="manifesto">
           <header className={styles.hero}>
             <h1 className={styles.title}>
