@@ -427,9 +427,9 @@
 
 .archiveBreach {
   position: absolute;
-  top: -120px;
-  right: -120px;
-  width: 1600px;
+  top: 40px; /* Moved down from -120px to sit lower and more balanced */
+  right: -8vw; /* Uses vw to scale horizontally with the screen width */
+  width: min(1600px, 100vw); /* Ensure it doesn't exceed small screen widths */
   z-index: 101; 
   cursor: pointer;
   pointer-events: auto;
