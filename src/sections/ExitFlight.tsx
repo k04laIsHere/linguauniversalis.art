@@ -104,6 +104,7 @@ export function ExitFlight() {
       }
 
       // 3. Zoom in the wall and arch with parallax
+      // Removed opacity: 0 to keep them visible at all times
       tl.fromTo([baseDark, caveEdges, edgesContainer], 
       {
          scale: 1,
@@ -112,11 +113,11 @@ export function ExitFlight() {
       },
       { 
         scale: 12, 
-        opacity: 0, 
+        opacity: 1, 
         yPercent: 15,
         duration: 3,
         ease: 'power2.in',
-        immediateRender: false // Prevent conflict with initial set
+        immediateRender: false 
       }, 0.2);
 
       // 4. The landscape (vegetation mask) moves DOWN
