@@ -44,7 +44,7 @@
 .stage {
   position: relative;
   border-radius: 26px;
-  background: rgba(10, 12, 14, 0.22);
+  background: rgba(8, 9, 11, 0.45);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   overflow: hidden;
@@ -57,7 +57,7 @@
 }
 
 .stage.active, .stage.sending, .stage.error {
-  background: rgba(10, 12, 14, 0.6);
+  background: rgba(8, 9, 11, 0.85);
   backdrop-filter: blur(30px);
   -webkit-backdrop-filter: blur(30px);
 }

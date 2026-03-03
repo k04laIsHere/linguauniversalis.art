@@ -231,6 +231,8 @@
   font-family: var(--font-title);
   text-transform: uppercase;
   text-shadow: 0 10px 40px rgba(0, 0, 0, 0.9);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .manifestoItem::after {
@@ -264,6 +266,8 @@
   width: min(700px, 80vw); /* Slightly reduced to prevent tight overlaps */
   z-index: 2;
   cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .artifactImgWrapper {

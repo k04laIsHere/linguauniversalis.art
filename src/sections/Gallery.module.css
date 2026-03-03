@@ -125,6 +125,8 @@
   cursor: pointer;
   overflow: hidden;
   transition: transform 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .card:hover {

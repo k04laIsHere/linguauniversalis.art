@@ -1,7 +1,7 @@
 .root {
   position: fixed;
   inset: 0;
-  background-color: #fcfcf9;
+  background-color: #020305;
   z-index: 10000;
   display: flex;
   flex-direction: column;
@@ -35,7 +35,7 @@
   font-size: 1.5rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: #1a1a1a;
+  color: #fcfcf9;
   margin-bottom: 0.5rem;
 }
 
@@ -49,14 +49,14 @@
 .progressContainer {
   width: 100%;
   height: 1px;
-  background: rgba(0, 0, 0, 0.05);
+  background: rgba(255, 255, 255, 0.1);
   position: relative;
   margin-bottom: 1.5rem;
 }
 
 .progressBar {
   height: 100%;
-  background: #1a1a1a;
+  background: #fcfcf9;
   transition: width 0.3s ease-out;
 }
 
@@ -92,7 +92,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: #fcfcf9;
+  background: #020305;
   z-index: 10;
   animation: choiceFadeIn 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
 }
@@ -104,7 +104,7 @@
   height: 70vh;
   gap: 1px;
   padding: 0;
-  background: rgba(0, 0, 0, 0.03); /* Thin divider line */
+  background: rgba(255, 255, 255, 0.05); /* Thin divider line */
 }
 
 .choiceCard {
@@ -126,15 +126,15 @@
   inset: 0;
   background-size: cover;
   background-position: center;
-  filter: grayscale(1) brightness(1.1);
-  opacity: 0.07; /* Increased default visibility as requested */
+  filter: grayscale(1) brightness(0.8);
+  opacity: 0.15; /* Increased default visibility for dark theme */
   transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   transform: scale(1.05);
   z-index: 0;
 }
 
 .choiceCard:hover .choiceBg {
-  opacity: 0.15;
+  opacity: 0.3;
   transform: scale(1);
   filter: grayscale(0.5) brightness(1);
 }
@@ -150,7 +150,7 @@
 .choiceTitle {
   font-family: var(--font-title);
   font-size: clamp(2rem, 5vw, 4rem);
-  color: #1a1a1a;
+  color: #fcfcf9;
   margin-bottom: 1.5rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -158,7 +158,7 @@
 
 .choiceDesc {
   font-size: 0.8rem;
-  color: #666;
+  color: #aaa;
   max-width: 280px;
   line-height: 1.6;
   opacity: 0;
@@ -174,19 +174,19 @@
 .choiceAction {
   margin-top: 2rem;
   padding: 0.75rem 2rem;
-  border: 1px solid #1a1a1a;
+  border: 1px solid #fcfcf9;
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.2em;
-  color: #1a1a1a;
+  color: #fcfcf9;
   opacity: 0.4;
   transition: all 0.4s ease;
 }
 
 .choiceCard:hover .choiceAction {
   opacity: 1;
-  background: #1a1a1a;
-  color: #fcfcf9;
+  background: #fcfcf9;
+  color: #020305;
 }
 
 .choiceHint {

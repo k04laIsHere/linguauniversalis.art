@@ -35,6 +35,9 @@ function AppContent() {
       setIsTransitioning(true);
       document.body.style.overflow = 'hidden'; // Pause during transition
 
+      // Force scroll to top when mode changes (especially for Gallery/Archive)
+      window.scrollTo(0, 0);
+
       // Fade out
       setTimeout(() => {
         // Mode has changed, now fade in
@@ -114,7 +117,7 @@ function AppContent() {
           style={{
             position: 'fixed',
             inset: 0,
-            background: '#ffffff',
+            background: '#020305',
             zIndex: 9999,
             animation: 'modeFade 1s ease-in-out forwards',
           }}
