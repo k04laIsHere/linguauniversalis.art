@@ -427,9 +427,9 @@
 
 .archiveBreach {
   position: absolute;
-  top: 15vh; /* Radical move up from 50vh to clear the main title area */
-  left: 50%;
-  transform: translateX(-50%); /* Only horizontal centering, no vertical translate to keep top stable */
+  top: 50vh !important; /* Force the location change */
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
   width: clamp(800px, 80vw, 1800px);
   aspect-ratio: 16/9;
   z-index: 101; 
@@ -460,24 +460,24 @@
 
 .breachContent {
   position: relative;
-  z-index: 102; /* Higher than visual */
+  z-index: 102;
   text-align: center;
   font-family: var(--font-title);
-  color: #FFFFFF; /* High contrast white */
+  color: #000000; /* Back to Black */
   padding: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-shadow: 0 0 20px rgba(0,0,0,0.8); /* Shadow for legibility against glow */
+  text-shadow: none; /* No shadow */
 }
 
 .breachLabel {
   font-size: clamp(18px, 2.5vw, 32px);
   letter-spacing: 0.8em;
   text-transform: uppercase;
-  color: #FFFFFF;
+  color: #000000;
   margin-bottom: 1.5vh;
   display: block;
   font-weight: 500;
@@ -487,7 +487,7 @@
   font-size: clamp(11px, 1.2vw, 18px);
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #FFFFFF;
+  color: #000000;
   line-height: 1.6;
   margin: 0 auto;
   font-weight: 400;
@@ -496,12 +496,12 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 5vh; /* Moved way up from 35vh to sit right under the header */
+    top: 30vh !important; /* Radical position move way up */
     width: 350%; 
     padding: 0;
     aspect-ratio: 16/9;
-    left: 50%;
-    transform: translateX(-50%); /* Horizontal centering only */
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
   }
 
   .breachVisual {
@@ -516,33 +516,28 @@
   .breachContent {
     position: relative;
     z-index: 102;
-    max-width: 90vw; /* Hard constraint to viewport width */
-    width: 90vw; /* Ensure it stays within screen bounds */
+    max-width: 80vw;
+    width: 80vw;
     transform: none;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    text-shadow: none;
   }
 
   .breachLabel {
-    color: #FFFFFF;
+    color: #000000;
     font-size: 20px;
     margin-bottom: 8px;
-    letter-spacing: 0.4em;
-    width: 100%;
-    text-align: center;
+    letter-spacing: 0.5em;
   }
 
   .breachDesc {
-    color: #FFFFFF;
-    font-size: 12px;
-    max-width: 100%; /* Use the full available content width */
+    color: #000000;
+    font-size: 11px;
+    max-width: 100%;
     line-height: 1.4;
-    letter-spacing: 0.12em;
-    width: 100%;
-    text-align: center;
-    padding: 0 10px;
+    letter-spacing: 0.15em;
   }
 }
