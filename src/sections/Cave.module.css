@@ -496,12 +496,13 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 30vh !important; /* Radical position move way up */
-    width: 350%; 
+    top: 25vh !important; /* Moved even higher up (from 30vh) */
+    right: -10% !important; /* Nudged to the right */
+    left: auto !important; /* Release left lock for right bias */
+    width: 300%; /* Scale set to 300% as requested */
     padding: 0;
     aspect-ratio: 16/9;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    transform: translateY(-50%) !important; /* Only vertical centering, horizontal handled by right */
   }
 
   .breachVisual {
@@ -518,7 +519,8 @@
     z-index: 102;
     max-width: 80vw;
     width: 80vw;
-    transform: none;
+    margin-left: auto; /* Push content within the right-aligned container */
+    margin-right: 15%; /* Nudge content slightly left from the right edge for balance */
     display: flex;
     flex-direction: column;
     align-items: center;
