@@ -427,10 +427,10 @@
 
 .archiveBreach {
   position: absolute;
-  top: 50vh !important; /* Force the location change */
+  top: 25vh !important; /* Moved up from 50vh to clear the title */
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
-  width: clamp(800px, 80vw, 1800px);
+  width: clamp(1000px, 100vw, 2200px); /* Increased by ~1.2x from clamp(800px, 80vw, 1800px) */
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
