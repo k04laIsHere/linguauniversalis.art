@@ -426,8 +426,10 @@
 }
 
 .archiveBreach {
-  position: relative;
-  margin: 0 auto -45vh; /* Much larger negative margin to pull title way up into the glow */
+  position: absolute;
+  top: 50vh; /* Radical centering: middle of the first viewport */
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center horizontally and vertically */
   width: clamp(800px, 80vw, 1800px);
   aspect-ratio: 16/9;
   z-index: 101; 
@@ -493,12 +495,12 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    margin: 50px -125% -40vh; /* -125% horizontal margin centers a 350% width element */
+    top: 40vh; /* Centered higher on mobile to frame the title */
     width: 350%; 
     padding: 0;
     aspect-ratio: 16/9;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, -50%);
   }
 
   .breachVisual {
