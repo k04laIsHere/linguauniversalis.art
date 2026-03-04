@@ -242,7 +242,11 @@ export function Cave() {
             />
           </div>
           <div className={styles.breachContent}>
-            <span className={styles.breachLabel}>{t.cave.breachLabel}</span>
+            <span className={styles.breachLabel}>
+              {t.cave.breachLabel.split('\n').map((line, idx) => (
+                <span key={idx} style={{ display: 'block' }}>{line}</span>
+              ))}
+            </span>
             <p className={styles.breachDesc}>
               {t.cave.breachDesc.split('\n').map((line, idx) => (
                 <span key={idx} style={{ display: 'block' }}>{line}</span>
