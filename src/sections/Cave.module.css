@@ -67,7 +67,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(400px, 40vw, 900px) clamp(225px, 22.5vw, 506px) at 50% 25vh,
+      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 25vh,
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -83,7 +83,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(400px, 40vw, 900px) clamp(225px, 22.5vw, 506px) at 50% 25vh,
+      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 25vh,
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -371,7 +371,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 50% 20% at 50% 18vh,
+        ellipse 33% 13% at 50% 18vh,
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -385,7 +385,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 50% 20% at 50% 18vh,
+        ellipse 33% 13% at 50% 18vh,
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -574,7 +574,7 @@
     align-items: center;
     justify-content: center;
     text-shadow: none;
-    transform: translate(-45px, -25px); /* Nudge text further left (-45px) and slightly higher (-25px) */
+    transform: translate(-60px, -25px); /* Increased left nudge from -45px to -60px */
   }
 
   .breachLabel {
