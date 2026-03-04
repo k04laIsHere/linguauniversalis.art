@@ -154,15 +154,17 @@ export function Cave() {
       // Archive Breach parallax and appearance
       gsap.fromTo(
         `.${styles.archiveBreach}`,
-        { opacity: 0, y: -20 },
+        { opacity: 0, scale: 0.9, y: 20 },
         {
           opacity: 1,
+          scale: 1,
           y: 0,
-          duration: 2,
-          ease: 'power2.out',
+          duration: 2.5,
+          delay: 1.5, // Delayed start to follow title animation
+          ease: 'expo.out',
           scrollTrigger: {
-            trigger: root,
-            start: 'top 20%',
+            trigger: `.${styles.hero}`,
+            start: 'top 85%',
           },
         }
       );

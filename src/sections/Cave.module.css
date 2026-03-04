@@ -496,12 +496,12 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 18vh !important; /* Moved even higher up (from 25vh) */
-    width: 300%; 
+    top: 18vh !important;
+    width: 270%; /* Reduced from 300% */
     padding: 0;
     aspect-ratio: 16/9;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important; /* Restored previous centering logic */
+    transform: translate(-50%, -50%) !important;
   }
 
   .breachVisual {
@@ -523,7 +523,7 @@
     align-items: center;
     justify-content: center;
     text-shadow: none;
-    transform: translateX(-15px); /* Nudge text slightly to the left */
+    transform: translateX(-30px); /* Increased nudge to the left from -15px */
   }
 
   .breachLabel {
