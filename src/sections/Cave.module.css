@@ -523,7 +523,7 @@
     align-items: center;
     justify-content: center;
     text-shadow: none;
-    transform: translateX(-30px); /* Increased nudge to the left from -15px */
+    transform: translate(-45px, -25px); /* Nudge text further left (-45px) and slightly higher (-25px) */
   }
 
   .breachLabel {
