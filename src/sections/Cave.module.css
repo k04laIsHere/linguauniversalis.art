@@ -352,16 +352,16 @@
   }
 
   .title {
-    font-size: clamp(32px, 8vw, 60px);
-    letter-spacing: 0.1em;
-    padding: 0 10px;
-    gap: 0.1em;
+    font-size: clamp(40px, 10vw, 72px); /* Increased from 32px / 8vw / 60px */
+    letter-spacing: 0.12em;
+    padding: 0 15px;
+    gap: 0.15em;
   }
 
   .subtitle {
-    letter-spacing: 0.3em;
-    font-size: 12px;
-    margin-top: 30px;
+    letter-spacing: 0.4em;
+    font-size: 14px; /* Slightly larger from 12px */
+    margin-top: 35px;
     padding: 0 20px;
   }
 
@@ -523,6 +523,7 @@
     align-items: center;
     justify-content: center;
     text-shadow: none;
+    transform: translateX(-15px); /* Nudge text slightly to the left */
   }
 
   .breachLabel {
