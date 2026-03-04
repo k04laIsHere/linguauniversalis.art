@@ -427,7 +427,7 @@
 
 .archiveBreach {
   position: relative;
-  margin: 0 auto -20vh; /* Shifted to position above the hero */
+  margin: 0 auto -45vh; /* Much larger negative margin to pull title way up into the glow */
   width: clamp(800px, 80vw, 1800px);
   aspect-ratio: 16/9;
   z-index: 101; 
@@ -493,8 +493,8 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    margin: -10vh auto -15vh; /* Massive scale on mobile needs more headroom */
-    width: 250%; /* Massive expansion */
+    margin: -15vh auto -35vh; /* Deep overlap for mobile */
+    width: 350%; /* Massive expansion requested */
     padding: 0;
     aspect-ratio: 16/9;
   }
