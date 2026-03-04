@@ -160,12 +160,9 @@ export function Cave() {
           scale: 1,
           y: 0,
           duration: 2.5,
-          delay: 0.5, // Reduced delay
+          delay: 1.0, // Reduced delay to follow title more closely
           ease: 'expo.out',
-          scrollTrigger: {
-            trigger: root, // Use root instead of hero
-            start: 'top top', // Fire immediately when section is entered
-          },
+          // Removed ScrollTrigger to make it an immediate automatic entrance
         }
       );
 
@@ -247,7 +244,9 @@ export function Cave() {
           <div className={styles.breachContent}>
             <span className={styles.breachLabel}>{t.cave.breachLabel}</span>
             <p className={styles.breachDesc}>
-              {t.cave.breachDesc}
+              {t.cave.breachDesc.split('\n').map((line, idx) => (
+                <span key={idx} style={{ display: 'block' }}>{line}</span>
+              ))}
             </p>
           </div>
         </div>
