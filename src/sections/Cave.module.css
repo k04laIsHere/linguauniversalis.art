@@ -54,21 +54,42 @@
   z-index: 3;
   opacity: 1; /* Start visible */
   
-  /* Increased mask radius as requested previously, keeping it broad */
-  mask-image: radial-gradient(
-    circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
-    transparent 0%,
-    rgba(0, 0, 0, 0.01) 20%,
-    rgba(0, 0, 0, 0.4) 55%,
-    black 92%
-  );
-  -webkit-mask-image: radial-gradient(
-    circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
-    transparent 0%,
-    rgba(0, 0, 0, 0.01) 20%,
-    rgba(0, 0, 0, 0.4) 55%,
-    black 92%
-  );
+  /* Multiple Masks: 
+     1. The dynamic moving flashlight
+     2. A static oval matching the Archive Breach's position (top 25vh) and scale (clamp)
+  */
+  mask-image: 
+    radial-gradient(
+      circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
+      transparent 0%,
+      rgba(0, 0, 0, 0.01) 20%,
+      rgba(0, 0, 0, 0.4) 55%,
+      black 92%
+    ),
+    radial-gradient(
+      ellipse clamp(400px, 40vw, 900px) clamp(225px, 22.5vw, 506px) at 50% 25vh,
+      transparent 0%,
+      rgba(0, 0, 0, 0.1) 30%,
+      rgba(0, 0, 0, 0.6) 70%,
+      black 100%
+    );
+  mask-composite: intersect;
+  -webkit-mask-image: 
+    radial-gradient(
+      circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
+      transparent 0%,
+      rgba(0, 0, 0, 0.01) 20%,
+      rgba(0, 0, 0, 0.4) 55%,
+      black 92%
+    ),
+    radial-gradient(
+      ellipse clamp(400px, 40vw, 900px) clamp(225px, 22.5vw, 506px) at 50% 25vh,
+      transparent 0%,
+      rgba(0, 0, 0, 0.1) 30%,
+      rgba(0, 0, 0, 0.6) 70%,
+      black 100%
+    );
+  -webkit-mask-composite: source-in; /* 'source-in' for webkit works like 'intersect' to combine holes */
 }
 
 .root[data-cave-active='1'] .bg,
@@ -340,8 +361,38 @@
   color: var(--muted);
 }
 
-/* Mobile Optimizations */
 @media (max-width: 960px) {
+  .shadowMask {
+    mask-image: 
+      radial-gradient(
+        circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
+        transparent 0%,
+        rgba(0, 0, 0, 0.4) 55%,
+        black 92%
+      ),
+      radial-gradient(
+        ellipse 50% 20% at 50% 18vh,
+        transparent 0%,
+        rgba(0, 0, 0, 0.1) 30%,
+        black 100%
+      );
+    mask-composite: intersect;
+    -webkit-mask-image: 
+      radial-gradient(
+        circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
+        transparent 0%,
+        rgba(0, 0, 0, 0.4) 55%,
+        black 92%
+      ),
+      radial-gradient(
+        ellipse 50% 20% at 50% 18vh,
+        transparent 0%,
+        rgba(0, 0, 0, 0.1) 30%,
+        black 100%
+      );
+    -webkit-mask-composite: source-in;
+  }
+
   .root {
     min-height: 350vh; /* Slightly more to accommodate items */
     padding-top: 80px;
