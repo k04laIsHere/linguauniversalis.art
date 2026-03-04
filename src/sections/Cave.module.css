@@ -494,7 +494,7 @@
 @media (max-width: 960px) {
   .archiveBreach {
     margin: -5vh auto 10vh; /* Tighter margins for mobile */
-    width: 120%; /* Keep large mobile presence */
+    width: 170%; /* Increased from 120% */
     padding: 0;
     aspect-ratio: 16/9;
   }
