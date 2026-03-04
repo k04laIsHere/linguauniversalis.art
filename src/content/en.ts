@@ -27,6 +27,8 @@ export const en: I18nDict = {
     flashlightTitle: 'Flashlight',
     flashlightHint: 'Move the cursor to reveal the cave.',
     flashlightHint2: 'Scroll down—the journey begins.',
+    breachLabel: 'Archive',
+    breachDesc: 'Direct access to the results. View the portfolio and events',
   },
   ancient: { title: 'Ancient marks' },
   exitFlight: {

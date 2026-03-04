@@ -21,6 +21,8 @@ export type I18nDict = {
     flashlightTitle: string;
     flashlightHint: string;
     flashlightHint2: string;
+    breachLabel: string;
+    breachDesc: string;
   };
   ancient: {
     title: string;

@@ -160,11 +160,11 @@ export function Cave() {
           scale: 1,
           y: 0,
           duration: 2.5,
-          delay: 1.5, // Delayed start to follow title animation
+          delay: 0.5, // Reduced delay
           ease: 'expo.out',
           scrollTrigger: {
-            trigger: `.${styles.hero}`,
-            start: 'top 85%',
+            trigger: root, // Use root instead of hero
+            start: 'top top', // Fire immediately when section is entered
           },
         }
       );
@@ -245,10 +245,9 @@ export function Cave() {
             />
           </div>
           <div className={styles.breachContent}>
-            <span className={styles.breachLabel}>Archive</span>
+            <span className={styles.breachLabel}>{t.cave.breachLabel}</span>
             <p className={styles.breachDesc}>
-              Direct access to the results.<br />
-              View the portfolio and curated artifacts
+              {t.cave.breachDesc}
             </p>
           </div>
         </div>

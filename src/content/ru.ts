@@ -27,6 +27,8 @@ export const ru: I18nDict = {
     flashlightTitle: 'Фонарь',
     flashlightHint: 'Двигайтесь курсором, чтобы проявить пещеру.',
     flashlightHint2: 'Прокрутите вниз — путь начинается.',
+    breachLabel: 'Архив',
+    breachDesc: 'Прямой доступ к результатам. Просмотр портфолио и событий',
   },
   ancient: { title: 'Древние образы' },
   exitFlight: {
