@@ -460,33 +460,34 @@
 
 .breachContent {
   position: relative;
-  z-index: 2;
+  z-index: 102; /* Higher than visual */
   text-align: center;
   font-family: var(--font-title);
-  color: #000000;
+  color: #FFFFFF; /* High contrast white */
   padding: 0;
   width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  text-shadow: 0 0 20px rgba(0,0,0,0.8); /* Shadow for legibility against glow */
 }
 
 .breachLabel {
-  font-size: clamp(18px, 2.5vw, 32px); /* Dynamic label size */
+  font-size: clamp(18px, 2.5vw, 32px);
   letter-spacing: 0.8em;
   text-transform: uppercase;
-  color: #000000;
+  color: #FFFFFF;
   margin-bottom: 1.5vh;
   display: block;
   font-weight: 500;
 }
 
 .breachDesc {
-  font-size: clamp(11px, 1.2vw, 18px); /* Dynamic description size */
+  font-size: clamp(11px, 1.2vw, 18px);
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #000000;
+  color: #FFFFFF;
   line-height: 1.6;
   margin: 0 auto;
   font-weight: 400;
@@ -495,7 +496,7 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 40vh; /* Centered higher on mobile to frame the title */
+    top: 35vh; /* Nudge slightly higher to frame the title perfectly */
     width: 350%; 
     padding: 0;
     aspect-ratio: 16/9;
@@ -504,16 +505,17 @@
   }
 
   .breachVisual {
-    position: absolute; /* Reverted to absolute for mobile layering */
+    position: absolute;
     inset: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
   }
 
   .breachContent {
     position: relative;
-    z-index: 2;
+    z-index: 102;
     max-width: 80%;
     transform: none;
     display: flex;
@@ -523,15 +525,17 @@
   }
 
   .breachLabel {
-    font-size: 22px;
-    margin-bottom: 10px;
-    letter-spacing: 0.8em;
+    color: #FFFFFF;
+    font-size: clamp(20px, 6vw, 24px);
+    margin-bottom: 8px;
+    letter-spacing: 0.5em;
   }
 
   .breachDesc {
-    font-size: 13px;
-    max-width: 80%;
-    line-height: 1.6;
-    letter-spacing: 0.22em;
+    color: #FFFFFF;
+    font-size: clamp(10px, 3vw, 13px);
+    max-width: 260px;
+    line-height: 1.4;
+    letter-spacing: 0.15em;
   }
 }
