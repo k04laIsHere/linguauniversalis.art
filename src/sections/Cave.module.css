@@ -427,9 +427,9 @@
 
 .archiveBreach {
   position: absolute;
-  top: 50vh; /* Radical centering: middle of the first viewport */
+  top: 15vh; /* Radical move up from 50vh to clear the main title area */
   left: 50%;
-  transform: translate(-50%, -50%); /* Center horizontally and vertically */
+  transform: translateX(-50%); /* Only horizontal centering, no vertical translate to keep top stable */
   width: clamp(800px, 80vw, 1800px);
   aspect-ratio: 16/9;
   z-index: 101; 
@@ -496,12 +496,12 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 35vh; /* Nudge slightly higher to frame the title perfectly */
+    top: 5vh; /* Moved way up from 35vh to sit right under the header */
     width: 350%; 
     padding: 0;
     aspect-ratio: 16/9;
     left: 50%;
-    transform: translate(-50%, -50%);
+    transform: translateX(-50%); /* Horizontal centering only */
   }
 
   .breachVisual {
@@ -516,26 +516,33 @@
   .breachContent {
     position: relative;
     z-index: 102;
-    max-width: 80%;
+    max-width: 90vw; /* Hard constraint to viewport width */
+    width: 90vw; /* Ensure it stays within screen bounds */
     transform: none;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
   }
 
   .breachLabel {
     color: #FFFFFF;
-    font-size: clamp(20px, 6vw, 24px);
+    font-size: 20px;
     margin-bottom: 8px;
-    letter-spacing: 0.5em;
+    letter-spacing: 0.4em;
+    width: 100%;
+    text-align: center;
   }
 
   .breachDesc {
     color: #FFFFFF;
-    font-size: clamp(10px, 3vw, 13px);
-    max-width: 260px;
+    font-size: 12px;
+    max-width: 100%; /* Use the full available content width */
     line-height: 1.4;
-    letter-spacing: 0.15em;
+    letter-spacing: 0.12em;
+    width: 100%;
+    text-align: center;
+    padding: 0 10px;
   }
 }
