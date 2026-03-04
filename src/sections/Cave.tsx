@@ -227,49 +227,48 @@ export function Cave() {
       </div>
       <div className={styles.shadowMask} aria-hidden="true" />
 
-      <div className={styles.inner}>
-        <div 
-          className={styles.archiveBreach}
-          onClick={handleArchiveClick}
-          role="button"
-          tabIndex={0}
-          aria-label="Enter Archive"
-        >
-          <div className={styles.breachVisual}>
-            <img 
-              src="/assets/images/backgrounds/archive-breach.webp" 
-              alt="" 
-              className={styles.breachImg} 
-            />
-          </div>
-          <div className={styles.breachContent}>
-            <span className={styles.breachLabel}>Archive</span>
-            <p className={styles.breachDesc}>
-              Direct access to the results.<br />
-              View the portfolio and curated artifacts
-            </p>
-          </div>
-        </div>
+          <div className={styles.manifestoWrapper} id="manifesto">
+            <header className={styles.hero}>
+              <h1 className={styles.title}>
+                {t.cave.title.split(' ').map((word, wordIdx) => (
+                  <span key={wordIdx} className={styles.titleWord}>
+                    {word.split('').map((char, charIdx) => (
+                      <span key={charIdx} className={styles.titleChar}>
+                        {char}
+                      </span>
+                    ))}
+                    {wordIdx < t.cave.title.split(' ').length - 1 && '\u00A0'}
+                  </span>
+                ))}
+              </h1>
+              <p className={styles.subtitle}>{t.cave.subtitle}</p>
+              <div className={styles.scrollHint}>{t.cave.flashlightHint2}</div>
+            </header>
 
-        <div className={styles.manifestoWrapper} id="manifesto">
-          <header className={styles.hero}>
-            <h1 className={styles.title}>
-              {t.cave.title.split(' ').map((word, wordIdx) => (
-                <span key={wordIdx} className={styles.titleWord}>
-                  {word.split('').map((char, charIdx) => (
-                    <span key={charIdx} className={styles.titleChar}>
-                      {char}
-                    </span>
-                  ))}
-                  {wordIdx < t.cave.title.split(' ').length - 1 && '\u00A0'}
-                </span>
-              ))}
-            </h1>
-            <p className={styles.subtitle}>{t.cave.subtitle}</p>
-            <div className={styles.scrollHint}>{t.cave.flashlightHint2}</div>
-          </header>
+            <div 
+              className={styles.archiveBreach}
+              onClick={handleArchiveClick}
+              role="button"
+              tabIndex={0}
+              aria-label="Enter Archive"
+            >
+              <div className={styles.breachVisual}>
+                <img 
+                  src="/assets/images/backgrounds/archive-breach.webp" 
+                  alt="" 
+                  className={styles.breachImg} 
+                />
+              </div>
+              <div className={styles.breachContent}>
+                <span className={styles.breachLabel}>Archive</span>
+                <p className={styles.breachDesc}>
+                  Direct access to the results.<br />
+                  View the portfolio and curated artifacts
+                </p>
+              </div>
+            </div>
 
-          <div className={styles.manifestoGrid}>
+            <div className={styles.manifestoGrid}>
             {t.cave.manifesto.map((line, i) => (
               <div 
                 key={i} 

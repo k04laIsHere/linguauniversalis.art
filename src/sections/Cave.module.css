@@ -426,10 +426,9 @@
 }
 
 .archiveBreach {
-  position: absolute;
-  top: 15vh; /* Relative to viewport height to avoid header text */
-  right: -10vw;
-  width: clamp(800px, 80vw, 1800px); /* Dynamic scale: min 800px, up to 80% viewport, max 1800px */
+  position: relative; /* Changed from absolute */
+  margin: -10vh auto 15vh; /* Negative top margin to pull it up towards the header, spacing below for manifesto */
+  width: clamp(800px, 80vw, 1800px);
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -494,30 +493,34 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 5vh;
-    right: -10%;
-    left: -10%;
-    width: 120%; /* Large on mobile */
+    margin: -5vh auto 10vh; /* Tighter margins for mobile */
+    width: 120%; /* Keep large mobile presence */
     padding: 0;
-    margin: 0 auto;
-    aspect-ratio: 4/3; /* Taller on mobile for better text fitting */
+    aspect-ratio: 16/9;
   }
 
   .breachVisual {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .breachContent {
     max-width: 90%;
+    transform: none;
   }
 
   .breachLabel {
     font-size: 22px;
     margin-bottom: 10px;
+    letter-spacing: 0.8em;
   }
 
   .breachDesc {
     font-size: 13px;
     max-width: 80%;
+    line-height: 1.6;
+    letter-spacing: 0.22em;
   }
 }
