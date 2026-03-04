@@ -426,8 +426,8 @@
 }
 
 .archiveBreach {
-  position: relative; /* Changed from absolute */
-  margin: -10vh auto 15vh; /* Negative top margin to pull it up towards the header, spacing below for manifesto */
+  position: relative;
+  margin: 0 auto -20vh; /* Shifted to position above the hero */
   width: clamp(800px, 80vw, 1800px);
   aspect-ratio: 16/9;
   z-index: 101; 
@@ -493,8 +493,8 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    margin: -5vh auto 10vh; /* Tighter margins for mobile */
-    width: 170%; /* Increased from 120% */
+    margin: -10vh auto -15vh; /* Massive scale on mobile needs more headroom */
+    width: 250%; /* Massive expansion */
     padding: 0;
     aspect-ratio: 16/9;
   }
