@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useI18n } from '../i18n/useI18n';
 import { useViewMode } from '../contexts/ViewModeContext';
 import styles from './Cave.module.css';
@@ -6,7 +6,7 @@ import { gsap, ScrollTrigger } from '../animation/gsap';
 
 export function Cave() {
   const { t } = useI18n();
-  const { mode, setMode } = useViewMode();
+  const { setMode } = useViewMode();
   const rootRef = useRef<HTMLElement | null>(null);
   const manifestEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -170,7 +170,7 @@ export function Cave() {
     }, root);
 
     return () => ctx.revert();
-  }, [mode]);
+  }, []);
 
   const navigate = (newMode: 'immersive' | 'gallery') => {
     // iris-like transition starting from white inside the breach
@@ -253,6 +253,21 @@ export function Cave() {
 
         <div className={styles.manifestoWrapper} id="manifesto">
           <header className={styles.hero}>
+            <h1 className={styles.title}>
+              {t.cave.title.split(' ').map((word, wordIdx) => (
+                <span key={wordIdx} className={styles.titleWord}>
+                  {word.split('').map((char, charIdx) => (
+                    <span key={charIdx} className={styles.titleChar}>
+                      {char}
+                    </span>
+                  ))}
+                  {wordIdx < t.cave.title.split(' ').length - 1 && '\u00A0'}
+                </span>
+              ))}
+            </h1>
+            <p className={styles.subtitle}>{t.cave.subtitle}</p>
+            <div className={styles.scrollHint}>{t.cave.flashlightHint2}</div>
+          </header>
 
           <div className={styles.manifestoGrid}>
             {t.cave.manifesto.map((line, i) => (
