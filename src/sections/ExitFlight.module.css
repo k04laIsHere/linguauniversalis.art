@@ -60,7 +60,7 @@
   position: absolute;
   inset: 0;
   z-index: 2; /* On top of baseDark */
-  background-image: url('/assets/images/backgrounds/cave-arch-mask.png');
+  background-image: url('/assets/images/backgrounds/cave-arch-mask.webp');
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
