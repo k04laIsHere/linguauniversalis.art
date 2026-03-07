@@ -29,6 +29,8 @@
   z-index: 5; /* Above everything to prevent z-fighting */
   will-change: transform, opacity;
   pointer-events: none; /* User shouldn't click through the "opening" */
+  /* Added to force composite layer and avoid flicker through the mask */
+  transform: translateZ(0);
 }
 
 .exitFill {
@@ -41,6 +43,7 @@
   z-index: 1; /* Below the arch mask */
   filter: brightness(1.1);
   will-change: transform, opacity;
+  transform: translateZ(0); /* Same for this layer */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }

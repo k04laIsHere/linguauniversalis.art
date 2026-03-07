@@ -84,7 +84,7 @@ export function ExitFlight() {
       // The transition:
       // 1. Initial fade in for brightness
       tl.to([baseDark, exitFill], { 
-        filter: 'brightness(1.5) contrast(1.1) saturate(1.1)', 
+        filter: 'brightness(1.5) contrast(1.1) saturate(1)', 
         duration: 1 
       }, 0);
 
