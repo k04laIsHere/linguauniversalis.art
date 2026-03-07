@@ -132,6 +132,7 @@
 
 .title {
   margin: 0;
+  margin-top: 15vh; /* Added margin to push title down and avoid breach occlusion */
   font-size: clamp(32px, 6vw, 72px); /* Reduced from 40px/8vw/100px */
   letter-spacing: 0.25em; /* Increased spacing for better integration */
   text-transform: uppercase;
@@ -479,7 +480,7 @@
 
 .archiveBreach {
   position: absolute;
-  top: 25vh !important; /* Moved up from 50vh to clear the title */
+  top: 10vh !important; /* Moved even further up to clear title on small devices */
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
   width: clamp(500px, 50vw, 1100px); /* Scaled down 50% from clamp(1000px, 100vw, 2200px) */
@@ -549,7 +550,7 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 18vh !important;
+    top: 10vh !important; /* Moved from 15vh to match desktop upward shift and clear title */
     width: 135%; /* Scaled down 50% from 270% */
     padding: 0;
     aspect-ratio: 16/9;
