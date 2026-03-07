@@ -43,33 +43,33 @@ export function ExitFlight() {
       gsap.set(baseDark, { 
         opacity: 1, 
         yPercent: 0,
-        filter: 'brightness(1.2) contrast(1.1) saturate(1)' // Start bright
+        filter: 'brightness(1.2) contrast(1.1)' // Removed saturate(1)
       });
       
       // Ensure exit fill is visible from start
       gsap.set(exitFill, { 
         opacity: 1, 
-        y: -200, // Lowered default position (was -400)
-        scale: 1, // Keep it zoomed out (1:1)
-        filter: 'brightness(0.8) contrast(1.1)'
+        y: -200, 
+        scale: 1, 
+        filter: 'brightness(0.8) contrast(1.1)' // Removed saturate
       });
 
       // Nature backdrop should be ready and BRIGHT
       if (nature) {
         gsap.set(nature, { 
-          opacity: 1, // Start visible to avoid "darkness at first"
+          opacity: 1, 
           filter: 'brightness(1.1) contrast(1.05)', 
-          scale: 1.4, // Increased zoom for a stronger transition
+          scale: 1.4, 
         });
       }
 
       const tl = gsap.timeline({
-        defaults: { ease: 'none' }, // Switched to none for linear scrub progress
+        defaults: { ease: 'none' }, 
         scrollTrigger: {
           trigger: root,
           start: 'top top',
-          end: '+=500%', // Slightly more breathing room
-          scrub: 1.5, // Increased from 1 to smooth out micro-stutters
+          end: '+=500%', 
+          scrub: 1.5, 
           pin: root,
           pinSpacing: true,
           anticipatePin: 1,
@@ -84,7 +84,7 @@ export function ExitFlight() {
       // The transition:
       // 1. Initial fade in for brightness
       tl.to([baseDark, exitFill], { 
-        filter: 'brightness(1.5) contrast(1.1) saturate(1)', 
+        filter: 'brightness(1.5) contrast(1.1)', // Removed saturate(1)
         duration: 1 
       }, 0);
 
