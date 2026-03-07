@@ -172,39 +172,60 @@ export function Cave() {
   }, []);
 
   const navigate = (newMode: 'immersive' | 'gallery') => {
-    // iris-like transition starting from white inside the breach
-    const iris = document.createElement('div');
-    iris.style.position = 'fixed';
-    iris.style.top = '0';
-    iris.style.left = '0';
-    iris.style.width = '100vw';
-    iris.style.height = '100vh';
-    iris.style.zIndex = '999999';
-    iris.style.background = '#fcfcf9';
+    // scale transition starting from white inside the breach
+    const breach = document.querySelector(`.${styles.archiveBreach}`);
+    const breachImg = document.querySelector(`.${styles.breachImg}`);
+    const breachContent = document.querySelector(`.${styles.breachContent}`);
     
-    // Starting position: center of the breach
-    const rect = document.querySelector(`.${styles.archiveBreach}`)?.getBoundingClientRect();
-    const cx = rect ? rect.left + rect.width / 2 : window.innerWidth / 2;
-    const cy = rect ? rect.top + rect.height / 2 : window.innerHeight / 2;
-    
-    iris.style.clipPath = `circle(0% at ${cx}px ${cy}px)`;
-    document.body.appendChild(iris);
+    // Create a white overlay that fades in during the scale
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.top = '0';
+    overlay.style.left = '0';
+    overlay.style.width = '100vw';
+    overlay.style.height = '100vh';
+    overlay.style.zIndex = '999998';
+    overlay.style.background = '#fcfcf9';
+    overlay.style.opacity = '0';
+    document.body.appendChild(overlay);
 
-    gsap.to(iris, {
-      clipPath: `circle(150% at ${cx}px ${cy}px)`,
-      duration: 1.2,
-      ease: 'expo.inOut',
+    const tl = gsap.timeline({
       onComplete: () => {
         setMode(newMode);
         window.scrollTo({ top: 0, behavior: 'instant' });
-        gsap.to(iris, {
+        gsap.to(overlay, {
           opacity: 0,
           duration: 0.8,
           delay: 0.2,
-          onComplete: () => iris.remove()
+          onComplete: () => overlay.remove()
         });
       }
     });
+
+    // Fade out text immediately
+    if (breachContent) {
+      tl.to(breachContent, {
+        opacity: 0,
+        duration: 0.4,
+        ease: 'power2.out'
+      }, 0);
+    }
+
+    // Scale up the breach image
+    if (breachImg) {
+      tl.to(breachImg, {
+        scale: 15,
+        duration: 1.5,
+        ease: 'expo.in',
+      }, 0);
+    }
+
+    // Fade in the white overlay to match the inner white of the image
+    tl.to(overlay, {
+      opacity: 1,
+      duration: 1.0,
+      ease: 'power2.in'
+    }, 0.5);
   };
 
   const handleArchiveClick = () => {
@@ -236,7 +257,7 @@ export function Cave() {
         >
           <div className={styles.breachVisual}>
             <img 
-              src="/assets/images/backgrounds/archive-breach.webp" 
+              src="/assets/images/backgrounds/archiveEntrance2.webp" 
               alt="" 
               className={styles.breachImg} 
             />

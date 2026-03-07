@@ -507,6 +507,7 @@
   height: 100%;
   object-fit: contain;
   filter: brightness(1) contrast(1.05);
+  will-change: transform;
 }
 
 .breachContent {
