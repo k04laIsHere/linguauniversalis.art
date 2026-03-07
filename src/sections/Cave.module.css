@@ -482,7 +482,7 @@
   top: 25vh !important; /* Moved up from 50vh to clear the title */
   left: 50% !important;
   transform: translate(-50%, -50%) !important;
-  width: clamp(1000px, 100vw, 2200px); /* Increased by ~1.2x from clamp(800px, 80vw, 1800px) */
+  width: clamp(500px, 50vw, 1100px); /* Scaled down 50% from clamp(1000px, 100vw, 2200px) */
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -550,7 +550,7 @@
 @media (max-width: 960px) {
   .archiveBreach {
     top: 18vh !important;
-    width: 270%; /* Reduced from 300% */
+    width: 135%; /* Scaled down 50% from 270% */
     padding: 0;
     aspect-ratio: 16/9;
     left: 50% !important;
