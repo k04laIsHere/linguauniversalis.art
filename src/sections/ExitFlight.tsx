@@ -64,12 +64,12 @@ export function ExitFlight() {
       }
 
       const tl = gsap.timeline({
-        defaults: { ease: 'power2.inOut' },
+        defaults: { ease: 'none' }, // Switched to none for linear scrub progress
         scrollTrigger: {
           trigger: root,
           start: 'top top',
-          end: '+=450%', 
-          scrub: 1,
+          end: '+=500%', // Slightly more breathing room
+          scrub: 1.5, // Increased from 1 to smooth out micro-stutters
           pin: root,
           pinSpacing: true,
           anticipatePin: 1,
@@ -82,29 +82,23 @@ export function ExitFlight() {
       });
 
       // The transition:
-      // 1. First, make the cave walls bright
-      tl.to(baseDark, { 
-        filter: 'brightness(1.5) contrast(1.1) saturate(1)', 
-        duration: 0.8 
+      // 1. Initial fade in for brightness
+      tl.to([baseDark, exitFill], { 
+        filter: 'brightness(1.5) contrast(1.1) saturate(1.1)', 
+        duration: 1 
       }, 0);
 
-      tl.to(exitFill, {
-        filter: 'brightness(1.2) contrast(1.1)',
-        duration: 0.8
-      }, 0);
-
-      // 2. Zoom out the nature backdrop from the very start
+      // 2. Zoom out the nature backdrop
       if (nature) {
         tl.to(nature, {
-          scale: 1, // Final unzoomed state
+          scale: 1,
           y: 0,
           duration: 4,
           ease: 'power1.inOut'
         }, 0);
       }
 
-      // 3. Zoom in the wall and arch with parallax
-      // Removed opacity: 0 to keep them visible at all times
+      // 3. Zoom in the wall and arch - keep them sharp
       tl.fromTo([baseDark, caveEdges, edgesContainer], 
       {
          scale: 1,
@@ -112,19 +106,19 @@ export function ExitFlight() {
          yPercent: 0
       },
       { 
-        scale: 12, 
+        scale: 15, // Increased scale to fully clear view
         opacity: 1, 
-        yPercent: 15,
+        yPercent: 20, // Moved lower
         duration: 3,
         ease: 'power2.in',
         immediateRender: false 
-      }, 0.2);
+      }, 0.1);
 
-      // 4. The landscape (vegetation mask) moves DOWN
-      // Removed scale zoom and opacity fade; moving much lower
+      // 4. The landscape (vegetation mask) moves DOWN smoothly
       tl.to(exitFill,
       { 
-        y: 2800, // Even lower to ensure clearance
+        y: '250vh', // Using vh for better responsiveness
+        scale: 1.1, // Slight zoom to keep edges hidden during movement
         duration: 2.5, 
         ease: 'power2.inOut',
         immediateRender: false 

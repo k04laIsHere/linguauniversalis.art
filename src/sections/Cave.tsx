@@ -34,7 +34,7 @@ export function Cave() {
 
       // Ultra Slow Background Parallax
       gsap.fromTo(
-        `.${styles.bg}`,
+        `.${styles.bgWrapper}`,
         { y: 0 },
         {
           y: window.innerHeight * 0.2,

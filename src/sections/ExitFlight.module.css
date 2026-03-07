@@ -26,20 +26,23 @@
 .wallsContainer {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 5; /* Above everything to prevent z-fighting */
   will-change: transform, opacity;
+  pointer-events: none; /* User shouldn't click through the "opening" */
 }
 
 .exitFill {
   position: absolute;
-  inset: -5% -5%; /* Zoomed out further (from -15% to -5%) */
+  inset: -15%; /* Buffer to avoid edge clipping during scale/shift */
   background-image: url('/assets/images/backgrounds/cave-exit-landscape.webp');
   background-size: cover;
   background-position: center;
-  background-repeat: no-repeat; /* Prevent tiling artifacts */
-  z-index: 0; /* Behind the walls container */
+  background-repeat: no-repeat;
+  z-index: 1; /* Below the arch mask */
   filter: brightness(1.1);
   will-change: transform, opacity;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 
 .edgesContainer {
