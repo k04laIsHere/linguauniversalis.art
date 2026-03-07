@@ -16,7 +16,7 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ViewMode>(() => {
     if (typeof window !== 'undefined') {
       // Prioritize URL hash for deep linking
-      if (window.location.hash === '#gallery') {
+      if (window.location.hash === '#gallery' || window.location.hash === '#archive') {
         return 'gallery';
       }
       // Fallback to localStorage
@@ -28,7 +28,7 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handleHashChange = () => {
-      if (window.location.hash === '#gallery') {
+      if (window.location.hash === '#gallery' || window.location.hash === '#archive') {
         setModeState('gallery');
         localStorage.setItem(STORAGE_KEY, 'gallery');
       } else if (window.location.hash === '#immersive') {
@@ -45,9 +45,12 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
     setModeState(newMode);
     localStorage.setItem(STORAGE_KEY, newMode);
     
-    // Update hash for consistency if needed
-    if (newMode === 'gallery' && window.location.hash !== '#gallery') {
-      window.location.hash = 'gallery';
+    // Update URL without hash scrolling if possible, or just pushState
+    if (newMode === 'gallery') {
+      window.history.pushState(null, '', '#archive');
+    } else {
+      // Clear hash when returning to immersive
+      window.history.pushState(null, '', window.location.pathname + window.location.search);
     }
   };
 

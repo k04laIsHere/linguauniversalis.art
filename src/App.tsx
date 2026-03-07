@@ -32,13 +32,13 @@ function AppContent() {
   // Handle mode transition
   useEffect(() => {
     const handleModeChange = () => {
-      setIsTransitioning(true);
-      document.body.style.overflow = 'hidden'; // Pause during transition
+      // document.body.style.overflow = 'hidden'; // Pause during transition
 
       // Force scroll to top when mode changes (especially for Gallery/Archive)
       window.scrollTo(0, 0);
 
-      // Fade out
+      // Fade out logic removed as requested - handled by Cave transition
+      /*
       setTimeout(() => {
         // Mode has changed, now fade in
         setTimeout(() => {
@@ -46,11 +46,12 @@ function AppContent() {
           document.body.style.overflow = ''; // Resume scrolling
         }, 500); // Wait for fade-in
       }, 500); // Wait for fade-out
+      */
     };
 
     // Listen for mode changes by checking a custom event
     window.addEventListener('mode-change', handleModeChange);
-    return () => window.removeEventListener('mode-change', handleModeChange);
+    return () => window.removeEventListener('hashchange', handleModeChange);
   }, []);
 
   // Trigger mode-change event when mode changes
@@ -110,8 +111,8 @@ function AppContent() {
     <div className="appRoot">
       <Loader onLoaded={() => setIsLoading(false)} />
 
-      {/* Mode Transition Overlay */}
-      {isTransitioning && (
+      {/* Mode Transition Overlay - Logic currently disabled to allow Cave.tsx to handle Archive entrance */}
+      {isTransitioning && mode === 'immersive' && (
         <div
           className="mode-transition-overlay"
           style={{
