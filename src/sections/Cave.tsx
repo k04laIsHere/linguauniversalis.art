@@ -257,7 +257,7 @@ export function Cave() {
         >
           <div className={styles.breachVisual}>
             <img 
-              src="/assets/images/backgrounds/archiveEntrance2.webp" 
+              src="/assets/images/backgrounds/archiveEntrance3.webp" 
               alt="" 
               className={styles.breachImg} 
             />
