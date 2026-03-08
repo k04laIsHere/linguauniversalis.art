@@ -149,7 +149,7 @@ export function GalleryMode() {
                   if (progressLabel) {
                     const currentStr = (currentIndex + 1).toString().padStart(2, '0');
                     const totalStr = groupWorksCount.toString().padStart(2, '0');
-                    progressLabel.innerText = `${currentStr} / ${totalStr}`;
+                    progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
                     gsap.fromTo(progressLabel, 
                       { y: 5, opacity: 0 }, 
                       { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
@@ -165,7 +165,8 @@ export function GalleryMode() {
                   gsap.set(works[i], { opacity: 0, visibility: 'hidden', y: 100 });
                 }
                 if (progressLabel) {
-                  progressLabel.innerText = `01 / ${groupWorksCount.toString().padStart(2, '0')}`;
+                  const totalStr = groupWorksCount.toString().padStart(2, '0');
+                  progressLabel.innerHTML = `01&nbsp;/&nbsp;${totalStr}`;
                 }
                 lastIndex = 0;
               }
@@ -271,7 +272,7 @@ export function GalleryMode() {
                         <h3 className={styles.mediumTitle}>{getTranslatedMedium(medium)}</h3>
                         <div className={styles.scrollProgress}>
                           <div className={styles.progressLabel}>
-                            01 / {works.length.toString().padStart(2, '0')}
+                            01&nbsp;/&nbsp;{works.length.toString().padStart(2, '0')}
                           </div>
                         </div>
                       </div>

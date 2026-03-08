@@ -247,7 +247,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 2rem;
+  gap: 1.5rem;
 }
 
 .mediumTitle {
@@ -256,7 +256,8 @@
   color: #d4af37;
   letter-spacing: 0.5em;
   text-transform: uppercase;
-  white-space: nowrap;
+  white-space: normal; /* Allow title to wrap if needed */
+  flex: 1;
 }
 
 .progressLabel {
@@ -265,8 +266,8 @@
   color: #888888;
   letter-spacing: 0.1em;
   white-space: nowrap;
-  min-width: 60px;
   text-align: right;
+  flex-shrink: 0;
 }
 
 .worksStack {
