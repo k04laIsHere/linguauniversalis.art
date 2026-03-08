@@ -20,9 +20,7 @@ export function Cave() {
       const { width, height } = content.getBoundingClientRect();
       
       // Calculate scale based on content dimensions.
-      // The base width for clamp(500px, 50vw, 1100px) at 1920 is 960px.
-      // We want the breach to be comfortably larger than the text.
-      const paddingFactor = 1.4; // 40% margin around text
+      const paddingFactor = 1.6; // Increased from 1.4 to provide more breathing room
       const targetWidth = width * paddingFactor;
       const targetHeight = height * paddingFactor;
       
@@ -30,14 +28,13 @@ export function Cave() {
       const breachWidthForHeight = targetHeight * (16/9);
       const neededWidth = Math.max(targetWidth, breachWidthForHeight);
       
-      // On mobile (max-width 960), the base width is 230% of viewport.
-      // On desktop, it is clamp(500px, 50vw, 1100px).
       const isMobile = window.innerWidth <= 960;
       const baseWidth = isMobile 
         ? window.innerWidth * 2.3 
         : Math.min(Math.max(500, window.innerWidth * 0.5), 1100);
       
-      setBreachScale(neededWidth / baseWidth);
+      // Apply a minimum scale of 1 to prevent it from ever being smaller than the base design
+      setBreachScale(Math.max(1, neededWidth / baseWidth));
     };
 
     updateScale();
