@@ -37,21 +37,23 @@ export function GalleryLightbox({
       const tl = gsap.timeline({
         onComplete: () => {
           setDisplayWork(work);
-          // Animate the new image sliding in from below
-          gsap.fromTo(imgRef.current, 
-            { y: 100, opacity: 0 },
-            { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
-          );
+          // Small delay to ensure the new image has swapped in before animating in
+          requestAnimationFrame(() => {
+            transitionRef.current = gsap.timeline()
+              .fromTo(imgRef.current, 
+                { y: 100, opacity: 0 },
+                { y: 0, opacity: 1, duration: 0.8, ease: 'power2.out' }
+              );
+          });
         }
       });
 
       transitionRef.current = tl;
 
-      // Animate the current image sliding out upwards
       tl.to(imgRef.current, {
         y: -100,
         opacity: 0,
-        duration: 0.3,
+        duration: 0.6,
         ease: 'power2.in'
       });
     }

@@ -124,7 +124,7 @@ export function GalleryMode() {
                     y: -100 * direction, // move opposite to flow
                     opacity: 0, 
                     visibility: 'hidden', 
-                    duration: 0.4,
+                    duration: 0.8,
                     ease: 'power2.inOut',
                     overwrite: 'auto'
                   });
@@ -139,7 +139,7 @@ export function GalleryMode() {
                     { 
                       y: 0, 
                       opacity: 1, 
-                      duration: 0.4, 
+                      duration: 0.8, 
                       ease: 'power2.out',
                       overwrite: 'auto'
                     }
