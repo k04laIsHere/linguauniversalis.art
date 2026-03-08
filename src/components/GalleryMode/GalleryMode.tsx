@@ -269,7 +269,9 @@ export function GalleryMode() {
                       <div className={styles.mediumHeader}>
                         <h3 className={styles.mediumTitle}>{getTranslatedMedium(medium)}</h3>
                         <div className={styles.scrollProgress}>
-                          <div className={styles.progressLabel}>01 / {works.length}</div>
+                          <div className={styles.progressLabel}>
+                            01 / {works.length.toString().padStart(2, '0')}
+                          </div>
                         </div>
                       </div>
                       
