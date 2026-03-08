@@ -94,7 +94,7 @@ export function GalleryMode() {
           refreshPriority: -1,
         });
 
-        // 2. Handle Medium Groups and their Flipping Works
+                  // 2. Handle Medium Groups and their Flipping Works
         mediumGroups.forEach((group) => {
           const works = gsap.utils.toArray<HTMLElement>(group.querySelectorAll(`.${styles.workItem}`));
           const progressLabel = group.querySelector(`.${styles.progressLabel}`) as HTMLElement;
@@ -116,20 +116,34 @@ export function GalleryMode() {
               onUpdate: (self) => {
                 const currentIndex = Math.round(self.progress * (groupWorksCount - 1));
                 if (currentIndex !== lastIndex) {
-                  // Hide previous
+                  // Direction: 1 for down (scrolling forward), -1 for up (scrolling back)
+                  const direction = currentIndex > lastIndex ? 1 : -1;
+
+                  // Hide previous - move it up and fade out
                   gsap.to(works[lastIndex], { 
+                    y: -100 * direction, // move opposite to flow
                     opacity: 0, 
                     visibility: 'hidden', 
-                    duration: 0.3,
+                    duration: 0.4,
+                    ease: 'power2.inOut',
                     overwrite: 'auto'
                   });
-                  // Show current
-                  gsap.to(works[currentIndex], { 
-                    opacity: 1, 
-                    visibility: 'visible', 
-                    duration: 0.3,
-                    overwrite: 'auto'
-                  });
+
+                  // Show current - slide in from below (if going down) or above (if going up)
+                  gsap.fromTo(works[currentIndex], 
+                    { 
+                      y: 100 * direction, 
+                      opacity: 0, 
+                      visibility: 'visible' 
+                    },
+                    { 
+                      y: 0, 
+                      opacity: 1, 
+                      duration: 0.4, 
+                      ease: 'power2.out',
+                      overwrite: 'auto'
+                    }
+                  );
                   
                   // Update Label with animation
                   if (progressLabel) {
@@ -145,9 +159,9 @@ export function GalleryMode() {
                 }
               },
               onLeaveBack: () => {
-                gsap.set(works[0], { opacity: 1, visibility: 'visible' });
+                gsap.set(works[0], { opacity: 1, visibility: 'visible', y: 0 });
                 for(let i = 1; i < works.length; i++) {
-                  gsap.set(works[i], { opacity: 0, visibility: 'hidden' });
+                  gsap.set(works[i], { opacity: 0, visibility: 'hidden', y: 100 });
                 }
                 if (progressLabel) {
                   progressLabel.innerText = `01 / ${groupWorksCount.toString().padStart(2, '0')}`;
