@@ -550,8 +550,8 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 10vh !important; /* Moved from 15vh to match desktop upward shift and clear title */
-    width: 135%; /* Scaled down 50% from 270% */
+    top: 5vh !important; /* Moved further up from 10vh to make room for the larger scale */
+    width: 230%; /* Increased 1.7x from 135% to make it significantly larger on mobile */
     padding: 0;
     aspect-ratio: 16/9;
     left: 50% !important;
@@ -577,19 +577,19 @@
     align-items: center;
     justify-content: center;
     text-shadow: none;
-    transform: translate(-60px, -25px); /* Increased left nudge from -45px to -60px */
+    transform: translateY(-20px); /* Nudge text slightly up to center visually in the breach */
   }
 
   .breachLabel {
     color: #000000;
-    font-size: 20px;
-    margin-bottom: 8px;
+    font-size: 24px; /* Increased for better visibility on larger breach */
+    margin-bottom: 12px;
     letter-spacing: 0.5em;
   }
 
   .breachDesc {
     color: #000000;
-    font-size: 11px;
+    font-size: 13px; /* Slightly larger */
     max-width: 100%;
     line-height: 1.4;
     letter-spacing: 0.15em;
