@@ -148,7 +148,8 @@ export function GalleryMode() {
                   // Update Label with animation
                   if (progressLabel) {
                     const currentStr = (currentIndex + 1).toString().padStart(2, '0');
-                    progressLabel.innerText = `${currentStr} / ${groupWorksCount.toString().padStart(2, '0')}`;
+                    const totalStr = groupWorksCount.toString().padStart(2, '0');
+                    progressLabel.innerText = `${currentStr} / ${totalStr}`;
                     gsap.fromTo(progressLabel, 
                       { y: 5, opacity: 0 }, 
                       { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }

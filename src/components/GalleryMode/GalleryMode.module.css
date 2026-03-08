@@ -19,11 +19,14 @@
   overflow-y: auto !important;
   scrollbar-width: auto !important;
   scrollbar-color: #1a1a1a #fcfcf9 !important;
+  /* Ensure mobile scrollbars aren't hidden by system overlays */
+  -webkit-overflow-scrolling: touch;
 }
 
 :global(html:has(.root))::-webkit-scrollbar,
 :global(body:has(.root))::-webkit-scrollbar {
   width: 14px !important;
+  height: 14px !important;
   display: block !important;
 }
 
@@ -38,6 +41,7 @@
   background-color: #1a1a1a !important;
   border: 3px solid #fcfcf9 !important;
   border-radius: 0 !important;
+  min-height: 40px;
 }
 
 :global(html:has(.root))::-webkit-scrollbar-thumb:hover,
