@@ -482,7 +482,7 @@
   position: absolute;
   top: 10vh !important; /* Moved even further up to clear title on small devices */
   left: 50% !important;
-  transform: translate(-50%, -50%) !important;
+  /* transform is handled by inline style for dynamic scaling */
   width: clamp(500px, 50vw, 1100px); /* Scaled down 50% from clamp(1000px, 100vw, 2200px) */
   aspect-ratio: 16/9;
   z-index: 101; 
@@ -494,6 +494,7 @@
   align-items: center;
   justify-content: center;
   overflow: visible;
+  will-change: transform;
 }
 
 .breachVisual {
@@ -555,7 +556,7 @@
     padding: 0;
     aspect-ratio: 16/9;
     left: 50% !important;
-    transform: translate(-50%, -50%) !important;
+    /* transform handled by inline style */
   }
 
   .breachVisual {

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useI18n } from '../i18n/useI18n';
 import { useViewMode } from '../contexts/ViewModeContext';
 import styles from './Cave.module.css';
@@ -9,6 +9,41 @@ export function Cave() {
   const { setMode } = useViewMode();
   const rootRef = useRef<HTMLElement | null>(null);
   const manifestEndRef = useRef<HTMLDivElement | null>(null);
+  const breachContentRef = useRef<HTMLDivElement | null>(null);
+  const [breachScale, setBreachScale] = useState(1);
+
+  useEffect(() => {
+    const updateScale = () => {
+      if (!breachContentRef.current) return;
+      
+      const content = breachContentRef.current;
+      const { width, height } = content.getBoundingClientRect();
+      
+      // Calculate scale based on content dimensions.
+      // The base width for clamp(500px, 50vw, 1100px) at 1920 is 960px.
+      // We want the breach to be comfortably larger than the text.
+      const paddingFactor = 1.4; // 40% margin around text
+      const targetWidth = width * paddingFactor;
+      const targetHeight = height * paddingFactor;
+      
+      // Aspect ratio of the breach image is 16/9
+      const breachWidthForHeight = targetHeight * (16/9);
+      const neededWidth = Math.max(targetWidth, breachWidthForHeight);
+      
+      // On mobile (max-width 960), the base width is 230% of viewport.
+      // On desktop, it is clamp(500px, 50vw, 1100px).
+      const isMobile = window.innerWidth <= 960;
+      const baseWidth = isMobile 
+        ? window.innerWidth * 2.3 
+        : Math.min(Math.max(500, window.innerWidth * 0.5), 1100);
+      
+      setBreachScale(neededWidth / baseWidth);
+    };
+
+    updateScale();
+    window.addEventListener('resize', updateScale);
+    return () => window.removeEventListener('resize', updateScale);
+  }, [t.cave.breachLabel, t.cave.breachDesc]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -254,6 +289,7 @@ export function Cave() {
           role="button"
           tabIndex={0}
           aria-label="Enter Archive"
+          style={{ transform: `translate(-50%, -50%) scale(${breachScale})` } as any}
         >
           <div className={styles.breachVisual}>
             <img 
@@ -262,7 +298,7 @@ export function Cave() {
               className={styles.breachImg} 
             />
           </div>
-          <div className={styles.breachContent}>
+          <div className={styles.breachContent} ref={breachContentRef}>
             <span className={styles.breachLabel}>
               {t.cave.breachLabel.split('\n').map((line, idx) => (
                 <span key={idx} style={{ display: 'block' }}>{line}</span>
