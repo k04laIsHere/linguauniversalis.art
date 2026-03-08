@@ -76,6 +76,7 @@
   display: grid;
   place-items: center;
   padding: 12px;
+  overflow: hidden;
 }
 
 .img {
@@ -83,6 +84,7 @@
   max-height: 100%;
   object-fit: contain;
   border-radius: 14px;
+  will-change: transform, opacity;
 }
 
 .navBtn {

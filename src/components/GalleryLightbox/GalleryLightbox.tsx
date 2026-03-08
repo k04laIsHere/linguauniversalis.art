@@ -19,6 +19,7 @@ export function GalleryLightbox({
 }) {
   const { t, lang } = useI18n();
   const [displayWork, setDisplayWork] = useState<GalleryWork | null>(work);
+  const containerRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLImageElement>(null);
   const transitionRef = useRef<gsap.core.Timeline | null>(null);
 
@@ -29,7 +30,6 @@ export function GalleryLightbox({
         return;
       }
 
-      // Kill any existing transition to remain responsive
       if (transitionRef.current) {
         transitionRef.current.kill();
       }
@@ -37,23 +37,21 @@ export function GalleryLightbox({
       const tl = gsap.timeline({
         onComplete: () => {
           setDisplayWork(work);
-          // Small delay to ensure the new image has swapped in before animating in
-          requestAnimationFrame(() => {
-            transitionRef.current = gsap.timeline()
-              .fromTo(imgRef.current, 
-                { y: 30, opacity: 0 },
-                { y: 0, opacity: 1, duration: 0.25, ease: 'power2.out' }
-              );
-          });
+          // Animate the new image sliding in from below
+          gsap.fromTo(imgRef.current, 
+            { y: 100, opacity: 0 },
+            { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
+          );
         }
       });
 
       transitionRef.current = tl;
 
+      // Animate the current image sliding out upwards
       tl.to(imgRef.current, {
-        y: -30,
+        y: -100,
         opacity: 0,
-        duration: 0.2,
+        duration: 0.3,
         ease: 'power2.in'
       });
     }
@@ -106,12 +104,13 @@ export function GalleryLightbox({
             </button>
           </div>
         </div>
-        <div className={styles.stage}>
+        <div className={styles.stage} ref={containerRef}>
           <button className={`${styles.navBtn} ${styles.prev}`} type="button" onClick={onPrev}>
             ‹
           </button>
           <img 
             ref={imgRef}
+            key={displayWork.id}
             className={styles.img} 
             src={displayWork.src} 
             alt={`${displayWork.artist} — ${displayTitle}`} 
@@ -124,5 +123,3 @@ export function GalleryLightbox({
     </div>
   );
 }
-
-
