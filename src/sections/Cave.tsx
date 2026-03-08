@@ -69,7 +69,7 @@ export function Cave() {
         `.${styles.bgWrapper}`,
         { y: 0 },
         {
-          y: window.innerHeight * 0.2,
+          y: () => window.innerHeight * 0.2,
           ease: 'none',
           scrollTrigger: {
             trigger: root,
@@ -186,22 +186,24 @@ export function Cave() {
       // Archive Breach parallax and appearance
       gsap.fromTo(
         `.${styles.archiveBreach}`,
-        { opacity: 0, scale: 0.9, y: 20 },
+        { opacity: 0, scale: 0.8, y: 20 },
         {
           opacity: 1,
-          scale: 1,
+          scale: (i, target) => {
+             // Let the dynamic scale from state be the base, but allow GSAP to animate it
+             return breachScale;
+          },
           y: 0,
           duration: 2.5,
-          delay: 1.0, // Reduced delay to follow title more closely
+          delay: 1.0,
           ease: 'expo.out',
-          // Removed ScrollTrigger to make it an immediate automatic entrance
         }
       );
 
     }, root);
 
     return () => ctx.revert();
-  }, []);
+  }, [breachScale]);
 
   const navigate = (newMode: 'immersive' | 'gallery') => {
     // scale transition starting from white inside the breach
@@ -286,7 +288,7 @@ export function Cave() {
           role="button"
           tabIndex={0}
           aria-label="Enter Archive"
-          style={{ transform: `translate(-50%, -50%) scale(${breachScale})` } as any}
+          style={{ '--breach-dynamic-scale': breachScale } as any}
         >
           <div className={styles.breachVisual}>
             <img 
