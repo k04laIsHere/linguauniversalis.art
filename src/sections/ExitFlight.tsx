@@ -36,7 +36,9 @@ export function ExitFlight() {
          root.style.height = `${window.innerHeight}px`;
          pin.style.height = `${window.innerHeight}px`;
          lastWidth = window.innerWidth;
-         ScrollTrigger.refresh();
+         if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
+           ScrollTrigger.refresh();
+         }
        }
     };
     updateHeight();

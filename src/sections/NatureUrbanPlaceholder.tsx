@@ -34,7 +34,9 @@ export function NatureUrbanPlaceholder() {
       if (window.innerWidth !== lastWidth || !root.style.height) {
         root.style.height = `${window.innerHeight}px`;
         lastWidth = window.innerWidth;
-        ScrollTrigger.refresh();
+        if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
+          ScrollTrigger.refresh();
+        }
       }
     };
     lockHeight();
