@@ -1,6 +1,7 @@
 .root {
   position: relative;
   height: 100vh;
+  height: 100svh; /* Lock to small viewport height to prevent resize jump */
   background: transparent;
   z-index: 10; /* Above Cave's fixed shadowMask (z-index 3) */
 }
@@ -8,6 +9,7 @@
 .pin {
   position: relative;
   height: 100vh;
+  height: 100svh;
   overflow: hidden;
 }
 
