@@ -29,6 +29,19 @@ export function ExitFlight() {
 
     initGsap();
 
+    // Lock height to avoid jump on mobile address bar hide
+    let lastWidth = window.innerWidth;
+    const updateHeight = () => {
+       if (window.innerWidth !== lastWidth || !root.style.height) {
+         root.style.height = `${window.innerHeight}px`;
+         pin.style.height = `${window.innerHeight}px`;
+         lastWidth = window.innerWidth;
+         ScrollTrigger.refresh();
+       }
+    };
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+
     const ctx = gsap.context(() => {
       const nature = document.getElementById('natureBackdrop');
 
@@ -117,7 +130,7 @@ export function ExitFlight() {
       // 4. The landscape (vegetation mask) moves DOWN smoothly
       tl.to(exitFill,
       { 
-        y: '250vh', // Using vh for better responsiveness
+        y: () => window.innerHeight * 2.5, // Lock to height calculated at start
         scale: 1.1, // Slight zoom to keep edges hidden during movement
         duration: 2.5, 
         ease: 'power2.inOut',
@@ -126,7 +139,10 @@ export function ExitFlight() {
 
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      window.removeEventListener('resize', updateHeight);
+    };
   }, [reduced]);
 
   return (

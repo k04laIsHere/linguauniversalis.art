@@ -25,6 +25,19 @@ export function Events() {
 
     initGsap();
 
+    // Lock height on mobile to prevent address bar resize jump
+    let lastWidth = window.innerWidth;
+    const lockHeight = () => {
+      if (window.innerWidth !== lastWidth || !root.style.height) {
+        root.style.height = `${window.innerHeight}px`;
+        pin.style.height = `${window.innerHeight}px`;
+        lastWidth = window.innerWidth;
+        ScrollTrigger.refresh();
+      }
+    };
+    lockHeight();
+    window.addEventListener('resize', lockHeight);
+
     const sections = Array.from(pin.querySelectorAll<HTMLElement>('[data-event-section]'));
     if (sections.length === 0) return;
 
@@ -141,6 +154,7 @@ export function Events() {
 
     return () => {
       ctx.revert();
+      window.removeEventListener('resize', lockHeight);
     };
   }, [reduced]);
 

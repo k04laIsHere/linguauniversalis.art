@@ -1,7 +1,6 @@
 .root {
   position: relative;
   height: 100vh;
-  height: 100svh; /* Lock to small viewport height to prevent resize jump */
   background: transparent;
   z-index: 10; /* Above Cave's fixed shadowMask (z-index 3) */
 }
@@ -9,7 +8,6 @@
 .pin {
   position: relative;
   height: 100vh;
-  height: 100svh;
   overflow: hidden;
 }
 
@@ -43,7 +41,7 @@
   height: 120%;
   background-image: url('/assets/images/backgrounds/cave-exit-landscape.webp');
   background-size: cover;
-  background-position: center;
+  background-position: center top; /* Anchored to top for stability on mobile resize */
   background-repeat: no-repeat;
   z-index: 1; /* Below the arch mask */
   filter: brightness(1.1);

@@ -28,6 +28,18 @@ export function NatureUrbanPlaceholder() {
 
     initGsap();
 
+    // Lock height on mobile to prevent address bar resize jump
+    let lastWidth = window.innerWidth;
+    const lockHeight = () => {
+      if (window.innerWidth !== lastWidth || !root.style.height) {
+        root.style.height = `${window.innerHeight}px`;
+        lastWidth = window.innerWidth;
+        ScrollTrigger.refresh();
+      }
+    };
+    lockHeight();
+    window.addEventListener('resize', lockHeight);
+
     // Setup canvas internal resolution
     canvas.width = 1920;
     canvas.height = 1080;
@@ -101,7 +113,10 @@ export function NatureUrbanPlaceholder() {
         .to(noise, { opacity: 0, duration: 0.3 }, 0.7);
     }, root);
 
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      window.removeEventListener('resize', lockHeight);
+    };
   }, [reduced]);
 
   return (
