@@ -11,35 +11,43 @@ export function Cave() {
   const manifestEndRef = useRef<HTMLDivElement | null>(null);
   const breachContentRef = useRef<HTMLDivElement | null>(null);
   const [breachScale, setBreachScale] = useState(1);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const updateScale = () => {
       if (!breachContentRef.current) return;
       
       const content = breachContentRef.current;
-      const { width, height } = content.getBoundingClientRect();
+      // Get base dimensions. We use 1.6 factor to ensure content is well within the 16/9 breach image.
+      const width = content.offsetWidth;
+      const height = content.offsetHeight;
       
-      // Calculate scale based on content dimensions.
-      const paddingFactor = 1.6; // Increased from 1.4 to provide more breathing room
+      if (width === 0 || height === 0) return;
+
+      const paddingFactor = 1.6; 
       const targetWidth = width * paddingFactor;
       const targetHeight = height * paddingFactor;
       
-      // Aspect ratio of the breach image is 16/9
       const breachWidthForHeight = targetHeight * (16/9);
       const neededWidth = Math.max(targetWidth, breachWidthForHeight);
       
       const isMobile = window.innerWidth <= 960;
+      // Mobile baseWidth logic needs to be stable relative to the 230% width in CSS
       const baseWidth = isMobile 
         ? window.innerWidth * 2.3 
         : Math.min(Math.max(500, window.innerWidth * 0.5), 1100);
       
-      // Apply a minimum scale of 1 to prevent it from ever being smaller than the base design
       setBreachScale(Math.max(1, neededWidth / baseWidth));
+      setIsInitialized(true);
     };
 
-    updateScale();
+    // Use a small delay to ensure styles and fonts are applied
+    const timer = setTimeout(updateScale, 200);
     window.addEventListener('resize', updateScale);
-    return () => window.removeEventListener('resize', updateScale);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', updateScale);
+    };
   }, [t.cave.breachLabel, t.cave.breachDesc]);
 
   useEffect(() => {
@@ -288,7 +296,12 @@ export function Cave() {
           role="button"
           tabIndex={0}
           aria-label="Enter Archive"
-          style={{ '--breach-dynamic-scale': breachScale } as any}
+          style={{ 
+            '--breach-dynamic-scale': breachScale,
+            opacity: isInitialized ? 1 : 0,
+            visibility: isInitialized ? 'visible' : 'hidden',
+            transition: 'opacity 0.6s ease'
+          } as any}
         >
           <div className={styles.breachVisual}>
             <img 
