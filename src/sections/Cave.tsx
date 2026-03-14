@@ -164,17 +164,8 @@ export function Cave() {
         }
       );
 
-      // Shadow Mask Light Following Title
-      ScrollTrigger.create({
-        trigger: `.${styles.title}`,
-        start: 'top bottom',
-        onUpdate: (self) => {
-          const title = self.trigger as HTMLElement;
-          const rect = title.getBoundingClientRect();
-          const yPercent = (rect.top + rect.height / 2) / window.innerHeight * 100;
-          root.style.setProperty('--title-y', `${yPercent}vh`);
-        }
-      });
+      // Static Title Mask (Pure CSS handled)
+      root.style.setProperty('--title-y', `43vh`);
 
     }, root);
 
