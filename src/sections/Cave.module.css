@@ -499,7 +499,8 @@
 
 .archiveBreach {
   position: relative;
-  width: clamp(380px, 100vw, 1000px);
+  width: 90vw;
+  max-width: 1000px;
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -550,7 +551,7 @@
 }
 
 .breachLabel {
-  font-size: clamp(18px, 3.8vw, 28px);
+  font-size: clamp(18px, 6vw, 36px);
   letter-spacing: 0.35em;
   text-transform: uppercase;
   color: #000000;
@@ -566,7 +567,7 @@
 }
 
 .breachDesc {
-  font-size: clamp(10px, 1.5vw, 15px);
+  font-size: clamp(10px, 3vw, 16px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #000000;
@@ -582,7 +583,8 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    width: clamp(360px, 100vw, 700px);
+    width: 96vw;
+    margin-bottom: 4vh;
   }
 
   .breachContent {
@@ -591,14 +593,14 @@
   }
 
   .breachLabel {
-    font-size: clamp(18px, 6vw, 26px);
+    font-size: clamp(20px, 8vw, 32px);
     letter-spacing: 0.15em;
     padding-left: 0.15em;
     margin-bottom: 4px;
   }
 
   .breachDesc {
-    font-size: clamp(11px, 3.2vw, 14px);
+    font-size: clamp(12px, 4vw, 16px);
     max-width: 95%;
     line-height: 1.1;
   }
