@@ -65,7 +65,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% var(--title-y, 43vh),
+      ellipse clamp(300px, 30vw, 800px) clamp(180px, 18vw, 450px) at 50% var(--title-y, 50vh),
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -81,7 +81,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% var(--title-y, 43vh),
+      ellipse clamp(300px, 30vw, 800px) clamp(180px, 18vw, 450px) at 50% var(--title-y, 50vh),
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -110,8 +110,8 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  padding-top: clamp(40px, 8vh, 100px);
-  gap: clamp(40px, 10vh, 120px);
+  padding-top: clamp(60px, 10vh, 120px);
+  gap: clamp(60px, 12vh, 150px);
   z-index: 100;
 }
 
@@ -130,7 +130,7 @@
   align-items: center;
   text-align: center;
   z-index: 10;
-  margin-bottom: 5vh;
+  margin-bottom: 12vh;
 }
 
 .title {
@@ -174,7 +174,7 @@
 
 .scrollHint {
   position: absolute;
-  bottom: 22vh;
+  bottom: -6vh;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-title);
@@ -184,11 +184,16 @@
   color: var(--muted);
   opacity: 0.4;
   animation: pulse 3s infinite ease-in-out;
+  white-space: nowrap;
 }
 
 @keyframes pulse {
   0%, 100% { opacity: 0.2; transform: translate(-50%, 0); }
   50% { opacity: 0.6; transform: translate(-50%, 10px); }
+}
+
+.manifestoGridWrapper {
+  width: 100%;
 }
 
 .manifestoGrid {
@@ -397,8 +402,8 @@
 
   .introStack {
     justify-content: flex-start;
-    padding-top: clamp(40px, 8vh, 100px);
-    gap: clamp(40px, 10vh, 120px);
+    padding-top: clamp(60px, 10vh, 120px);
+    gap: clamp(60px, 12vh, 150px);
     min-height: 100vh;
   }
 
@@ -411,7 +416,7 @@
     height: auto;
     min-height: auto;
     padding-top: 0;
-    margin-bottom: 5vh;
+    margin-bottom: 12vh;
   }
 
   .title {
@@ -431,7 +436,7 @@
   }
 
   .scrollHint {
-    bottom: 15vh;
+    bottom: -6vh;
   }
 
   .manifestoGrid {
@@ -494,7 +499,7 @@
 
 .archiveBreach {
   position: relative;
-  width: clamp(320px, 94vw, 850px);
+  width: clamp(380px, 100vw, 1000px);
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -520,7 +525,7 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: brightness(1) contrast(1.05);
+  filter: brightness(1.05) contrast(1.1);
   will-change: transform;
 }
 
@@ -534,8 +539,8 @@
   font-family: var(--font-title);
   color: #000000;
   padding: 0;
-  width: 85%; 
-  height: 85%;
+  width: 82%; 
+  height: 80%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -545,15 +550,15 @@
 }
 
 .breachLabel {
-  font-size: clamp(16px, 3.5vw, 26px);
-  letter-spacing: 0.3em;
+  font-size: clamp(18px, 3.8vw, 28px);
+  letter-spacing: 0.35em;
   text-transform: uppercase;
   color: #000000;
   margin-bottom: 0.2em;
   display: block;
   font-weight: 500;
   line-height: 1.1;
-  padding-left: 0.3em;
+  padding-left: 0.35em;
 }
 
 .breachLine {
@@ -561,14 +566,14 @@
 }
 
 .breachDesc {
-  font-size: clamp(9px, 1.4vw, 14px);
+  font-size: clamp(10px, 1.5vw, 15px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #000000;
   line-height: 1.2;
   margin: 0 auto;
   font-weight: 400;
-  max-width: 95%;
+  max-width: 90%;
 }
 
 .breachDescLine {
@@ -577,7 +582,7 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    width: clamp(320px, 96vw, 600px);
+    width: clamp(360px, 100vw, 700px);
   }
 
   .breachContent {
@@ -586,14 +591,14 @@
   }
 
   .breachLabel {
-    font-size: clamp(16px, 5.5vw, 24px);
+    font-size: clamp(18px, 6vw, 26px);
     letter-spacing: 0.15em;
     padding-left: 0.15em;
     margin-bottom: 4px;
   }
 
   .breachDesc {
-    font-size: clamp(10px, 2.8vw, 13px);
+    font-size: clamp(11px, 3.2vw, 14px);
     max-width: 95%;
     line-height: 1.1;
   }
