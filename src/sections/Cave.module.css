@@ -104,13 +104,15 @@
 }
 
 .introStack {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8vh;
-  min-height: 90vh;
-  padding-top: 5vh;
+  justify-content: flex-start;
+  min-height: 100vh;
+  padding-top: clamp(40px, 8vh, 100px);
+  gap: clamp(40px, 10vh, 120px);
+  z-index: 100;
 }
 
 .manifestoWrapper {
@@ -122,23 +124,23 @@
 }
 
 .hero {
+  position: relative;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
   text-align: center;
-  position: relative;
   z-index: 10;
+  margin-bottom: 5vh;
 }
 
 .title {
   margin: 0;
-  font-size: clamp(32px, 6vw, 72px);
+  font-size: clamp(32px, 8vw, 72px);
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: #fff;
   font-weight: 400;
-  line-height: 1;
+  line-height: 1.2;
   text-align: center;
   font-family: var(--font-title);
   filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.25));
@@ -371,7 +373,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 45% 20% at 50% 50%,
+        ellipse 45% 20% at 50% var(--title-y, 50vh),
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -385,7 +387,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 45% 20% at 50% 50%,
+        ellipse 45% 20% at 50% var(--title-y, 50vh),
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -394,9 +396,10 @@
   }
 
   .introStack {
-    gap: 6vh;
-    padding-top: 0;
-    min-height: 85vh;
+    justify-content: flex-start;
+    padding-top: clamp(40px, 8vh, 100px);
+    gap: clamp(40px, 10vh, 120px);
+    min-height: 100vh;
   }
 
   .root {
@@ -406,22 +409,24 @@
 
   .hero {
     height: auto;
-    min-height: 60vh;
+    min-height: auto;
     padding-top: 0;
+    margin-bottom: 5vh;
   }
 
   .title {
-    font-size: clamp(40px, 10vw, 72px);
+    font-size: clamp(32px, 8vw, 72px);
     letter-spacing: 0.12em;
     padding: 0 15px;
     gap: 0.15em;
     margin-top: 0;
+    line-height: 1.2;
   }
 
   .subtitle {
     letter-spacing: 0.4em;
     font-size: 14px;
-    margin-top: 25px; /* Tighter for mobile */
+    margin-top: 25px;
     padding: 0 20px;
   }
 
@@ -489,7 +494,7 @@
 
 .archiveBreach {
   position: relative;
-  width: clamp(340px, 94vw, 900px); /* Increased min and mobile width */
+  width: clamp(320px, 94vw, 850px);
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -521,7 +526,7 @@
 
 .breachContent {
   position: absolute;
-  top: 48%; /* Shifted up from 52% to center within the void */
+  top: 48%; 
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 102;
@@ -529,8 +534,8 @@
   font-family: var(--font-title);
   color: #000000;
   padding: 0;
-  width: 72%; /* Optimized for ArchiveEntrance3.webp */
-  height: 70%; /* Stay centered vertically */
+  width: 85%; 
+  height: 85%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -540,15 +545,15 @@
 }
 
 .breachLabel {
-  font-size: clamp(13px, 2.2vw, 24px);
-  letter-spacing: 0.35em; /* Optimized for Russian text length */
+  font-size: clamp(16px, 3.5vw, 26px);
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: #000000;
   margin-bottom: 0.2em;
   display: block;
   font-weight: 500;
   line-height: 1.1;
-  padding-left: 0.35em; /* Balance the letter spacing */
+  padding-left: 0.3em;
 }
 
 .breachLine {
@@ -556,14 +561,14 @@
 }
 
 .breachDesc {
-  font-size: clamp(8px, 0.9vw, 11px);
+  font-size: clamp(9px, 1.4vw, 14px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #000000;
   line-height: 1.2;
   margin: 0 auto;
   font-weight: 400;
-  max-width: 85%; /* Slightly tighter to avoid bottom jagged edges */
+  max-width: 95%;
 }
 
 .breachDescLine {
@@ -576,19 +581,19 @@
   }
 
   .breachContent {
-    width: 78%; /* Increased from 68% to fit RU text */
+    width: 85%;
     top: 50%;
   }
 
   .breachLabel {
-    font-size: clamp(14px, 5.5vw, 20px);
-    letter-spacing: 0.15em; /* Tighter for RU */
+    font-size: clamp(16px, 5.5vw, 24px);
+    letter-spacing: 0.15em;
     padding-left: 0.15em;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
   }
 
   .breachDesc {
-    font-size: clamp(9px, 2.8vw, 11px);
+    font-size: clamp(10px, 2.8vw, 13px);
     max-width: 95%;
     line-height: 1.1;
   }
