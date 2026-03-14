@@ -108,9 +108,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   min-height: 100vh;
-  gap: 15vh;
+  padding-top: 8vh;
+  gap: 12vh;
   z-index: 100;
 }
 
@@ -368,8 +369,9 @@
 
 @media (max-width: 960px) {
   .introStack {
-    padding-top: 0;
+    padding-top: 15vh;
     gap: 15vh;
+    justify-content: flex-start;
   }
 
   .title {
@@ -452,7 +454,7 @@
 
 .breachContent {
   position: absolute;
-  top: 50%; 
+  top: 48.5%; /* Precision visual centering for mobile RU */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 102;
@@ -508,7 +510,7 @@
 
   .breachContent {
     width: 65%; 
-    top: 50%;
+    top: 48.5%;
   }
 
   .breachLabel {
