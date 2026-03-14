@@ -110,8 +110,8 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  padding-top: clamp(60px, 10vh, 120px);
-  gap: clamp(60px, 8vh, 150px);
+  padding-top: clamp(40px, 8vh, 100px);
+  gap: clamp(20px, 4vh, 60px);
   z-index: 100;
 }
 
@@ -402,8 +402,8 @@
 
   .introStack {
     justify-content: flex-start;
-    padding-top: clamp(60px, 10vh, 120px);
-    gap: clamp(60px, 8vh, 150px);
+    padding-top: clamp(60px, 8vh, 120px);
+    gap: clamp(20px, 4vh, 60px);
     min-height: 100vh;
   }
 
@@ -585,16 +585,16 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    width: 250vw !important;
-    height: 140vw !important;
-    margin-bottom: 2vh;
+    width: 180vw !important;
+    height: calc(180vw * 9/16) !important;
+    margin-bottom: 0;
     overflow: visible;
   }
 
   .breachVisual {
     width: 100%;
     height: 100%;
-    transform: scale(0.65) translateY(-5%); /* Manual correction for the gap */
+    transform: scale(0.65);
   }
 
   .breachImg {
@@ -604,20 +604,20 @@
   }
 
   .breachContent {
-    width: 35%;
+    width: 45%;
     top: 50%;
   }
 
   .breachLabel {
-    font-size: 20px !important;
+    font-size: 16px !important;
     letter-spacing: 0.1em;
     padding-left: 0.1em;
     margin-bottom: 4px;
-    font-weight: 600;
+    font-weight: 400 !important;
   }
 
   .breachDesc {
-    font-size: 11px !important;
+    font-size: 10px !important;
     max-width: 90%;
     line-height: 1.1;
   }
