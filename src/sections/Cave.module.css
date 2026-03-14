@@ -472,10 +472,10 @@
 
 .archiveBreach {
   position: absolute;
-  top: clamp(60px, 12vh, 120px);
+  top: clamp(80px, 15vh, 140px);
   left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(320px, 60vw, 850px);
+  width: clamp(280px, 85vw, 900px);
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -507,7 +507,7 @@
 
 .breachContent {
   position: absolute;
-  top: 50%;
+  top: 52%; /* Slight downward shift to match the visual center of the crack */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 102;
@@ -515,8 +515,8 @@
   font-family: var(--font-title);
   color: #000000;
   padding: 0;
-  width: 90%;
-  height: 90%;
+  width: 75%; /* More conservative width to stay away from the jagged edges */
+  height: 70%; /* Stay centered vertically */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -526,15 +526,15 @@
 }
 
 .breachLabel {
-  font-size: clamp(16px, 3.2vw, 26px);
-  letter-spacing: 0.6em;
+  font-size: clamp(13px, 2.2vw, 24px);
+  letter-spacing: 0.4em; /* Slightly tighter to prevent overflow */
   text-transform: uppercase;
   color: #000000;
   margin-bottom: 0.2em;
   display: block;
   font-weight: 500;
   line-height: 1.1;
-  padding-left: 0.6em;
+  padding-left: 0.4em; /* Balance the letter spacing */
 }
 
 .breachLine {
@@ -542,14 +542,14 @@
 }
 
 .breachDesc {
-  font-size: clamp(9px, 1.4vw, 14px);
-  letter-spacing: 0.15em;
+  font-size: clamp(8px, 0.9vw, 11px);
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #000000;
-  line-height: 1.3;
+  line-height: 1.2;
   margin: 0 auto;
   font-weight: 400;
-  max-width: 95%;
+  max-width: 90%;
 }
 
 .breachDescLine {
@@ -558,20 +558,25 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: clamp(60px, 12vh, 120px);
-    width: clamp(320px, 90vw, 650px);
+    top: clamp(80px, 15vh, 140px);
+    width: clamp(280px, 92vw, 500px);
+  }
+
+  .breachContent {
+    width: 70%; /* Even tighter on mobile where edges are more pronounced */
+    top: 52%;
   }
 
   .breachLabel {
-    font-size: clamp(18px, 5vw, 24px);
-    letter-spacing: 0.4em;
-    padding-left: 0.4em;
-    margin-bottom: 8px;
+    font-size: clamp(14px, 5vw, 18px);
+    letter-spacing: 0.2em; /* Much tighter for longer RU text */
+    padding-left: 0.2em;
+    margin-bottom: 4px;
   }
 
   .breachDesc {
-    font-size: clamp(11px, 2.8vw, 13px);
+    font-size: clamp(8px, 2.5vw, 9.5px);
     max-width: 95%;
-    line-height: 1.3;
+    line-height: 1.1;
   }
 }
