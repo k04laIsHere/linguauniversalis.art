@@ -515,7 +515,7 @@
   font-family: var(--font-title);
   color: #000000;
   padding: 0;
-  width: 75%; /* More conservative width to stay away from the jagged edges */
+  width: 72%; /* Optimized for ArchiveEntrance3.webp */
   height: 70%; /* Stay centered vertically */
   display: flex;
   flex-direction: column;
@@ -527,14 +527,14 @@
 
 .breachLabel {
   font-size: clamp(13px, 2.2vw, 24px);
-  letter-spacing: 0.4em; /* Slightly tighter to prevent overflow */
+  letter-spacing: 0.35em; /* Optimized for Russian text length */
   text-transform: uppercase;
   color: #000000;
   margin-bottom: 0.2em;
   display: block;
   font-weight: 500;
   line-height: 1.1;
-  padding-left: 0.4em; /* Balance the letter spacing */
+  padding-left: 0.35em; /* Balance the letter spacing */
 }
 
 .breachLine {
@@ -549,7 +549,7 @@
   line-height: 1.2;
   margin: 0 auto;
   font-weight: 400;
-  max-width: 90%;
+  max-width: 85%; /* Slightly tighter to avoid bottom jagged edges */
 }
 
 .breachDescLine {
@@ -563,20 +563,20 @@
   }
 
   .breachContent {
-    width: 70%; /* Even tighter on mobile where edges are more pronounced */
+    width: 68%; /* More conservative for mobile where crack is visually tighter */
     top: 52%;
   }
 
   .breachLabel {
-    font-size: clamp(14px, 5vw, 18px);
-    letter-spacing: 0.2em; /* Much tighter for longer RU text */
-    padding-left: 0.2em;
+    font-size: clamp(13px, 5vw, 18px);
+    letter-spacing: 0.25em; /* Tighter for RU on narrow screens */
+    padding-left: 0.25em;
     margin-bottom: 4px;
   }
 
   .breachDesc {
     font-size: clamp(8px, 2.5vw, 9.5px);
-    max-width: 95%;
+    max-width: 90%;
     line-height: 1.1;
   }
 }
