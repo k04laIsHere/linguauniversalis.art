@@ -277,24 +277,22 @@ export function Cave() {
             </div>
           </div>
 
-          <div className={styles.manifestoWrapper} id="manifesto">
-            <header className={styles.hero}>
-              <h1 className={styles.title}>
-                {t.cave.title.split(' ').map((word, wordIdx) => (
-                  <span key={wordIdx} className={styles.titleWord}>
-                    {word.split('').map((char, charIdx) => (
-                      <span key={charIdx} className={styles.titleChar}>
-                        {char}
-                      </span>
-                    ))}
-                    {wordIdx < t.cave.title.split(' ').length - 1 && '\u00A0'}
-                  </span>
-                ))}
-              </h1>
-              <p className={styles.subtitle}>{t.cave.subtitle}</p>
-              <div className={styles.scrollHint}>{t.cave.flashlightHint2}</div>
-            </header>
-          </div>
+          <header className={styles.hero}>
+            <h1 className={styles.title}>
+              {t.cave.title.split(' ').map((word, wordIdx) => (
+                <span key={wordIdx} className={styles.titleWord}>
+                  {word.split('').map((char, charIdx) => (
+                    <span key={charIdx} className={styles.titleChar}>
+                      {char}
+                    </span>
+                  ))}
+                  {wordIdx < t.cave.title.split(' ').length - 1 && '\u00A0'}
+                </span>
+              ))}
+            </h1>
+            <p className={styles.subtitle}>{t.cave.subtitle}</p>
+            <div className={styles.scrollHint}>{t.cave.flashlightHint2}</div>
+          </header>
         </div>
 
         <div className={styles.manifestoGridWrapper}>
