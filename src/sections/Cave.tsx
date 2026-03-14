@@ -9,46 +9,6 @@ export function Cave() {
   const { setMode } = useViewMode();
   const rootRef = useRef<HTMLElement | null>(null);
   const manifestEndRef = useRef<HTMLDivElement | null>(null);
-  const breachContentRef = useRef<HTMLDivElement | null>(null);
-  const [breachScale, setBreachScale] = useState(1);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  useEffect(() => {
-    const updateScale = () => {
-      if (!breachContentRef.current) return;
-      
-      const content = breachContentRef.current;
-      // Get base dimensions. We use 1.6 factor to ensure content is well within the 16/9 breach image.
-      const width = content.offsetWidth;
-      const height = content.offsetHeight;
-      
-      if (width === 0 || height === 0) return;
-
-      const paddingFactor = 1.6; 
-      const targetWidth = width * paddingFactor;
-      const targetHeight = height * paddingFactor;
-      
-      const breachWidthForHeight = targetHeight * (16/9);
-      const neededWidth = Math.max(targetWidth, breachWidthForHeight);
-      
-      const isMobile = window.innerWidth <= 960;
-      // Mobile baseWidth logic needs to be stable relative to the 230% width in CSS
-      const baseWidth = isMobile 
-        ? window.innerWidth * 2.3 
-        : Math.min(Math.max(500, window.innerWidth * 0.5), 1100);
-      
-      setBreachScale(Math.max(1, neededWidth / baseWidth));
-      setIsInitialized(true);
-    };
-
-    // Use a small delay to ensure styles and fonts are applied
-    const timer = setTimeout(updateScale, 200);
-    window.addEventListener('resize', updateScale);
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener('resize', updateScale);
-    };
-  }, [t.cave.breachLabel, t.cave.breachDesc]);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -191,16 +151,12 @@ export function Cave() {
         });
       }
 
-      // Archive Breach parallax and appearance
+      // Archive Breach appearance
       gsap.fromTo(
         `.${styles.archiveBreach}`,
-        { opacity: 0, scale: 0.8, y: 20 },
+        { opacity: 0, y: 20 },
         {
           opacity: 1,
-          scale: (i, target) => {
-             // Let the dynamic scale from state be the base, but allow GSAP to animate it
-             return breachScale;
-          },
           y: 0,
           duration: 2.5,
           delay: 1.0,
@@ -211,11 +167,10 @@ export function Cave() {
     }, root);
 
     return () => ctx.revert();
-  }, [breachScale]);
+  }, []);
 
   const navigate = (newMode: 'immersive' | 'gallery') => {
     // scale transition starting from white inside the breach
-    const breach = document.querySelector(`.${styles.archiveBreach}`);
     const breachImg = document.querySelector(`.${styles.breachImg}`);
     const breachContent = document.querySelector(`.${styles.breachContent}`);
     
@@ -296,12 +251,6 @@ export function Cave() {
           role="button"
           tabIndex={0}
           aria-label="Enter Archive"
-          style={{ 
-            '--breach-dynamic-scale': breachScale,
-            opacity: isInitialized ? 1 : 0,
-            visibility: isInitialized ? 'visible' : 'hidden',
-            transition: 'opacity 0.6s ease'
-          } as any}
         >
           <div className={styles.breachVisual}>
             <img 
@@ -310,15 +259,15 @@ export function Cave() {
               className={styles.breachImg} 
             />
           </div>
-          <div className={styles.breachContent} ref={breachContentRef}>
+          <div className={styles.breachContent}>
             <span className={styles.breachLabel}>
               {t.cave.breachLabel.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block' }}>{line}</span>
+                <span key={idx} className={styles.breachLine}>{line}</span>
               ))}
             </span>
             <p className={styles.breachDesc}>
               {t.cave.breachDesc.split('\n').map((line, idx) => (
-                <span key={idx} style={{ display: 'block' }}>{line}</span>
+                <span key={idx} className={styles.breachDescLine}>{line}</span>
               ))}
             </p>
           </div>

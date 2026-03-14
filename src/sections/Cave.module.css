@@ -1,17 +1,16 @@
 .root {
   position: relative;
-  min-height: 500vh; /* Increased from 400vh to accommodate scattered artifacts */
+  min-height: 500vh;
   padding: 120px 0 100px;
   background: #020305;
   transition: visibility 0.3s;
 }
 
 .root:not([data-cave-active='1']) {
-  visibility: hidden; /* Hide the whole section when not active to prevent background leaking */
+  visibility: hidden;
   pointer-events: none;
 }
 
-/* Background wrapper to contain the cave environment */
 .bgWrapper {
   position: absolute;
   inset: 0;
@@ -24,7 +23,7 @@
   position: absolute;
   inset: 0;
   background-image: url('/assets/images/backgrounds/cave-wall-texture.jpg');
-  background-size: 2000px auto; /* Further increased to make rock details much larger */
+  background-size: 2000px auto;
   background-repeat: repeat;
   background-position: center;
   filter: saturate(0.6) contrast(1.2) brightness(0.6);
@@ -46,22 +45,17 @@
   z-index: 1;
 }
 
-/* Flashlight Shadow Mask - Faintly transparent as requested */
 .shadowMask {
   position: fixed;
   top: -10%;
   left: 0;
   width: 100%;
   height: 120%;
-  background: rgba(0, 0, 0, 0.65); /* Reduced from 0.75 to make artifacts more visible */
+  background: rgba(0, 0, 0, 0.65);
   pointer-events: none;
   z-index: 3;
-  opacity: 1; /* Start visible */
+  opacity: 1;
   
-  /* Multiple Masks: 
-     1. The dynamic moving flashlight
-     2. A static oval matching the Archive Breach's position (top 25vh) and scale (clamp)
-  */
   mask-image: 
     radial-gradient(
       circle var(--lu_r, 850px) at var(--lu_x, 50vw) var(--lu_y, 45vh),
@@ -93,17 +87,12 @@
       rgba(0, 0, 0, 0.6) 70%,
       black 100%
     );
-  -webkit-mask-composite: source-in; /* 'source-in' for webkit works like 'intersect' to combine holes */
+  -webkit-mask-composite: source-in;
 }
 
 .root[data-cave-active='1'] .bg,
 .root[data-cave-active='1'] .vignette {
   opacity: 1;
-}
-
-/* shadowMask opacity is now controlled by GSAP */
-.root[data-cave-active='1'] .shadowMask {
-  /* opacity is 1 by default, GSAP will fade it out */
 }
 
 .inner {
@@ -130,14 +119,14 @@
   align-items: center;
   text-align: center;
   position: relative;
-  z-index: 10; /* Above the mask always */
+  z-index: 10;
 }
 
 .title {
   margin: 0;
-  margin-top: 15vh; /* Added margin to push title down and avoid breach occlusion */
-  font-size: clamp(32px, 6vw, 72px); /* Reduced from 40px/8vw/100px */
-  letter-spacing: 0.25em; /* Increased spacing for better integration */
+  margin-top: 15vh;
+  font-size: clamp(32px, 6vw, 72px);
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: #fff;
   font-weight: 400;
@@ -175,7 +164,7 @@
 
 .scrollHint {
   position: absolute;
-  bottom: 22vh; /* Raised from 10vh */
+  bottom: 22vh;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-title);
@@ -198,7 +187,7 @@
   padding: 10vh 0;
   display: flex;
   flex-direction: column;
-  gap: 25vh; /* Tighter gap for manifesto items */
+  gap: 25vh;
 }
 
 .manifestoEnd {
@@ -228,7 +217,7 @@
   font-family: var(--font-title);
   font-size: clamp(160px, 18vw, 300px);
   color: var(--accent);
-  opacity: 0.25; /* Increased visibility further */
+  opacity: 0.25;
   line-height: 0.5;
   font-weight: 200;
   position: absolute;
@@ -281,14 +270,14 @@
 
 .artifactField {
   position: relative;
-  margin-top: 15vh; /* Tighter transition */
-  min-height: 200vh; /* Increased to allow for scattered layout without overlap */
+  margin-top: 15vh;
+  min-height: 200vh;
   padding: 0 5vw;
 }
 
 .artifact {
   position: absolute;
-  width: min(700px, 80vw); /* Slightly reduced to prevent tight overlaps */
+  width: min(700px, 80vw);
   z-index: 2;
   cursor: pointer;
   user-select: none;
@@ -298,10 +287,9 @@
 .artifactImgWrapper {
   position: relative;
   overflow: visible;
-  box-shadow: none; /* Removed sharp box-shadow */
+  box-shadow: none;
   background: transparent;
   transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-  /* Added a base background to prevent sudden appearance while loading */
   background: rgba(255, 255, 255, 0.03);
 }
 
@@ -311,15 +299,14 @@
   height: auto;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  filter: brightness(0.85) contrast(1.1) grayscale(0.2); /* Increased from 0.7 */
+  filter: brightness(0.85) contrast(1.1) grayscale(0.2);
   transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s ease, opacity 0.8s ease;
-  /* Replaced box-shadow with drop-shadow that respects alpha for feathered edges */
   filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
-  opacity: 0; /* Hidden initially for fade-in */
+  opacity: 0;
 }
 
 .artifactImg[src] {
-  opacity: 1; /* Fade in when src is assigned */
+  opacity: 1;
 }
 
 @media (min-width: 961px) {
@@ -327,7 +314,7 @@
     z-index: 20;
   }
   .artifact:hover .artifactImgWrapper {
-    transform: scale(1.5) translateY(-60px); /* Expanded even more for desktop */
+    transform: scale(1.5) translateY(-60px);
   }
 }
 
@@ -337,7 +324,7 @@
 
 .artifactCap {
   padding: 30px 0;
-  text-align: right; /* Changed to match 1st artifact on Right */
+  text-align: right;
   opacity: 0.6;
   transition: opacity 0.8s ease;
 }
@@ -347,7 +334,7 @@
 }
 
 .artifact:nth-child(even) .artifactCap {
-  text-align: left; /* Changed to match 2nd artifact on Left */
+  text-align: left;
 }
 
 .artifactTitle {
@@ -399,7 +386,7 @@
   }
 
   .root {
-    min-height: 350vh; /* Slightly more to accommodate items */
+    min-height: 350vh;
     padding-top: 80px;
   }
 
@@ -408,7 +395,7 @@
   }
 
   .title {
-    font-size: clamp(40px, 10vw, 72px); /* Increased from 32px / 8vw / 60px */
+    font-size: clamp(40px, 10vw, 72px);
     letter-spacing: 0.12em;
     padding: 0 15px;
     gap: 0.15em;
@@ -416,7 +403,7 @@
 
   .subtitle {
     letter-spacing: 0.4em;
-    font-size: 14px; /* Slightly larger from 12px */
+    font-size: 14px;
     margin-top: 35px;
     padding: 0 20px;
   }
@@ -481,12 +468,14 @@
   }
 }
 
+/* --- RE-ENGINEERED BREACH --- */
+
 .archiveBreach {
   position: absolute;
-  top: 10vh !important; /* Moved even further up to clear title on small devices */
-  left: 50% !important;
-  transform: translate(-50%, -50%) scale(var(--breach-dynamic-scale, 1)) !important;
-  width: clamp(500px, 50vw, 1100px); /* Scaled down 50% from clamp(1000px, 100vw, 2200px) */
+  top: clamp(60px, 12vh, 120px);
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: clamp(320px, 60vw, 850px);
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -537,74 +526,52 @@
 }
 
 .breachLabel {
-  font-size: clamp(18px, 2.5vw, 32px);
-  letter-spacing: 0.8em;
+  font-size: clamp(16px, 3.2vw, 26px);
+  letter-spacing: 0.6em;
   text-transform: uppercase;
   color: #000000;
-  margin-bottom: 1.5vh;
+  margin-bottom: 0.2em;
   display: block;
   font-weight: 500;
+  line-height: 1.1;
+  padding-left: 0.6em;
+}
+
+.breachLine {
+  display: block;
 }
 
 .breachDesc {
-  font-size: clamp(11px, 1.2vw, 18px);
-  letter-spacing: 0.22em;
+  font-size: clamp(9px, 1.4vw, 14px);
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   color: #000000;
-  line-height: 1.6;
+  line-height: 1.3;
   margin: 0 auto;
   font-weight: 400;
-  max-width: 60%;
+  max-width: 95%;
+}
+
+.breachDescLine {
+  display: block;
 }
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 15vh !important; /* Moved back down from 5vh to 15vh as requested */
-    width: 230%; /* Increased 1.7x from 135% to make it significantly larger on mobile */
-    padding: 0;
-    aspect-ratio: 16/9;
-    left: 50% !important;
-    /* transform handled by inline style */
-  }
-
-  .breachVisual {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    pointer-events: none;
-  }
-
-  .breachContent {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 102;
-    max-width: 80%;
-    width: 80%;
-    height: 90%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    text-shadow: none;
-    pointer-events: none;
+    top: clamp(60px, 12vh, 120px);
+    width: clamp(320px, 90vw, 650px);
   }
 
   .breachLabel {
-    color: #000000;
-    font-size: 20px; /* Reduced from 24px */
-    margin-bottom: 10px;
-    letter-spacing: 0.5em;
+    font-size: clamp(18px, 5vw, 24px);
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+    margin-bottom: 8px;
   }
 
   .breachDesc {
-    color: #000000;
-    font-size: 11px; /* Reduced from 13px */
-    max-width: 100%;
-    line-height: 1.4;
-    letter-spacing: 0.15em;
+    font-size: clamp(11px, 2.8vw, 13px);
+    max-width: 95%;
+    line-height: 1.3;
   }
 }
