@@ -110,7 +110,7 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  padding-top: 15vh;
+  padding-top: 18vh;
   gap: 12vh;
   z-index: 100;
 }
@@ -369,18 +369,18 @@
 
 @media (max-width: 960px) {
   .introStack {
-    padding-top: 15vh;
+    padding-top: 12vh;
     gap: 15vh;
     justify-content: flex-start;
   }
 
   .title {
-    font-size: clamp(32px, 10vw, 64px);
+    font-size: clamp(32px, 8vw, 64px);
     line-height: 1.2;
   }
 
   .subtitle {
-    margin-top: 25px;
+    margin-top: 20px;
     letter-spacing: 0.4em;
   }
 
@@ -454,7 +454,7 @@
 
 .breachContent {
   position: absolute;
-  top: 50%; 
+  top: 48%; 
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 102;
@@ -510,7 +510,7 @@
 
   .breachContent {
     width: 65%; 
-    top: 50%;
+    top: 48%;
   }
 
   .breachLabel {
