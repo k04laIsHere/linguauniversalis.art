@@ -108,11 +108,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center; /* Center vertically on landing */
+  justify-content: center;
   min-height: 100vh;
-  gap: clamp(40px, 6vh, 100px);
+  gap: 15vh;
   z-index: 100;
-  padding-top: 5vh;
 }
 
 .manifestoWrapper {
@@ -134,12 +133,12 @@
 
 .title {
   margin: 0;
-  font-size: clamp(42px, 10vw, 84px); /* Larger as per visual sketch */
-  letter-spacing: 0.15em;
+  font-size: clamp(32px, 6vw, 72px);
+  letter-spacing: 0.25em;
   text-transform: uppercase;
   color: #fff;
   font-weight: 400;
-  line-height: 1.1;
+  line-height: 1;
   text-align: center;
   font-family: var(--font-title);
   filter: drop-shadow(0 0 30px rgba(212, 175, 55, 0.25));
@@ -160,10 +159,10 @@
 }
 
 .subtitle {
-  margin-top: 30px;
+  margin-top: 40px;
   color: var(--accent);
-  font-size: clamp(14px, 3.5vw, 22px);
-  letter-spacing: 0.6em;
+  font-size: clamp(14px, 3.5vw, 28px);
+  letter-spacing: 0.8em;
   text-transform: uppercase;
   opacity: 0.9;
   font-weight: 400;
@@ -369,12 +368,12 @@
 
 @media (max-width: 960px) {
   .introStack {
-    padding-top: 10vh;
-    gap: clamp(40px, 8vh, 100px);
+    padding-top: 0;
+    gap: 15vh;
   }
 
   .title {
-    font-size: clamp(36px, 12vw, 64px);
+    font-size: clamp(32px, 8vw, 64px);
     line-height: 1.2;
   }
 
@@ -419,7 +418,7 @@
 
 .archiveBreach {
   position: relative;
-  width: clamp(340px, 50vw, 850px);
+  width: clamp(340px, 45vw, 750px);
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -453,7 +452,7 @@
 
 .breachContent {
   position: absolute;
-  top: 48%; /* Visually centered within the void */
+  top: 50%; 
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 102;
@@ -461,7 +460,7 @@
   font-family: var(--font-title);
   color: #000000;
   padding: 0;
-  width: 75%; /* Balanced containment */
+  width: 75%; 
   height: 75%;
   display: flex;
   flex-direction: column;
@@ -472,7 +471,7 @@
 }
 
 .breachLabel {
-  font-size: clamp(14px, 2.2vw, 24px);
+  font-size: clamp(14px, 2vw, 22px);
   letter-spacing: 0.4em;
   text-transform: uppercase;
   color: #000000;
@@ -488,7 +487,7 @@
 }
 
 .breachDesc {
-  font-size: clamp(9px, 0.9vw, 13px);
+  font-size: clamp(9px, 0.9vw, 12px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #000000;
@@ -504,12 +503,12 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    width: clamp(340px, 90vw, 600px);
+    width: clamp(340px, 92vw, 550px);
   }
 
   .breachContent {
-    width: 65%; /* Tighter for mobile to avoid edges */
-    top: 48%;
+    width: 65%; 
+    top: 50%;
   }
 
   .breachLabel {
