@@ -65,7 +65,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 30vh, /* Moved to 30vh from 35vh */
+      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 43vh, /* Moved to 43vh to match new 38vh title position + offset */
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -81,7 +81,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 30vh, /* Moved to 30vh from 35vh */
+      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 43vh, /* Moved to 43vh to match new 38vh title position + offset */
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -116,7 +116,7 @@
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-top: 25vh; /* Adjusted from 30vh to leave more space for the breach above */
+  padding-top: 38vh; /* Lowered from 25vh to something more balanced (requested ~35vh-40vh) */
   align-items: center;
   text-align: center;
   position: relative;
@@ -363,7 +363,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 33% 13% at 50% 24vh, /* Adjusted from 28vh */
+        ellipse 33% 13% at 50% 34vh, /* Adjusted to 34vh to match new mobile title position */
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -377,7 +377,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 33% 13% at 50% 24vh, /* Adjusted from 28vh */
+        ellipse 33% 13% at 50% 34vh, /* Adjusted to 34vh to match new mobile title position */
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -393,7 +393,7 @@
   .hero {
     height: 85vh;
     justify-content: flex-start;
-    padding-top: 18vh; /* Adjusted from 22vh */
+    padding-top: 28vh; /* Lowered from 18vh to increase vertical gap from Breach */
   }
 
   .title {
@@ -561,7 +561,7 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: clamp(80px, 15vh, 140px);
+    top: 100px; /* Locked position to ensure gap from title */
     width: clamp(280px, 92vw, 500px);
   }
 
