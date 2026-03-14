@@ -65,7 +65,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 25vh,
+      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 30vh, /* Moved to 30vh from 35vh */
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -81,7 +81,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 25vh,
+      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 30vh, /* Moved to 30vh from 35vh */
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -115,7 +115,8 @@
   height: 100vh;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
+  padding-top: 25vh; /* Adjusted from 30vh to leave more space for the breach above */
   align-items: center;
   text-align: center;
   position: relative;
@@ -124,7 +125,6 @@
 
 .title {
   margin: 0;
-  margin-top: 15vh;
   font-size: clamp(32px, 6vw, 72px);
   letter-spacing: 0.25em;
   text-transform: uppercase;
@@ -363,7 +363,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 33% 13% at 50% 18vh,
+        ellipse 33% 13% at 50% 24vh, /* Adjusted from 28vh */
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -377,7 +377,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 33% 13% at 50% 18vh,
+        ellipse 33% 13% at 50% 24vh, /* Adjusted from 28vh */
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -392,6 +392,8 @@
 
   .hero {
     height: 85vh;
+    justify-content: flex-start;
+    padding-top: 18vh; /* Adjusted from 22vh */
   }
 
   .title {
@@ -399,12 +401,13 @@
     letter-spacing: 0.12em;
     padding: 0 15px;
     gap: 0.15em;
+    margin-top: 0;
   }
 
   .subtitle {
     letter-spacing: 0.4em;
     font-size: 14px;
-    margin-top: 35px;
+    margin-top: 25px; /* Tighter for mobile */
     padding: 0 20px;
   }
 
@@ -475,7 +478,7 @@
   top: clamp(80px, 15vh, 140px);
   left: 50%;
   transform: translate(-50%, -50%);
-  width: clamp(280px, 85vw, 900px);
+  width: clamp(340px, 94vw, 900px); /* Increased min and mobile width */
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -507,7 +510,7 @@
 
 .breachContent {
   position: absolute;
-  top: 52%; /* Slight downward shift to match the visual center of the crack */
+  top: 48%; /* Shifted up from 52% to center within the void */
   left: 50%;
   transform: translate(-50%, -50%);
   z-index: 102;
