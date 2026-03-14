@@ -111,7 +111,7 @@
   justify-content: flex-start;
   min-height: 100vh;
   padding-top: clamp(60px, 10vh, 120px);
-  gap: clamp(60px, 12vh, 150px);
+  gap: clamp(60px, 8vh, 150px);
   z-index: 100;
 }
 
@@ -130,7 +130,7 @@
   align-items: center;
   text-align: center;
   z-index: 10;
-  margin-bottom: 12vh;
+  margin-bottom: 2vh;
 }
 
 .title {
@@ -174,7 +174,7 @@
 
 .scrollHint {
   position: absolute;
-  bottom: -6vh;
+  bottom: -15vh;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-title);
@@ -403,7 +403,7 @@
   .introStack {
     justify-content: flex-start;
     padding-top: clamp(60px, 10vh, 120px);
-    gap: clamp(60px, 12vh, 150px);
+    gap: clamp(60px, 8vh, 150px);
     min-height: 100vh;
   }
 
@@ -416,7 +416,7 @@
     height: auto;
     min-height: auto;
     padding-top: 0;
-    margin-bottom: 12vh;
+    margin-bottom: 2vh;
   }
 
   .title {
@@ -436,7 +436,7 @@
   }
 
   .scrollHint {
-    bottom: -6vh;
+    bottom: -15vh;
   }
 
   .manifestoGrid {
@@ -553,7 +553,7 @@
 }
 
 .breachLabel {
-  font-size: clamp(18px, 6vw, 36px);
+  font-size: clamp(16px, 4vw, 36px);
   letter-spacing: 0.35em;
   text-transform: uppercase;
   color: #000000;
@@ -569,7 +569,7 @@
 }
 
 .breachDesc {
-  font-size: clamp(10px, 3vw, 16px);
+  font-size: clamp(10px, 2.5vw, 16px);
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: #000000;
@@ -585,25 +585,40 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    width: 96vw;
-    margin-bottom: 4vh;
+    width: 250vw !important;
+    height: 140vw !important;
+    margin-bottom: 2vh;
+    overflow: visible;
+  }
+
+  .breachVisual {
+    width: 100%;
+    height: 100%;
+    transform: scale(0.65) translateY(-5%); /* Manual correction for the gap */
+  }
+
+  .breachImg {
+     width: 100% !important;
+     height: 100% !important;
+     object-fit: contain !important;
   }
 
   .breachContent {
-    width: 85%;
+    width: 35%;
     top: 50%;
   }
 
   .breachLabel {
-    font-size: clamp(20px, 8vw, 32px);
-    letter-spacing: 0.15em;
-    padding-left: 0.15em;
+    font-size: 20px !important;
+    letter-spacing: 0.1em;
+    padding-left: 0.1em;
     margin-bottom: 4px;
+    font-weight: 600;
   }
 
   .breachDesc {
-    font-size: clamp(12px, 4vw, 16px);
-    max-width: 95%;
+    font-size: 11px !important;
+    max-width: 90%;
     line-height: 1.1;
   }
 }
