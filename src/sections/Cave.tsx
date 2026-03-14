@@ -164,6 +164,18 @@ export function Cave() {
         }
       );
 
+      // Shadow Mask Light Following Title
+      ScrollTrigger.create({
+        trigger: `.${styles.title}`,
+        start: 'top bottom',
+        onUpdate: (self) => {
+          const title = self.trigger as HTMLElement;
+          const rect = title.getBoundingClientRect();
+          const yPercent = (rect.top + rect.height / 2) / window.innerHeight * 100;
+          root.style.setProperty('--title-y', `${yPercent}vh`);
+        }
+      });
+
     }, root);
 
     return () => ctx.revert();
@@ -245,52 +257,56 @@ export function Cave() {
       <div className={styles.shadowMask} aria-hidden="true" />
 
       <div className={styles.inner}>
-        <div 
-          className={styles.archiveBreach}
-          onClick={handleArchiveClick}
-          role="button"
-          tabIndex={0}
-          aria-label="Enter Archive"
-        >
-          <div className={styles.breachVisual}>
-            <img 
-              src="/assets/images/backgrounds/archiveEntrance3.webp" 
-              alt="" 
-              className={styles.breachImg} 
-            />
+        <div className={styles.introStack}>
+          <div 
+            className={styles.archiveBreach}
+            onClick={handleArchiveClick}
+            role="button"
+            tabIndex={0}
+            aria-label="Enter Archive"
+          >
+            <div className={styles.breachVisual}>
+              <img 
+                src="/assets/images/backgrounds/archiveEntrance3.webp" 
+                alt="" 
+                className={styles.breachImg} 
+              />
+            </div>
+            <div className={styles.breachContent}>
+              <span className={styles.breachLabel}>
+                {t.cave.breachLabel.split('\n').map((line, idx) => (
+                  <span key={idx} className={styles.breachLine}>{line}</span>
+                ))}
+              </span>
+              <p className={styles.breachDesc}>
+                {t.cave.breachDesc.split('\n').map((line, idx) => (
+                  <span key={idx} className={styles.breachDescLine}>{line}</span>
+                ))}
+              </p>
+            </div>
           </div>
-          <div className={styles.breachContent}>
-            <span className={styles.breachLabel}>
-              {t.cave.breachLabel.split('\n').map((line, idx) => (
-                <span key={idx} className={styles.breachLine}>{line}</span>
-              ))}
-            </span>
-            <p className={styles.breachDesc}>
-              {t.cave.breachDesc.split('\n').map((line, idx) => (
-                <span key={idx} className={styles.breachDescLine}>{line}</span>
-              ))}
-            </p>
+
+          <div className={styles.manifestoWrapper} id="manifesto">
+            <header className={styles.hero}>
+              <h1 className={styles.title}>
+                {t.cave.title.split(' ').map((word, wordIdx) => (
+                  <span key={wordIdx} className={styles.titleWord}>
+                    {word.split('').map((char, charIdx) => (
+                      <span key={charIdx} className={styles.titleChar}>
+                        {char}
+                      </span>
+                    ))}
+                    {wordIdx < t.cave.title.split(' ').length - 1 && '\u00A0'}
+                  </span>
+                ))}
+              </h1>
+              <p className={styles.subtitle}>{t.cave.subtitle}</p>
+              <div className={styles.scrollHint}>{t.cave.flashlightHint2}</div>
+            </header>
           </div>
         </div>
 
-        <div className={styles.manifestoWrapper} id="manifesto">
-          <header className={styles.hero}>
-            <h1 className={styles.title}>
-              {t.cave.title.split(' ').map((word, wordIdx) => (
-                <span key={wordIdx} className={styles.titleWord}>
-                  {word.split('').map((char, charIdx) => (
-                    <span key={charIdx} className={styles.titleChar}>
-                      {char}
-                    </span>
-                  ))}
-                  {wordIdx < t.cave.title.split(' ').length - 1 && '\u00A0'}
-                </span>
-              ))}
-            </h1>
-            <p className={styles.subtitle}>{t.cave.subtitle}</p>
-            <div className={styles.scrollHint}>{t.cave.flashlightHint2}</div>
-          </header>
-
+        <div className={styles.manifestoGridWrapper}>
           <div className={styles.manifestoGrid}>
             {t.cave.manifesto.map((line, i) => (
               <div 

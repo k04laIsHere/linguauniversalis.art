@@ -65,7 +65,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 43vh, /* Moved to 43vh to match new 38vh title position + offset */
+      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% var(--title-y, 43vh),
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -81,7 +81,7 @@
       black 92%
     ),
     radial-gradient(
-      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% 43vh, /* Moved to 43vh to match new 38vh title position + offset */
+      ellipse clamp(266px, 26vw, 600px) clamp(150px, 15vw, 337px) at 50% var(--title-y, 43vh),
       transparent 0%,
       rgba(0, 0, 0, 0.1) 30%,
       rgba(0, 0, 0, 0.6) 70%,
@@ -103,8 +103,16 @@
   z-index: 2;
 }
 
+.introStack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10vh; /* Consistent gap between Breach and Title */
+  padding-top: 10vh;
+}
+
 .manifestoWrapper {
-  min-height: 100vh;
+  width: 100%;
   padding: 0 24px;
   display: flex;
   flex-direction: column;
@@ -112,11 +120,10 @@
 }
 
 .hero {
-  height: 100vh;
+  min-height: 80vh;
   display: flex;
   flex-direction: column;
-  justify-content: flex-start;
-  padding-top: 38vh; /* Lowered from 25vh to something more balanced (requested ~35vh-40vh) */
+  justify-content: center;
   align-items: center;
   text-align: center;
   position: relative;
@@ -363,7 +370,7 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 33% 13% at 50% 34vh, /* Adjusted to 34vh to match new mobile title position */
+        ellipse 33% 13% at 50% var(--title-y, 34vh),
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
@@ -377,12 +384,17 @@
         black 92%
       ),
       radial-gradient(
-        ellipse 33% 13% at 50% 34vh, /* Adjusted to 34vh to match new mobile title position */
+        ellipse 33% 13% at 50% var(--title-y, 34vh),
         transparent 0%,
         rgba(0, 0, 0, 0.1) 30%,
         black 100%
       );
     -webkit-mask-composite: source-in;
+  }
+
+  .introStack {
+    gap: 15vh;
+    padding-top: 100px;
   }
 
   .root {
@@ -391,9 +403,9 @@
   }
 
   .hero {
-    height: 85vh;
-    justify-content: flex-start;
-    padding-top: 28vh; /* Lowered from 18vh to increase vertical gap from Breach */
+    height: auto;
+    min-height: 60vh;
+    padding-top: 0;
   }
 
   .title {
@@ -474,10 +486,7 @@
 /* --- RE-ENGINEERED BREACH --- */
 
 .archiveBreach {
-  position: absolute;
-  top: clamp(80px, 15vh, 140px);
-  left: 50%;
-  transform: translate(-50%, -50%);
+  position: relative;
   width: clamp(340px, 94vw, 900px); /* Increased min and mobile width */
   aspect-ratio: 16/9;
   z-index: 101; 
@@ -561,7 +570,6 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    top: 100px; /* Locked position to ensure gap from title */
     width: clamp(280px, 92vw, 500px);
   }
 
