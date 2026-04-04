@@ -1,4 +1,0 @@
-{
-  "state": "completed",
-  "summary": "Implemented floating capsule header with top margin, mobile menu overhaul with integrated language toggle, replaced 100vh with 100dvh across all key sections, removed jittery resize listeners in Events and ExitFlight, and refined landing page spacing for better mobile balance."
-}
