@@ -110,11 +110,11 @@ export function GalleryMode() {
                 end: `+=${groupDistance}`,
                 pin: true,
                 pinSpacing: true,
-                scrub: 1.5,
+                scrub: 1.2,
                 snap: {
                   snapTo: 1 / (groupWorksCount - 1),
-                  duration: { min: 0.2, max: 0.4 },
-                  delay: 0.05, // Fast start after scroll stops
+                  duration: { min: 0.1, max: 0.3 },
+                  delay: 0.02, // Fast start after scroll stops
                   ease: 'power1.inOut'
                 },
                 invalidateOnRefresh: true,
@@ -123,37 +123,39 @@ export function GalleryMode() {
             });
 
             works.forEach((work, i) => {
-              // Set initial states for all works to ensure determinism
+              // Reset all works to a base state to ensure reverse scroll works perfectly
               gsap.set(work, { 
                 autoAlpha: i === 0 ? 1 : 0, 
-                y: i === 0 ? 0 : 60, 
+                y: i === 0 ? 0 : 80, 
                 scale: i === 0 ? 1 : 1.02 
               });
 
               if (i === 0) return;
 
-              // Transition between work[i-1] and work[i]
-              // Previous fades out and drifts up
+              // Transition for index i happens between timeline time i-1 and i
+              const pos = i - 1;
+
+              // Outgoing
               tl.to(works[i - 1], {
                 autoAlpha: 0,
-                y: -60,
+                y: -80,
                 scale: 0.98,
                 duration: 1,
                 ease: 'power2.inOut',
-              }, i - 0.85); // Increased overlap
+              }, pos);
 
-              // Current fades in and settles from below
+              // Incoming
               tl.fromTo(works[i], 
-                { autoAlpha: 0, y: 60, scale: 1.02 },
+                { autoAlpha: 0, y: 80, scale: 1.02 },
                 { 
                   autoAlpha: 1, 
                   y: 0, 
                   scale: 1,
-                  duration: 1.2,
-                  ease: 'power2.out',
+                  duration: 1,
+                  ease: 'power2.inOut',
                   immediateRender: false
                 }, 
-                i - 0.95 // Significant overlap for buttery cross-fade
+                pos
               );
 
               // Update progress label
@@ -162,18 +164,10 @@ export function GalleryMode() {
                 const totalStr = groupWorksCount.toString().padStart(2, '0');
                 tl.add(() => {
                   progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
-                }, i - 0.5);
+                }, pos + 0.5);
               }
             });
           }
-
-          // Initial setup
-          works.forEach((work, i) => {
-            gsap.set(work, { 
-              opacity: i === 0 ? 1 : 0,
-              visibility: i === 0 ? 'visible' : 'hidden'
-            });
-          });
         });
       });
     }, collectionSection);
