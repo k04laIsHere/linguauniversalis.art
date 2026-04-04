@@ -103,72 +103,61 @@ export function GalleryMode() {
           const groupDistance = (groupWorksCount - 1) * window.innerHeight;
 
           if (groupWorksCount > 1) {
-            let lastIndex = 0;
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: group,
+                start: 'top top',
+                end: `+=${groupDistance}`,
+                pin: true,
+                pinSpacing: true,
+                scrub: 1.5, // Increased for buttery smoothness
+                invalidateOnRefresh: true,
+                refreshPriority: 1,
+              }
+            });
 
-            ScrollTrigger.create({
-              trigger: group,
-              start: 'top top',
-              end: `+=${groupDistance}`,
-              pin: true,
-              pinSpacing: true,
-              invalidateOnRefresh: true,
-              refreshPriority: 1,
-              onUpdate: (self) => {
-                const currentIndex = Math.round(self.progress * (groupWorksCount - 1));
-                if (currentIndex !== lastIndex) {
-                  // Direction: 1 for down (scrolling forward), -1 for up (scrolling back)
-                  const direction = currentIndex > lastIndex ? 1 : -1;
+            works.forEach((work, i) => {
+              // Ensure clean initial state for all works in the stack
+              if (i > 0) {
+                gsap.set(work, { opacity: 0, visibility: 'hidden', y: 60, scale: 1.02 });
+              } else {
+                gsap.set(work, { opacity: 1, visibility: 'visible', y: 0, scale: 1 });
+              }
 
-                  // Hide previous - move it up and fade out
-                  gsap.to(works[lastIndex], { 
-                    y: -100 * direction, // move opposite to flow
-                    opacity: 0, 
-                    visibility: 'hidden', 
-                    duration: 0.8,
-                    ease: 'power2.inOut',
-                    overwrite: 'auto'
-                  });
+              if (i === 0) return;
 
-                  // Show current - slide in from below (if going down) or above (if going up)
-                  gsap.fromTo(works[currentIndex], 
-                    { 
-                      y: 100 * direction, 
-                      opacity: 0, 
-                      visibility: 'visible' 
-                    },
-                    { 
-                      y: 0, 
-                      opacity: 1, 
-                      duration: 0.8, 
-                      ease: 'power2.out',
-                      overwrite: 'auto'
-                    }
-                  );
-                  
-                  // Update Label with animation
-                  if (progressLabel) {
-                    const currentStr = (currentIndex + 1).toString().padStart(2, '0');
-                    const totalStr = groupWorksCount.toString().padStart(2, '0');
-                    progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
-                    gsap.fromTo(progressLabel, 
-                      { y: 5, opacity: 0 }, 
-                      { y: 0, opacity: 1, duration: 0.4, ease: 'power2.out' }
-                    );
-                  }
-                  
-                  lastIndex = currentIndex;
-                }
-              },
-              onLeaveBack: () => {
-                gsap.set(works[0], { opacity: 1, visibility: 'visible', y: 0 });
-                for(let i = 1; i < works.length; i++) {
-                  gsap.set(works[i], { opacity: 0, visibility: 'hidden', y: 100 });
-                }
-                if (progressLabel) {
-                  const totalStr = groupWorksCount.toString().padStart(2, '0');
-                  progressLabel.innerHTML = `01&nbsp;/&nbsp;${totalStr}`;
-                }
-                lastIndex = 0;
+              // Transition between work[i-1] and work[i]
+              // Previous fades out and drifts up
+              tl.to(works[i - 1], {
+                opacity: 0,
+                y: -60,
+                scale: 0.98,
+                duration: 1,
+                ease: 'power2.inOut',
+                onComplete: () => gsap.set(works[i - 1], { visibility: 'hidden' }),
+              }, i - 0.8);
+
+              // Current fades in and settles from below
+              tl.fromTo(works[i], 
+                { opacity: 0, y: 60, scale: 1.02, visibility: 'visible' },
+                { 
+                  opacity: 1, 
+                  y: 0, 
+                  scale: 1,
+                  duration: 1.2,
+                  ease: 'power2.out',
+                  immediateRender: false
+                }, 
+                i - 0.9 // Substantial overlap to eliminate the "sudden" appearance
+              );
+
+              // Update progress label
+              if (progressLabel) {
+                const currentStr = (i + 1).toString().padStart(2, '0');
+                const totalStr = groupWorksCount.toString().padStart(2, '0');
+                tl.add(() => {
+                  progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
+                }, i - 0.5);
               }
             });
           }
