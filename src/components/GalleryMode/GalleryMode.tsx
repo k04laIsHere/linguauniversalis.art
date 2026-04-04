@@ -110,45 +110,50 @@ export function GalleryMode() {
                 end: `+=${groupDistance}`,
                 pin: true,
                 pinSpacing: true,
-                scrub: 1.5, // Increased for buttery smoothness
+                scrub: 1.5,
+                snap: {
+                  snapTo: 1 / (groupWorksCount - 1),
+                  duration: { min: 0.2, max: 0.4 },
+                  delay: 0.05, // Fast start after scroll stops
+                  ease: 'power1.inOut'
+                },
                 invalidateOnRefresh: true,
                 refreshPriority: 1,
               }
             });
 
             works.forEach((work, i) => {
-              // Ensure clean initial state for all works in the stack
-              if (i > 0) {
-                gsap.set(work, { opacity: 0, visibility: 'hidden', y: 60, scale: 1.02 });
-              } else {
-                gsap.set(work, { opacity: 1, visibility: 'visible', y: 0, scale: 1 });
-              }
+              // Set initial states for all works to ensure determinism
+              gsap.set(work, { 
+                autoAlpha: i === 0 ? 1 : 0, 
+                y: i === 0 ? 0 : 60, 
+                scale: i === 0 ? 1 : 1.02 
+              });
 
               if (i === 0) return;
 
               // Transition between work[i-1] and work[i]
               // Previous fades out and drifts up
               tl.to(works[i - 1], {
-                opacity: 0,
+                autoAlpha: 0,
                 y: -60,
                 scale: 0.98,
                 duration: 1,
                 ease: 'power2.inOut',
-                onComplete: () => gsap.set(works[i - 1], { visibility: 'hidden' }),
-              }, i - 0.8);
+              }, i - 0.85); // Increased overlap
 
               // Current fades in and settles from below
               tl.fromTo(works[i], 
-                { opacity: 0, y: 60, scale: 1.02, visibility: 'visible' },
+                { autoAlpha: 0, y: 60, scale: 1.02 },
                 { 
-                  opacity: 1, 
+                  autoAlpha: 1, 
                   y: 0, 
                   scale: 1,
                   duration: 1.2,
                   ease: 'power2.out',
                   immediateRender: false
                 }, 
-                i - 0.9 // Substantial overlap to eliminate the "sudden" appearance
+                i - 0.95 // Significant overlap for buttery cross-fade
               );
 
               // Update progress label
