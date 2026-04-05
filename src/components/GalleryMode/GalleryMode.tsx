@@ -83,91 +83,66 @@ export function GalleryMode() {
         const artistCol = block.querySelector(`.${styles.artistCol}`) as HTMLElement;
         const mediumGroups = gsap.utils.toArray<HTMLElement>(block.querySelectorAll(`.${styles.mediumGroup}`));
         
-        // 1. Pin the Artist Info Column
-        ScrollTrigger.create({
-          trigger: block,
-          start: 'top top',
-          end: 'bottom bottom',
-          pin: artistCol,
-          pinSpacing: false,
-          invalidateOnRefresh: true,
-          refreshPriority: -1,
-        });
+        // 1. Artist Sidebar/Header pinning (Native CSS handled via .artistCol sticky class)
+        // No GSAP pin needed here anymore as we'll use CSS position: sticky
 
-                  // 2. Handle Medium Groups and their Flipping Works
+        // 2. Handle Works within each Medium Group
         mediumGroups.forEach((group) => {
           const works = gsap.utils.toArray<HTMLElement>(group.querySelectorAll(`.${styles.workItem}`));
           const progressLabel = group.querySelector(`.${styles.progressLabel}`) as HTMLElement;
           const groupWorksCount = works.length;
-          
-          const groupDistance = (groupWorksCount - 1) * window.innerHeight;
 
-          if (groupWorksCount > 1) {
-            const tl = gsap.timeline({
-              scrollTrigger: {
-                trigger: group,
-                start: 'top top',
-                end: `+=${groupDistance}`,
-                pin: true,
-                pinSpacing: true,
-                scrub: 1.2,
-                snap: {
-                  snapTo: 1 / (groupWorksCount - 1),
-                  duration: { min: 0.1, max: 0.3 },
-                  delay: 0.02, // Fast start after scroll stops
-                  ease: 'power1.inOut'
-                },
-                invalidateOnRefresh: true,
-                refreshPriority: 1,
-              }
+          // Instead of pinning the whole group, we animate each work 
+          // as it hits the sticky "active" zone at the top of the viewport
+          works.forEach((work, i) => {
+            const isLast = i === groupWorksCount - 1;
+            
+            // Initial state for all works
+            gsap.set(work, { 
+              autoAlpha: i === 0 ? 1 : 0,
+              scale: 1,
+              y: 0 
             });
 
-            works.forEach((work, i) => {
-              // Reset all works to a base state to ensure reverse scroll works perfectly
-              gsap.set(work, { 
-                autoAlpha: i === 0 ? 1 : 0, 
-                y: i === 0 ? 0 : 80, 
-                scale: i === 0 ? 1 : 1.02 
+            // "Flip" Animation: 
+            // Triggered when the NEXT work starts coming up
+            if (!isLast) {
+              const nextWork = works[i + 1];
+              
+              ScrollTrigger.create({
+                trigger: nextWork,
+                start: 'top bottom', // When next work enters screen
+                end: 'top top',    // Until next work is fully sticky
+                scrub: true,
+                onUpdate: (self) => {
+                  // Current work fades out and drifts up
+                  gsap.set(work, {
+                    autoAlpha: 1 - self.progress,
+                    y: -100 * self.progress,
+                    scale: 1 - (0.05 * self.progress)
+                  });
+                  
+                  // Next work fades in and settles
+                  gsap.set(nextWork, {
+                    autoAlpha: self.progress,
+                    scale: 1.03 - (0.03 * self.progress),
+                    y: 60 * (1 - self.progress)
+                  });
+                  
+                  // Update Label at the midpoint
+                  if (progressLabel && self.progress > 0.5) {
+                    const currentStr = (i + 2).toString().padStart(2, '0');
+                    const totalStr = groupWorksCount.toString().padStart(2, '0');
+                    progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
+                  } else if (progressLabel && self.progress <= 0.5) {
+                    const currentStr = (i + 1).toString().padStart(2, '0');
+                    const totalStr = groupWorksCount.toString().padStart(2, '0');
+                    progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
+                  }
+                }
               });
-
-              if (i === 0) return;
-
-              // Transition for index i happens between timeline time i-1 and i
-              const pos = i - 1;
-
-              // Outgoing
-              tl.to(works[i - 1], {
-                autoAlpha: 0,
-                y: -80,
-                scale: 0.98,
-                duration: 1,
-                ease: 'power2.inOut',
-              }, pos);
-
-              // Incoming
-              tl.fromTo(works[i], 
-                { autoAlpha: 0, y: 80, scale: 1.02 },
-                { 
-                  autoAlpha: 1, 
-                  y: 0, 
-                  scale: 1,
-                  duration: 1,
-                  ease: 'power2.inOut',
-                  immediateRender: false
-                }, 
-                pos
-              );
-
-              // Update progress label
-              if (progressLabel) {
-                const currentStr = (i + 1).toString().padStart(2, '0');
-                const totalStr = groupWorksCount.toString().padStart(2, '0');
-                tl.add(() => {
-                  progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
-                }, pos + 0.5);
-              }
-            });
-          }
+            }
+          });
         });
       });
     }, collectionSection);

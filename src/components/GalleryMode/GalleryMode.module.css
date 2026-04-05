@@ -21,6 +21,8 @@
   scrollbar-color: #1a1a1a #fcfcf9 !important;
   /* Ensure mobile scrollbars aren't hidden by system overlays */
   -webkit-overflow-scrolling: touch;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
 }
 
 :global(html:has(.root))::-webkit-scrollbar,
@@ -127,6 +129,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  scroll-snap-align: start;
 }
 
 .manifestoContent {
@@ -194,7 +197,9 @@
   flex-direction: column;
   justify-content: center;
   border-right: 1px solid rgba(0, 0, 0, 0.05);
-  will-change: transform;
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
 .artistPhotoWrapper {
@@ -233,17 +238,17 @@
 
 .mediumGroup {
   position: relative;
-  height: 100vh;
+  height: auto;
   width: 100%;
-  background: #fcfcf9;
+  background: transparent;
 }
 
 .mediumHeader {
-  position: absolute;
+  position: sticky;
   top: 5rem;
   left: 4rem;
   right: 4rem;
-  z-index: 50;
+  z-index: 150;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -273,24 +278,24 @@
 .worksStack {
   position: relative;
   width: 100%;
-  height: 100%;
-  overflow: hidden;
+  height: auto;
 }
 
 .workItem {
-  position: absolute;
+  position: sticky;
   top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   margin: 0;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   padding: 8rem 4rem 4rem;
-  background: transparent; /* Changed to prevent background stacking/flicker during cross-fade */
+  background: transparent;
   will-change: transform, opacity;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
 }
 
 .workImageWrapper {
@@ -403,8 +408,9 @@
     justify-content: flex-start;
     gap: 0.25rem;
     width: 100%;
+    scroll-snap-align: start;
   }
-  
+
   .artistInfo {
     display: flex;
     align-items: center;
@@ -438,7 +444,8 @@
   .mediumHeader {
     left: 1.5rem;
     right: 1.5rem;
-    top: 7rem; 
+    top: 6rem; /* Adjusted for sticky header */
+    position: sticky;
   }
 
   .mediumTitle {
@@ -448,6 +455,8 @@
 
   .workItem {
     padding: 10rem 1.5rem 2.5rem; 
+    height: 100vh;
+    scroll-snap-align: start;
   }
 
   .workImageWrapper {
