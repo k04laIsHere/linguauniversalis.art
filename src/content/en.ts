@@ -11,6 +11,7 @@ export const en: I18nDict = {
     natureUrban: 'Nature→Urban',
     gallery: 'Gallery',
     contact: 'Contact',
+    movie: 'Documentary',
     brandHint: 'Art of Creation',
   },
   cave: {

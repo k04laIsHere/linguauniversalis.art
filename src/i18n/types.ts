@@ -11,6 +11,7 @@ export type I18nDict = {
     natureUrban: string;
     gallery: string;
     contact: string;
+    movie: string;
     brandHint: string;
   };
   cave: {

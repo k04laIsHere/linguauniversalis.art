@@ -3,6 +3,7 @@ import { useI18n } from '../../i18n/useI18n';
 import { useViewMode } from '../../contexts/ViewModeContext';
 import { teamMembers } from '../../content/teamData';
 import { galleryWorks } from '../../content/galleryManifest';
+import { events } from '../../content/eventsData';
 import { Contact } from '../../sections/Contact';
 import { gsap, ScrollTrigger } from '../../animation/gsap';
 import styles from './GalleryMode.module.css';
@@ -11,6 +12,7 @@ export function GalleryMode() {
   const { t, lang, setLang } = useI18n();
   const { toggleMode } = useViewMode();
   const collectionSectionRef = useRef<HTMLElement | null>(null);
+  const eventsSectionRef = useRef<HTMLElement | null>(null);
   const manifestoSectionRef = useRef<HTMLElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
 
@@ -78,77 +80,140 @@ export function GalleryMode() {
 
     const ctx = gsap.context(() => {
       const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
+      const eventBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.eventBlock}`);
 
       artistBlocks.forEach((block) => {
         const artistCol = block.querySelector(`.${styles.artistCol}`) as HTMLElement;
         const mediumGroups = gsap.utils.toArray<HTMLElement>(block.querySelectorAll(`.${styles.mediumGroup}`));
         
-        // 1. Artist Sidebar/Header pinning (Native CSS handled via .artistCol sticky class)
-        // No GSAP pin needed here anymore as we'll use CSS position: sticky
+        // 1. Pin the Artist Info Column
+        ScrollTrigger.create({
+          trigger: block,
+          start: 'top top',
+          end: 'bottom bottom',
+          pin: artistCol,
+          pinSpacing: false,
+          invalidateOnRefresh: true,
+          refreshPriority: -1,
+        });
 
-        // 2. Handle Works within each Medium Group
+        // 2. Handle Medium Groups and their Flipping Works
         mediumGroups.forEach((group) => {
           const works = gsap.utils.toArray<HTMLElement>(group.querySelectorAll(`.${styles.workItem}`));
           const progressLabel = group.querySelector(`.${styles.progressLabel}`) as HTMLElement;
           const groupWorksCount = works.length;
+          
+          const groupDistance = (groupWorksCount - 1) * window.innerHeight;
 
-          // Instead of pinning the whole group, we animate each work 
-          // as it hits the sticky "active" zone at the top of the viewport
-          works.forEach((work, i) => {
-            const isLast = i === groupWorksCount - 1;
-            
-            // Initial state for all works
-            gsap.set(work, { 
-              autoAlpha: i === 0 ? 1 : 0,
-              scale: 1,
-              y: 0 
+          if (groupWorksCount > 1) {
+            const tl = gsap.timeline({
+              scrollTrigger: {
+                trigger: group,
+                start: 'top top',
+                end: `+=${groupDistance}`,
+                pin: true,
+                pinSpacing: true,
+                scrub: 1.2,
+                snap: {
+                  snapTo: 1 / (groupWorksCount - 1),
+                  duration: { min: 0.1, max: 0.3 },
+                  delay: 0.02, // Fast start after scroll stops
+                  ease: 'power1.inOut'
+                },
+                invalidateOnRefresh: true,
+                refreshPriority: 1,
+              }
             });
 
-            // "Flip" Animation: 
-            // Triggered when the NEXT work starts coming up
-            if (!isLast) {
-              const nextWork = works[i + 1];
-              
-              ScrollTrigger.create({
-                trigger: nextWork,
-                start: 'top bottom', // When next work enters screen
-                end: 'top top',    // Until next work is fully sticky
-                scrub: true,
-                onUpdate: (self) => {
-                  // Current work fades out and drifts up
-                  gsap.set(work, {
-                    autoAlpha: 1 - self.progress,
-                    y: -100 * self.progress,
-                    scale: 1 - (0.05 * self.progress)
-                  });
-                  
-                  // Next work fades in and settles
-                  gsap.set(nextWork, {
-                    autoAlpha: self.progress,
-                    scale: 1.03 - (0.03 * self.progress),
-                    y: 60 * (1 - self.progress)
-                  });
-                  
-                  // Update Label at the midpoint
-                  if (progressLabel && self.progress > 0.5) {
-                    const currentStr = (i + 2).toString().padStart(2, '0');
-                    const totalStr = groupWorksCount.toString().padStart(2, '0');
-                    progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
-                  } else if (progressLabel && self.progress <= 0.5) {
-                    const currentStr = (i + 1).toString().padStart(2, '0');
-                    const totalStr = groupWorksCount.toString().padStart(2, '0');
-                    progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
-                  }
-                }
+            works.forEach((work, i) => {
+              // Reset all works to a base state to ensure reverse scroll works perfectly
+              gsap.set(work, { 
+                autoAlpha: i === 0 ? 1 : 0, 
+                y: i === 0 ? 0 : 80, 
+                scale: i === 0 ? 1 : 1.02 
               });
-            }
-          });
+
+              if (i === 0) return;
+
+              // Transition for index i happens between timeline time i-1 and i
+              const pos = i - 1;
+
+              // Outgoing
+              tl.to(works[i - 1], {
+                autoAlpha: 0,
+                y: -80,
+                scale: 0.98,
+                duration: 1,
+                ease: 'power2.inOut',
+              }, pos);
+
+              // Incoming
+              tl.fromTo(works[i], 
+                { autoAlpha: 0, y: 80, scale: 1.02 },
+                { 
+                  autoAlpha: 1, 
+                  y: 0, 
+                  scale: 1,
+                  duration: 1,
+                  ease: 'power2.inOut',
+                  immediateRender: false
+                }, 
+                pos
+              );
+
+              // Update progress label
+              if (progressLabel) {
+                const currentStr = (i + 1).toString().padStart(2, '0');
+                const totalStr = groupWorksCount.toString().padStart(2, '0');
+                tl.add(() => {
+                  progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
+                }, pos + 0.5);
+              }
+            });
+          }
+        });
+      });
+
+      // Pin Event Columns
+      eventBlocks.forEach((block) => {
+        const eventCol = block.querySelector(`.${styles.eventCol}`) as HTMLElement;
+        ScrollTrigger.create({
+          trigger: block,
+          start: 'top top',
+          end: 'bottom bottom',
+          pin: eventCol,
+          pinSpacing: false,
+          invalidateOnRefresh: true,
+          refreshPriority: -1,
         });
       });
     }, collectionSection);
 
+    // 3. Events Section Orchestration
+    const eventsSection = eventsSectionRef.current;
+    if (eventsSection && !isMobile) {
+      const eventsCtx = gsap.context(() => {
+        const eventBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.eventBlock}`);
+        eventBlocks.forEach((block) => {
+          const eventCol = block.querySelector(`.${styles.eventCol}`) as HTMLElement;
+          ScrollTrigger.create({
+            trigger: block,
+            start: 'top top',
+            end: 'bottom bottom',
+            pin: eventCol,
+            pinSpacing: false,
+            invalidateOnRefresh: true,
+          });
+        });
+      }, eventsSection);
+      return () => {
+        ctx.revert();
+        eventsCtx.revert();
+      };
+    }
+
     return () => ctx.revert();
-  }, [artistEntries.length]);
+  }, [artistEntries.length, isMobile]);
 
   return (
     <div className={styles.root}>
@@ -276,6 +341,135 @@ export function GalleryMode() {
               </div>
             );
           })}
+        </div>
+      </section>
+
+      {/* Events Section */}
+      <section ref={eventsSectionRef} id="events" className={styles.eventsSection}>
+        {events.map((event) => (
+          <div key={event.id} className={styles.eventBlock}>
+            {/* Left: Text & Links */}
+            <div className={styles.eventCol}>
+              <div className={styles.eventInfo}>
+                <span className={styles.eventCategory}>{t.header.events}</span>
+                <h2 className={styles.eventTitle}>
+                  {lang === 'ru' ? event.titleRu : event.titleEn}
+                </h2>
+                <div className={styles.eventMeta}>
+                  <span>{lang === 'ru' ? event.dateRu : event.dateEn}</span>
+                  <span>{lang === 'ru' ? event.locationRu : event.locationEn}</span>
+                </div>
+                <div className={styles.eventStory}>
+                  <p>{lang === 'ru' ? event.fullStoryRu : event.fullStoryEn}</p>
+                </div>
+                
+                {event.links && event.links.length > 0 && (
+                  <div className={styles.linksSection}>
+                    <h4 className={styles.linksTitle}>{lang === 'ru' ? 'Источники' : 'Sources'}</h4>
+                    <nav className={styles.blueLinksList}>
+                      {event.links.map((link, i) => (
+                        <a 
+                          key={i} 
+                          href={link.url} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className={styles.blueLink}
+                        >
+                          {lang === 'ru' ? link.titleRu : link.titleEn}
+                        </a>
+                      ))}
+                    </nav>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Scrolling Images */}
+            <div className={styles.eventImagesCol}>
+              {event.images.map((img, idx) => (
+                <figure key={idx} className={styles.eventImageFigure}>
+                  <img 
+                    src={img} 
+                    alt="" 
+                    className={styles.eventImageLarge} 
+                    loading="lazy" 
+                  />
+                </figure>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Movie Section */}
+      <section id="movie" className={styles.movieSection}>
+        <span className={styles.movieLabel}>{t.header.movie}</span>
+        <h2 className={styles.movieTitle}>Lingua Universalis</h2>
+        <div className={styles.videoWrapper}>
+          <iframe 
+            src="https://rutube.ru/play/embed/250e0fe59efd7f8bc6026577e8331b58/" 
+            className={styles.videoFrame}
+            allow="clipboard-write; autoplay" 
+            allowFullScreen
+            title="Lingua Universalis Movie"
+          />
+        </div>
+      </section>
+
+      {/* Events Section */}
+      <section className={styles.eventsSection}>
+        {events.map((event) => (
+          <div key={event.id} className={styles.eventBlock}>
+            <div className={styles.eventCol}>
+              <div className={styles.eventInfo}>
+                <h2 className={styles.eventTitle}>{lang === 'ru' ? event.titleRu : event.titleEn}</h2>
+                <div className={styles.eventMeta}>
+                  {lang === 'ru' ? event.dateRu : event.dateEn} • {lang === 'ru' ? event.locationRu : event.locationEn}
+                </div>
+                <div className={styles.eventStory}>
+                  <p>{lang === 'ru' ? event.fullStoryRu : event.fullStoryEn}</p>
+                </div>
+                {event.links && event.links.length > 0 && (
+                  <div className={styles.eventLinks}>
+                    {event.links.map((link, i) => (
+                      <a 
+                        key={i} 
+                        href={link.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className={styles.blueLink}
+                      >
+                        {lang === 'ru' ? link.titleRu : link.titleEn}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+            <div className={styles.eventMediaCol}>
+              <div className={styles.eventImageStack}>
+                {event.images.map((img, i) => (
+                  <div key={i} className={styles.eventFrame}>
+                    <img src={img} alt="" className={styles.eventImg} loading="lazy" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* Movie Section */}
+      <section className={styles.movieSection}>
+        <h2 className={styles.movieTitle}>{t.header.movie}</h2>
+        <p className={styles.movieSubtitle}>Lingua Universalis: Documental Film</p>
+        <div className={styles.videoContainer}>
+          <iframe 
+            src="https://rutube.ru/play/embed/250e0fe59efd7f8bc6026577e8331b58/" 
+            frameBorder="0" 
+            allow="clipboard-write; autoplay" 
+            allowFullScreen
+          ></iframe>
         </div>
       </section>
 

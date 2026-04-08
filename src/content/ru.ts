@@ -11,6 +11,7 @@ export const ru: I18nDict = {
     natureUrban: 'Природа→Город',
     gallery: 'Галерея',
     contact: 'Связаться',
+    movie: 'Фильм',
     brandHint: 'Искусство творения',
   },
   cave: {
