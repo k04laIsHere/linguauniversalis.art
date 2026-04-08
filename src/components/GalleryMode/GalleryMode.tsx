@@ -80,7 +80,6 @@ export function GalleryMode() {
 
     const ctx = gsap.context(() => {
       const artistBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.artistBlock}`);
-      const eventBlocks = gsap.utils.toArray<HTMLElement>(`.${styles.eventBlock}`);
 
       artistBlocks.forEach((block) => {
         const artistCol = block.querySelector(`.${styles.artistCol}`) as HTMLElement;
@@ -171,20 +170,6 @@ export function GalleryMode() {
               }
             });
           }
-        });
-      });
-
-      // Pin Event Columns
-      eventBlocks.forEach((block) => {
-        const eventCol = block.querySelector(`.${styles.eventCol}`) as HTMLElement;
-        ScrollTrigger.create({
-          trigger: block,
-          start: 'top top',
-          end: 'bottom bottom',
-          pin: eventCol,
-          pinSpacing: false,
-          invalidateOnRefresh: true,
-          refreshPriority: -1,
         });
       });
     }, collectionSection);
@@ -413,63 +398,6 @@ export function GalleryMode() {
             allowFullScreen
             title="Lingua Universalis Movie"
           />
-        </div>
-      </section>
-
-      {/* Events Section */}
-      <section className={styles.eventsSection}>
-        {events.map((event) => (
-          <div key={event.id} className={styles.eventBlock}>
-            <div className={styles.eventCol}>
-              <div className={styles.eventInfo}>
-                <h2 className={styles.eventTitle}>{lang === 'ru' ? event.titleRu : event.titleEn}</h2>
-                <div className={styles.eventMeta}>
-                  {lang === 'ru' ? event.dateRu : event.dateEn} • {lang === 'ru' ? event.locationRu : event.locationEn}
-                </div>
-                <div className={styles.eventStory}>
-                  <p>{lang === 'ru' ? event.fullStoryRu : event.fullStoryEn}</p>
-                </div>
-                {event.links && event.links.length > 0 && (
-                  <div className={styles.eventLinks}>
-                    {event.links.map((link, i) => (
-                      <a 
-                        key={i} 
-                        href={link.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer" 
-                        className={styles.blueLink}
-                      >
-                        {lang === 'ru' ? link.titleRu : link.titleEn}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-            <div className={styles.eventMediaCol}>
-              <div className={styles.eventImageStack}>
-                {event.images.map((img, i) => (
-                  <div key={i} className={styles.eventFrame}>
-                    <img src={img} alt="" className={styles.eventImg} loading="lazy" />
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </section>
-
-      {/* Movie Section */}
-      <section className={styles.movieSection}>
-        <h2 className={styles.movieTitle}>{t.header.movie}</h2>
-        <p className={styles.movieSubtitle}>Lingua Universalis: Documental Film</p>
-        <div className={styles.videoContainer}>
-          <iframe 
-            src="https://rutube.ru/play/embed/250e0fe59efd7f8bc6026577e8331b58/" 
-            frameBorder="0" 
-            allow="clipboard-write; autoplay" 
-            allowFullScreen
-          ></iframe>
         </div>
       </section>
 
