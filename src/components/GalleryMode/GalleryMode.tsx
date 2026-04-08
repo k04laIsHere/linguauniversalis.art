@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../../i18n/useI18n';
 import { useViewMode } from '../../contexts/ViewModeContext';
 import { teamMembers } from '../../content/teamData';
 import { galleryWorks } from '../../content/galleryManifest';
 import { events } from '../../content/eventsData';
 import { Contact } from '../../sections/Contact';
+import { scrollToId } from '../../utils/scroll';
 import { gsap, ScrollTrigger } from '../../animation/gsap';
 import styles from './GalleryMode.module.css';
 
@@ -15,6 +16,7 @@ export function GalleryMode() {
   const eventsSectionRef = useRef<HTMLElement | null>(null);
   const manifestoSectionRef = useRef<HTMLElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   // Detect mobile on mount and resize
   useEffect(() => {
@@ -23,6 +25,20 @@ export function GalleryMode() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const navItems = useMemo(() => [
+    { id: 'manifesto', label: t.header.manifesto },
+    { id: 'works', label: t.header.gallery },
+    { id: 'events', label: t.header.events },
+    { id: 'movie', label: t.header.movie },
+    { id: 'contact', label: t.header.contact },
+  ], [t]);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const handleNavClick = (id: string) => {
+    scrollToId(id);
+    setIsMenuOpen(false);
+  };
 
   // Group works by artist and then by medium
   const worksByArtist = galleryWorks.reduce((acc, work) => {
@@ -187,36 +203,87 @@ export function GalleryMode() {
   }, [artistEntries.length, isMobile]);
 
   return (
-    <div className={styles.root}>
-      {/* Minimalist Header */}
-      <header className={styles.header}>
-        <div className={styles.logo}>Lingua Universalis</div>
-        <button
-          className={styles.enterButton}
-          onClick={toggleMode}
-          aria-label="Enter immersive mode"
-        >
-          {lang === 'ru' ? 'Войти в Иммерсию' : 'Enter Immersion'}
-        </button>
-      </header>
+    <div className={`${styles.root} ${isMenuOpen ? styles.menuOpen : ''}`}>
+      {/* Sidebar Navigation */}
+      <aside className={styles.sidebar}>
+        <div className={styles.sidebarInner}>
+          <div className={styles.sidebarLogo}>Lingua Universalis</div>
+          <nav className={styles.sidebarNav}>
+            {navItems.map((item, i) => (
+              <button
+                key={item.id}
+                className={styles.sidebarNavLink}
+                onClick={() => handleNavClick(item.id)}
+                style={{ '--index': i } as any}
+              >
+                <span className={styles.navNumber}>{(i + 1).toString().padStart(2, '0')}</span>
+                <span className={styles.navLabel}>{item.label}</span>
+              </button>
+            ))}
+          </nav>
+          
+          <div className={styles.sidebarArtists}>
+            <div className={styles.sidebarSmallLabel}>{lang === 'ru' ? 'Участники' : 'Creators'}</div>
+            <div className={styles.artistMiniList}>
+              {teamMembers.map((member, i) => (
+                <button
+                  key={member.name}
+                  className={styles.artistMiniLink}
+                  onClick={() => handleNavClick(member.name.split(' ')[0])}
+                  style={{ '--index': i + 5 } as any}
+                >
+                  {lang === 'ru' ? (
+                    member.name === 'Andrey Vaganov' ? 'Андрей Ваганов' :
+                    member.name === 'Evgeny Globenko' ? 'Евгений Глобенко' :
+                    member.name === 'Petr Tsvetkov' ? 'Петр Цветков' :
+                    member.name === 'Omar Godines' ? 'Омар Годинес' :
+                    member.name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
+                    member.name === 'Joslen Orsini' ? 'Жослен Орсини' :
+                    member.name
+                  ) : member.name}
+                </button>
+              ))}
+            </div>
+          </div>
 
-      {/* Persistent Language Toggle */}
-      <button
-        type="button"
-        className={styles.langToggleFixed}
-        onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-        aria-label="Toggle Language"
-      >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={styles.globeIcon}>
-          <circle cx="12" cy="12" r="10" />
-          <line x1="2" y1="12" x2="22" y2="12" />
-          <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-        </svg>
-        <span className={styles.langCode}>{lang.toUpperCase()}</span>
-      </button>
+          <div className={styles.sidebarFooter}>
+            <button
+              className={styles.sidebarLangBtn}
+              onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
+            >
+              {lang.toUpperCase()}
+            </button>
+          </div>
+        </div>
+      </aside>
 
-      {/* Manifesto Section */}
-      <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
+      {/* Main Content Area */}
+      <main className={styles.mainContent}>
+        {/* Minimalist Header / Mobile Burger */}
+        <header className={styles.header}>
+          <div className={styles.logo} onClick={() => handleNavClick('manifesto')}>Lingua Universalis</div>
+          
+          <div className={styles.headerActions}>
+            <button
+              className={styles.enterButton}
+              onClick={toggleMode}
+              aria-label="Enter immersive mode"
+            >
+              {lang === 'ru' ? 'Иммерсия' : 'Immersion'}
+            </button>
+            
+            <button 
+              className={`${styles.burger} ${isMenuOpen ? styles.burgerActive : ''}`}
+              onClick={toggleMenu}
+              aria-label="Menu"
+            >
+              <span />
+            </button>
+          </div>
+        </header>
+
+        {/* Manifesto Section */}
+        <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
         <div className={styles.manifestoContent}>
           <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
           <p className={styles.manifestoSubtitle}>{t.cave.subtitle}</p>
@@ -230,7 +297,7 @@ export function GalleryMode() {
       </section>
 
       {/* Collection - The Stationary Flip Architecture */}
-      <section ref={collectionSectionRef} className={styles.collectionSection}>
+      <section ref={collectionSectionRef} className={styles.collectionSection} id="works">
         <div className={styles.collectionInner}>
           {artistEntries.map(([artistName, mediums]) => {
             const artistData = getArtistData(artistName);
@@ -257,7 +324,7 @@ export function GalleryMode() {
                       </div>
                     )}
                     <div className={styles.artistText}>
-                      <h2 className={styles.artistName}>{artistData.name}</h2>
+                      <h2 className={styles.artistName} id={artistData.name.split(' ')[0]}>{artistData.name}</h2>
                       <p className={styles.artistBio}>{artistData.bio}</p>
                     </div>
                   </div>
@@ -388,9 +455,10 @@ export function GalleryMode() {
       </section>
 
       {/* Contact */}
-      <div className={styles.contactWrapper}>
+      <div className={styles.contactWrapper} id="contact">
         <Contact />
       </div>
-    </div>
-  );
+    </main>
+  </div>
+);
 }
