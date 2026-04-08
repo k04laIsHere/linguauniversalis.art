@@ -9,7 +9,6 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-  /* Resetting potential overrides */
   scrollbar-gutter: stable;
 }
 
@@ -19,7 +18,6 @@
   overflow-y: auto !important;
   scrollbar-width: auto !important;
   scrollbar-color: #1a1a1a #fcfcf9 !important;
-  /* Ensure mobile scrollbars aren't hidden by system overlays */
   -webkit-overflow-scrolling: touch;
 }
 
@@ -51,7 +49,7 @@
 
 /* Header */
 .header {
-  position: relative; /* Remove sticky to allow artistCol to hit true top */
+  position: relative;
   z-index: 1000;
   display: flex;
   justify-content: space-between;
@@ -256,7 +254,7 @@
   color: #d4af37;
   letter-spacing: 0.5em;
   text-transform: uppercase;
-  white-space: normal; /* Allow title to wrap if needed */
+  white-space: normal;
   flex: 1;
 }
 
@@ -289,7 +287,7 @@
   justify-content: center;
   align-items: center;
   padding: 8rem 4rem 4rem;
-  background: transparent; /* Changed to prevent background stacking/flicker during cross-fade */
+  background: transparent;
   will-change: transform, opacity;
 }
 
@@ -369,161 +367,6 @@
   letter-spacing: 0.05em;
 }
 
-/* Contact Integration */
-.contactWrapper {
-  background: #fcfcf9;
-  padding: 8rem 2rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.1);
-}
-
-/* Events & Movie Styles */
-.eventBlock {
-  display: grid;
-  grid-template-columns: 450px 1fr;
-  min-height: 100vh;
-  position: relative;
-  background-color: #fcfcf9;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-}
-
-.eventCol {
-  padding: 4rem;
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  border-right: 1px solid rgba(0, 0, 0, 0.05);
-  will-change: transform;
-}
-
-.eventTitle {
-  font-family: var(--font-title);
-  font-size: 2.5rem;
-  margin: 0 0 1rem 0;
-  line-height: 1.1;
-  color: #1a1a1a;
-}
-
-.eventMeta {
-  font-size: 0.75rem;
-  color: #d4af37;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  margin-bottom: 2rem;
-  font-weight: 600;
-}
-
-.eventStory {
-  font-size: 0.95rem;
-  line-height: 1.7;
-  color: #444;
-  margin-bottom: 3rem;
-  max-width: 350px;
-}
-
-.eventLinks {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  border-top: 1px solid rgba(0, 0, 0, 0.05);
-  padding-top: 2rem;
-}
-
-.blueLink {
-  color: #3b82f6;
-  text-decoration: none;
-  font-size: 0.85rem;
-  font-weight: 500;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.2s ease;
-  width: fit-content;
-}
-
-.blueLink::after {
-  content: "→";
-  transition: transform 0.2s ease;
-}
-
-.blueLink:hover {
-  color: #2563eb;
-  transform: translateX(5px);
-}
-
-.eventMediaCol {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-}
-
-.eventImageStack {
-  display: flex;
-  flex-direction: column;
-  gap: 4rem;
-  padding: 6rem 4rem;
-}
-
-.eventFrame {
-  width: 100%;
-  max-width: 900px;
-  background: #fff;
-  padding: 1rem;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.05);
-  border: 1px solid rgba(0, 0, 0, 0.03);
-}
-
-.eventImg {
-  width: 100%;
-  height: auto;
-  display: block;
-  object-fit: cover;
-}
-
-/* Movie Section */
-.movieSection {
-  padding: 10rem 2rem;
-  background: #111;
-  color: #fff;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-}
-
-.movieTitle {
-  font-family: var(--font-title);
-  font-size: 3rem;
-  margin-bottom: 1rem;
-  letter-spacing: 0.1em;
-}
-
-.movieSubtitle {
-  font-size: 0.8rem;
-  text-transform: uppercase;
-  letter-spacing: 0.3em;
-  color: #d4af37;
-  margin-bottom: 4rem;
-}
-
-.videoContainer {
-  width: 100%;
-  max-width: 1000px;
-  aspect-ratio: 16 / 9;
-  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  position: relative;
-  background: #000;
-}
-
-.videoContainer iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-}
-
 /* Events Section */
 .eventsSection {
   background-color: #fcfcf9;
@@ -546,6 +389,7 @@
   justify-content: center;
   border-right: 1px solid rgba(0, 0, 0, 0.05);
   background: #fcfcf9;
+  will-change: transform;
 }
 
 .eventCategory {
@@ -611,6 +455,7 @@
   width: fit-content;
   position: relative;
   line-height: 1.4;
+  font-weight: 500;
 }
 
 .blueLink::after {
@@ -635,7 +480,6 @@
   transform-origin: left;
 }
 
-/* Event Images Column */
 .eventImagesCol {
   background: #f5f5f2;
   display: flex;
@@ -647,7 +491,10 @@
 .eventImageFigure {
   margin: 0;
   width: 100%;
+  background: #fff;
+  padding: 1rem;
   box-shadow: 0 20px 40px rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.03);
 }
 
 .eventImageLarge {
@@ -687,6 +534,8 @@
   aspect-ratio: 16 / 9;
   position: relative;
   box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+  background: #000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .videoFrame {
@@ -698,47 +547,21 @@
   border: none;
 }
 
-/* Mobile Overrides */
-@media (max-width: 1024px) {
-  .eventBlock {
-    grid-template-columns: 1fr;
-  }
-
-  .eventCol {
-    height: auto;
-    padding: 3rem 1.5rem;
-    border-right: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    position: relative; /* Not sticky on mobile for better text flow */
-  }
-
-  .eventStory {
-    max-width: 100%;
-  }
-
-  .eventImagesCol {
-    padding: 3rem 1.5rem;
-    gap: 2rem;
-  }
-
-  .movieSection {
-    padding: 6rem 1.5rem;
-  }
-
-  .movieTitle {
-    font-size: 2rem;
-  }
+/* Contact Integration */
+.contactWrapper {
+  background: #fcfcf9;
+  padding: 8rem 2rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
 }
 
+/* Mobile Overrides */
 @media (max-width: 1024px) {
   .manifestoSection {
-    padding: 8rem 1.5rem 6rem; /* Move text higher */
+    padding: 8rem 1.5rem 6rem;
   }
 
-  .artistBlock {
+  .artistBlock, .eventBlock {
     grid-template-columns: 1fr;
-    position: relative;
-    padding-bottom: 0;
   }
   
   .artistCol {
@@ -749,13 +572,22 @@
     align-items: center;
     text-align: left;
     position: sticky;
-    top: 0; /* Align to the very top */
+    top: 0;
     z-index: 500;
-    background: #fcfcf9; /* Solid background for stickiness */
+    background: #fcfcf9;
     flex-direction: column;
     justify-content: flex-start;
     gap: 0.25rem;
     width: 100%;
+  }
+
+  .eventCol {
+    height: auto;
+    padding: 3rem 1.5rem;
+    border-right: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    position: relative;
+    justify-content: flex-start;
   }
   
   .artistInfo {
@@ -775,28 +607,17 @@
 
   .artistName {
     font-size: 1.5rem; 
-    margin: 0 0 0.1rem 0;
   }
 
-  .artistBio {
-    display: block;
+  .artistBio, .eventStory {
     font-size: 0.8rem; 
-    line-height: 1.3;
     max-width: 100%;
-    color: #666666;
-    margin: 0;
-    opacity: 0.8;
   }
 
   .mediumHeader {
     left: 1.5rem;
     right: 1.5rem;
     top: 7rem; 
-  }
-
-  .mediumTitle {
-    font-size: 0.9rem; /* Bigger style name */
-    font-weight: 700;
   }
 
   .workItem {
@@ -807,43 +628,23 @@
     height: 40vh;
   }
 
-  .workTitle {
-    font-size: 1.125rem;
-  }
-
-  .langToggleFixed {
-    bottom: 1.5rem;
-    right: 1.5rem; /* Consistent right placement */
-    left: auto;
-    padding: 0.5rem 0.8rem;
-  }
-
-  .eventBlock {
-    grid-template-columns: 1fr;
-  }
-
-  .eventCol {
-    height: auto;
-    padding: 2rem 1.5rem;
-    border-right: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-    position: relative; /* Not sticky on mobile to allow reading long text */
-  }
-
-  .eventTitle {
-    font-size: 1.75rem;
-  }
-
-  .eventStory {
-    max-width: 100%;
-  }
-
-  .eventImageStack {
-    padding: 2rem 1.5rem;
+  .eventImagesCol {
+    padding: 3rem 1.5rem;
     gap: 2rem;
+  }
+
+  .movieSection {
+    padding: 6rem 1.5rem;
   }
 
   .movieTitle {
     font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+
+  .langToggleFixed {
+    bottom: 1.5rem;
+    right: 1.5rem;
+    padding: 0.5rem 0.8rem;
   }
 }
