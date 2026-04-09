@@ -28,11 +28,33 @@ export function GalleryMode() {
 
   const navItems = useMemo(() => [
     { id: 'manifesto', label: t.header.manifesto },
-    { id: 'works', label: t.header.gallery },
-    { id: 'events', label: t.header.events },
+    { 
+      id: 'works', 
+      label: t.header.team,
+      children: teamMembers.map(m => ({
+        id: m.name.split(' ')[0],
+        label: lang === 'ru' ? (
+          m.name === 'Andrey Vaganov' ? 'Андрей Ваганов' :
+          m.name === 'Evgeny Globenko' ? 'Евгений Глобенко' :
+          m.name === 'Petr Tsvetkov' ? 'Петр Цветков' :
+          m.name === 'Omar Godines' ? 'Омар Годинес' :
+          m.name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
+          m.name === 'Joslen Orsini' ? 'Жослен Орсини' :
+          m.name
+        ) : m.name
+      }))
+    },
+    { 
+      id: 'events', 
+      label: t.header.events,
+      children: events.map(e => ({
+        id: e.id,
+        label: lang === 'ru' ? e.titleRu : e.titleEn
+      }))
+    },
     { id: 'movie', label: t.header.movie },
     { id: 'contact', label: t.header.contact },
-  ], [t]);
+  ], [t, lang]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const handleNavClick = (id: string) => {
@@ -210,41 +232,32 @@ export function GalleryMode() {
           <div className={styles.sidebarLogo}>Lingua Universalis</div>
           <nav className={styles.sidebarNav}>
             {navItems.map((item, i) => (
-              <button
-                key={item.id}
-                className={styles.sidebarNavLink}
-                onClick={() => handleNavClick(item.id)}
-                style={{ '--index': i } as any}
-              >
-                <span className={styles.navNumber}>{(i + 1).toString().padStart(2, '0')}</span>
-                <span className={styles.navLabel}>{item.label}</span>
-              </button>
+              <div key={item.id} className={styles.navGroup}>
+                <button
+                  className={styles.sidebarNavLink}
+                  onClick={() => handleNavClick(item.id)}
+                  style={{ '--index': i } as any}
+                >
+                  <span className={styles.navNumber}>{(i + 1).toString().padStart(2, '0')}</span>
+                  <span className={styles.navLabel}>{item.label}</span>
+                </button>
+                {item.children && (
+                  <div className={styles.navChildren}>
+                    {item.children.map((child, j) => (
+                      <button
+                        key={child.id}
+                        className={styles.sidebarNavChild}
+                        onClick={() => handleNavClick(child.id)}
+                        style={{ '--index': i + j * 0.1 + 0.5 } as any}
+                      >
+                        {child.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             ))}
           </nav>
-          
-          <div className={styles.sidebarArtists}>
-            <div className={styles.sidebarSmallLabel}>{lang === 'ru' ? 'Участники' : 'Creators'}</div>
-            <div className={styles.artistMiniList}>
-              {teamMembers.map((member, i) => (
-                <button
-                  key={member.name}
-                  className={styles.artistMiniLink}
-                  onClick={() => handleNavClick(member.name.split(' ')[0])}
-                  style={{ '--index': i + 5 } as any}
-                >
-                  {lang === 'ru' ? (
-                    member.name === 'Andrey Vaganov' ? 'Андрей Ваганов' :
-                    member.name === 'Evgeny Globenko' ? 'Евгений Глобенко' :
-                    member.name === 'Petr Tsvetkov' ? 'Петр Цветков' :
-                    member.name === 'Omar Godines' ? 'Омар Годинес' :
-                    member.name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
-                    member.name === 'Joslen Orsini' ? 'Жослен Орсини' :
-                    member.name
-                  ) : member.name}
-                </button>
-              ))}
-            </div>
-          </div>
 
           <div className={styles.sidebarFooter}>
             <button
