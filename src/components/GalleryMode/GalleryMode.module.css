@@ -92,6 +92,14 @@
   transform: translateX(8px);
 }
 
+.sidebarNavLinkActive .navLabel {
+  color: #d4af37;
+}
+
+.sidebarNavLinkActive .navNumber {
+  opacity: 1;
+}
+
 .navGroup {
   display: flex;
   flex-direction: column;
@@ -122,6 +130,11 @@
 .sidebarNavChild:hover {
   color: #1a1a1a;
   transform: translateX(4px);
+}
+
+.sidebarNavChildActive {
+  color: #1a1a1a;
+  font-weight: 500;
 }
 
 .sidebarFooter {

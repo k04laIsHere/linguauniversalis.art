@@ -6,6 +6,7 @@ import { galleryWorks } from '../../content/galleryManifest';
 import { events } from '../../content/eventsData';
 import { Contact } from '../../sections/Contact';
 import { scrollToId } from '../../utils/scroll';
+import { useActiveSection } from '../Header/useActiveSection';
 import { gsap, ScrollTrigger } from '../../animation/gsap';
 import styles from './GalleryMode.module.css';
 
@@ -55,6 +56,18 @@ export function GalleryMode() {
     { id: 'movie', label: t.header.movie },
     { id: 'contact', label: t.header.contact },
   ], [t, lang]);
+
+  const allNavIds = useMemo(() => {
+    const ids = navItems.map(item => item.id);
+    navItems.forEach(item => {
+      if (item.children) {
+        ids.push(...item.children.map(c => c.id));
+      }
+    });
+    return ids;
+  }, [navItems]);
+
+  const activeSection = useActiveSection(allNavIds);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   const handleNavClick = (id: string) => {
@@ -234,7 +247,7 @@ export function GalleryMode() {
             {navItems.map((item, i) => (
               <div key={item.id} className={styles.navGroup}>
                 <button
-                  className={styles.sidebarNavLink}
+                  className={`${styles.sidebarNavLink} ${activeSection === item.id ? styles.sidebarNavLinkActive : ''}`}
                   onClick={() => handleNavClick(item.id)}
                   style={{ '--index': i } as any}
                 >
@@ -246,7 +259,7 @@ export function GalleryMode() {
                     {item.children.map((child, j) => (
                       <button
                         key={child.id}
-                        className={styles.sidebarNavChild}
+                        className={`${styles.sidebarNavChild} ${activeSection === child.id ? styles.sidebarNavChildActive : ''}`}
                         onClick={() => handleNavClick(child.id)}
                         style={{ '--index': i + j * 0.1 + 0.5 } as any}
                       >
