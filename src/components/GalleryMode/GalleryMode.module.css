@@ -169,8 +169,10 @@
 
 /* Header */
 .header {
-  position: sticky;
+  position: fixed; /* Changed from sticky to fixed */
   top: 0;
+  right: 0;
+  width: 100%; /* Ensure full width when absolute/fixed */
   z-index: 1000;
   display: none; /* Desktop hidden by default */
   justify-content: space-between;
@@ -703,6 +705,7 @@
   .header {
     display: flex;
     padding: 1rem 1.5rem;
+    left: 0; /* Align correctly on mobile */
   }
 
   .headerActions {

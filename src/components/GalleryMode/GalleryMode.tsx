@@ -40,7 +40,7 @@ export function GalleryMode() {
           m.name === 'Petr Tsvetkov' ? 'Петр Цветков' :
           m.name === 'Omar Godines' ? 'Омар Годинес' :
           m.name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
-          m.name === 'Joslen Orsini' ? 'Жослен Орсини' :
+          m.name === 'Joslen Orsini' ? 'Йослен Орсини' :
           m.name
         ) : m.name
       }))
@@ -411,7 +411,7 @@ export function GalleryMode() {
       {/* Events Section */}
       <section ref={eventsSectionRef} id="events" className={styles.eventsSection}>
         {events.map((event) => (
-          <div key={event.id} className={styles.eventBlock}>
+          <div key={event.id} className={styles.eventBlock} id={event.id}>
             {/* Left: Text & Links */}
             <div className={styles.eventCol}>
               <div className={styles.eventInfo}>
