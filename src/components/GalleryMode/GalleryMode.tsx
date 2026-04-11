@@ -27,22 +27,39 @@ export function GalleryMode() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  const artistEntries = useMemo(() => {
+    const worksByArtist = galleryWorks.reduce((acc, work) => {
+      if (!acc[work.artist]) {
+        acc[work.artist] = {};
+      }
+      const medium = work.medium || 'Other';
+      if (!acc[work.artist][medium]) {
+        acc[work.artist][medium] = [];
+      }
+      acc[work.artist][medium].push(work);
+      return acc;
+    }, {} as Record<string, Record<string, typeof galleryWorks>>);
+
+    const uniqueArtists = Array.from(new Set(galleryWorks.map(w => w.artist)));
+    return uniqueArtists.map(name => [name, worksByArtist[name]] as [string, Record<string, typeof galleryWorks>]);
+  }, []);
+
   const navItems = useMemo(() => [
     { id: 'manifesto', label: t.header.manifesto },
     { 
       id: 'works', 
       label: t.header.team,
-      children: teamMembers.map(m => ({
-        id: m.name.split(' ')[0],
+      children: artistEntries.map(([name]) => ({
+        id: `artist-${name.replace(/\s+/g, '-').toLowerCase()}`,
         label: lang === 'ru' ? (
-          m.name === 'Andrey Vaganov' ? 'Андрей Ваганов' :
-          m.name === 'Evgeny Globenko' ? 'Евгений Глобенко' :
-          m.name === 'Petr Tsvetkov' ? 'Петр Цветков' :
-          m.name === 'Omar Godines' ? 'Омар Годинес' :
-          m.name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
-          m.name === 'Joslen Orsini' ? 'Йослен Орсини' :
-          m.name
-        ) : m.name
+          name === 'Andrey Vaganov' ? 'Андрей Ваганов' :
+          name === 'Evgeny Globenko' ? 'Евгений Глобенко' :
+          name === 'Petr Tsvetkov' ? 'Петр Цветков' :
+          name === 'Omar Godines' ? 'Омар Годинес' :
+          name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
+          name === 'Joslen Orsini' ? 'Йослен Орсини' :
+          name
+        ) : name
       }))
     },
     { 
@@ -55,7 +72,7 @@ export function GalleryMode() {
     },
     { id: 'movie', label: t.header.movie },
     { id: 'contact', label: t.header.contact },
-  ], [t, lang]);
+  ], [t, lang, artistEntries]);
 
   const allNavIds = useMemo(() => {
     const ids = navItems.map(item => item.id);
@@ -74,21 +91,6 @@ export function GalleryMode() {
     scrollToId(id);
     setIsMenuOpen(false);
   };
-
-  // Group works by artist and then by medium
-  const worksByArtist = galleryWorks.reduce((acc, work) => {
-    if (!acc[work.artist]) {
-      acc[work.artist] = {};
-    }
-    const medium = work.medium || 'Other';
-    if (!acc[work.artist][medium]) {
-      acc[work.artist][medium] = [];
-    }
-    acc[work.artist][medium].push(work);
-    return acc;
-  }, {} as Record<string, Record<string, typeof galleryWorks>>);
-
-  const artistEntries = Object.entries(worksByArtist);
 
   // Translation map for mediums
   const mediumTranslations: Record<string, { en: string; ru: string }> = {
@@ -113,7 +115,7 @@ export function GalleryMode() {
       member?.name === 'Petr Tsvetkov' ? 'Петр Цветков' :
       member?.name === 'Omar Godines' ? 'Омар Годинес' :
       member?.name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
-      member?.name === 'Joslen Orsini' ? 'Жослен Орсини' :
+      member?.name === 'Joslen Orsini' ? 'Йослен Орсини' :
       member?.name
     ) : member?.name;
 
@@ -242,7 +244,7 @@ export function GalleryMode() {
       {/* Sidebar Navigation */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarInner}>
-          <div className={styles.sidebarLogo}>Lingua Universalis</div>
+          <div className={styles.sidebarLogo} onClick={() => handleNavClick('manifesto')}>Lingua Universalis</div>
           <nav className={styles.sidebarNav}>
             {navItems.map((item, i) => (
               <div key={item.id} className={styles.navGroup}>
@@ -310,181 +312,182 @@ export function GalleryMode() {
 
         {/* Manifesto Section */}
         <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
-        <div className={styles.manifestoContent}>
-          <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
-          <p className={styles.manifestoSubtitle}>{t.cave.subtitle}</p>
+          <div className={styles.manifestoContent}>
+            <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
+            <p className={styles.manifestoSubtitle}>{t.cave.subtitle}</p>
 
-          <div className={styles.manifestoText}>
-            {t.cave.manifesto.map((line, i) => (
-              <p key={i} className={styles.manifestoLine}>{line}</p>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Collection - The Stationary Flip Architecture */}
-      <section ref={collectionSectionRef} className={styles.collectionSection} id="works">
-        <div className={styles.collectionInner}>
-          {artistEntries.map(([artistName, mediums]) => {
-            const artistData = getArtistData(artistName);
-            const mediumEntries = Object.entries(mediums);
-
-            return (
-              <div
-                key={artistName}
-                className={styles.artistBlock}
-                data-artist={artistName}
-              >
-                {/* Artist Info - Pinned on Left (Desktop) / Top (Mobile) */}
-                <div className={styles.artistCol}>
-                  <div className={styles.artistInfo}>
-                    {artistData.photo && (
-                      <div className={styles.artistPhotoWrapper}>
-                        <img
-                          src={artistData.photo}
-                          alt={artistName}
-                          className={styles.artistPhoto}
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-                    )}
-                    <div className={styles.artistText}>
-                      <h2 className={styles.artistName} id={artistData.name.split(' ')[0]}>{artistData.name}</h2>
-                      <p className={styles.artistBio}>{artistData.bio}</p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Works Column - Stacks works for the Flip Effect */}
-                <div className={styles.worksCol}>
-                  {mediumEntries.map(([medium, works]) => (
-                    <div key={medium} className={styles.mediumGroup}>
-                      <div className={styles.mediumHeader}>
-                        <h3 className={styles.mediumTitle}>{getTranslatedMedium(medium)}</h3>
-                        <div className={styles.scrollProgress}>
-                          <div className={styles.progressLabel}>
-                            01&nbsp;/&nbsp;{works.length.toString().padStart(2, '0')}
-                          </div>
-                        </div>
-                      </div>
-                      
-                      <div className={styles.worksStack}>
-                        {works.map((work, idx) => (
-                          <figure key={work.id} className={styles.workItem} style={{ zIndex: works.length - idx }}>
-                            <div className={styles.workImageWrapper}>
-                              <img
-                                src={work.src}
-                                alt={lang === 'ru' ? work.titleRu : work.titleEn}
-                                className={styles.workImage}
-                                loading="lazy"
-                                decoding="async"
-                              />
-                            </div>
-                            <figcaption className={styles.workCaption}>
-                              <div className={styles.captionHeader}>
-                                <div className={styles.captionTitleArea}>
-                                  <span className={styles.workMediumTag}>{getTranslatedMedium(work.medium || 'Other')}</span>
-                                  <h4 className={styles.workTitle}>
-                                    {lang === 'ru' ? work.titleRu : work.titleEn}
-                                  </h4>
-                                </div>
-                                <span className={styles.workIndex}>{(idx + 1).toString().padStart(2, '0')}</span>
-                              </div>
-                              <div className={styles.workMeta}>
-                                {work.year && <span className={styles.workMetaItem}>{work.year}</span>}
-                                {work.size && <span className={styles.workMetaItem}>{work.size}</span>}
-                              </div>
-                            </figcaption>
-                          </figure>
-                        ))}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      {/* Events Section */}
-      <section ref={eventsSectionRef} id="events" className={styles.eventsSection}>
-        {events.map((event) => (
-          <div key={event.id} className={styles.eventBlock} id={event.id}>
-            {/* Left: Text & Links */}
-            <div className={styles.eventCol}>
-              <div className={styles.eventInfo}>
-                <span className={styles.eventCategory}>{t.header.events}</span>
-                <h2 className={styles.eventTitle}>
-                  {lang === 'ru' ? event.titleRu : event.titleEn}
-                </h2>
-                <div className={styles.eventMeta}>
-                  <span>{lang === 'ru' ? event.dateRu : event.dateEn}</span>
-                  <span>{lang === 'ru' ? event.locationRu : event.locationEn}</span>
-                </div>
-                <div className={styles.eventStory}>
-                  <p>{lang === 'ru' ? event.fullStoryRu : event.fullStoryEn}</p>
-                </div>
-                
-                {event.links && event.links.length > 0 && (
-                  <div className={styles.linksSection}>
-                    <h4 className={styles.linksTitle}>{lang === 'ru' ? 'Источники' : 'Sources'}</h4>
-                    <nav className={styles.blueLinksList}>
-                      {event.links.map((link, i) => (
-                        <a 
-                          key={i} 
-                          href={link.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer" 
-                          className={styles.blueLink}
-                        >
-                          {lang === 'ru' ? link.titleRu : link.titleEn}
-                        </a>
-                      ))}
-                    </nav>
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right: Scrolling Images */}
-            <div className={styles.eventImagesCol}>
-              {event.images.map((img, idx) => (
-                <figure key={idx} className={styles.eventImageFigure}>
-                  <img 
-                    src={img} 
-                    alt="" 
-                    className={styles.eventImageLarge} 
-                    loading="lazy" 
-                  />
-                </figure>
+            <div className={styles.manifestoText}>
+              {t.cave.manifesto.map((line, i) => (
+                <p key={i} className={styles.manifestoLine}>{line}</p>
               ))}
             </div>
           </div>
-        ))}
-      </section>
+        </section>
 
-      {/* Movie Section */}
-      <section id="movie" className={styles.movieSection}>
-        <span className={styles.movieLabel}>{t.header.movie}</span>
-        <h2 className={styles.movieTitle}>Lingua Universalis</h2>
-        <div className={styles.videoWrapper}>
-          <iframe 
-            src="https://rutube.ru/play/embed/250e0fe59efd7f8bc6026577e8331b58/" 
-            className={styles.videoFrame}
-            allow="clipboard-write; autoplay" 
-            allowFullScreen
-            title="Lingua Universalis Movie"
-          />
+        {/* Collection - The Stationary Flip Architecture */}
+        <section ref={collectionSectionRef} className={styles.collectionSection} id="works">
+          <div className={styles.collectionInner}>
+            {artistEntries.map(([artistName, mediums]) => {
+              const artistData = getArtistData(artistName);
+              const mediumEntries = Object.entries(mediums);
+
+              return (
+                <div
+                  key={artistName}
+                  className={styles.artistBlock}
+                  data-artist={artistName}
+                  id={artistName.split(' ')[0]}
+                >
+                  {/* Artist Info - Pinned on Left (Desktop) / Top (Mobile) */}
+                  <div className={styles.artistCol}>
+                    <div className={styles.artistInfo}>
+                      {artistData.photo && (
+                        <div className={styles.artistPhotoWrapper}>
+                          <img
+                            src={artistData.photo}
+                            alt={artistName}
+                            className={styles.artistPhoto}
+                            loading="lazy"
+                            decoding="async"
+                          />
+                        </div>
+                      )}
+                      <div className={styles.artistText}>
+                        <h2 className={styles.artistName}>{artistData.name}</h2>
+                        <p className={styles.artistBio}>{artistData.bio}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Works Column - Stacks works for the Flip Effect */}
+                  <div className={styles.worksCol}>
+                    {mediumEntries.map(([medium, works]) => (
+                      <div key={medium} className={styles.mediumGroup}>
+                        <div className={styles.mediumHeader}>
+                          <h3 className={styles.mediumTitle}>{getTranslatedMedium(medium)}</h3>
+                          <div className={styles.scrollProgress}>
+                            <div className={styles.progressLabel}>
+                              01&nbsp;/&nbsp;{works.length.toString().padStart(2, '0')}
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className={styles.worksStack}>
+                          {works.map((work, idx) => (
+                            <figure key={work.id} className={styles.workItem} style={{ zIndex: works.length - idx }}>
+                              <div className={styles.workImageWrapper}>
+                                <img
+                                  src={work.src}
+                                  alt={lang === 'ru' ? work.titleRu : work.titleEn}
+                                  className={styles.workImage}
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                              </div>
+                              <figcaption className={styles.workCaption}>
+                                <div className={styles.captionHeader}>
+                                  <div className={styles.captionTitleArea}>
+                                    <span className={styles.workMediumTag}>{getTranslatedMedium(work.medium || 'Other')}</span>
+                                    <h4 className={styles.workTitle}>
+                                      {lang === 'ru' ? work.titleRu : work.titleEn}
+                                    </h4>
+                                  </div>
+                                  <span className={styles.workIndex}>{(idx + 1).toString().padStart(2, '0')}</span>
+                                </div>
+                                <div className={styles.workMeta}>
+                                  {work.year && <span className={styles.workMetaItem}>{work.year}</span>}
+                                  {work.size && <span className={styles.workMetaItem}>{work.size}</span>}
+                                </div>
+                              </figcaption>
+                            </figure>
+                          ))}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* Events Section */}
+        <section ref={eventsSectionRef} id="events" className={styles.eventsSection}>
+          {events.map((event) => (
+            <div key={event.id} className={styles.eventBlock} id={event.id}>
+              {/* Left: Text & Links */}
+              <div className={styles.eventCol}>
+                <div className={styles.eventInfo}>
+                  <span className={styles.eventCategory}>{t.header.events}</span>
+                  <h2 className={styles.eventTitle}>
+                    {lang === 'ru' ? event.titleRu : event.titleEn}
+                  </h2>
+                  <div className={styles.eventMeta}>
+                    <span>{lang === 'ru' ? event.dateRu : event.dateEn}</span>
+                    <span>{lang === 'ru' ? event.locationRu : event.locationEn}</span>
+                  </div>
+                  <div className={styles.eventStory}>
+                    <p>{lang === 'ru' ? event.fullStoryRu : event.fullStoryEn}</p>
+                  </div>
+                  
+                  {event.links && event.links.length > 0 && (
+                    <div className={styles.linksSection}>
+                      <h4 className={styles.linksTitle}>{lang === 'ru' ? 'Источники' : 'Sources'}</h4>
+                      <nav className={styles.blueLinksList}>
+                        {event.links.map((link, i) => (
+                          <a 
+                            key={i} 
+                            href={link.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className={styles.blueLink}
+                          >
+                            {lang === 'ru' ? link.titleRu : link.titleEn}
+                          </a>
+                        ))}
+                      </nav>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: Scrolling Images */}
+              <div className={styles.eventImagesCol}>
+                {event.images.map((img, idx) => (
+                  <figure key={idx} className={styles.eventImageFigure}>
+                    <img 
+                      src={img} 
+                      alt="" 
+                      className={styles.eventImageLarge} 
+                      loading="lazy" 
+                    />
+                  </figure>
+                ))}
+              </div>
+            </div>
+          ))}
+        </section>
+
+        {/* Movie Section */}
+        <section id="movie" className={styles.movieSection}>
+          <span className={styles.movieLabel}>{t.header.movie}</span>
+          <h2 className={styles.movieTitle}>Lingua Universalis</h2>
+          <div className={styles.videoWrapper}>
+            <iframe 
+              src="https://rutube.ru/play/embed/250e0fe59efd7f8bc6026577e8331b58/" 
+              className={styles.videoFrame}
+              allow="clipboard-write; autoplay" 
+              allowFullScreen
+              title="Lingua Universalis Movie"
+            />
+          </div>
+        </section>
+
+        {/* Contact */}
+        <div className={styles.contactWrapper} id="contact">
+          <Contact />
         </div>
-      </section>
-
-      {/* Contact */}
-      <div className={styles.contactWrapper} id="contact">
-        <Contact />
-      </div>
-    </main>
-  </div>
-);
+      </main>
+    </div>
+  );
 }
