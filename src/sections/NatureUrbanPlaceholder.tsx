@@ -1,10 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { ScrollTrigger, initGsap, gsap } from '../animation/gsap';
 import styles from './NatureUrbanPlaceholder.module.css';
 
+const FRAME_COUNT = 172;
+
 export function NatureUrbanPlaceholder() {
   const rootRef = useRef<HTMLElement | null>(null);
-  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const noiseRef = useRef<HTMLDivElement | null>(null);
 
   const reduced = useMemo(
     () => window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false,
@@ -14,8 +17,12 @@ export function NatureUrbanPlaceholder() {
   useEffect(() => {
     if (reduced) return;
     const root = rootRef.current;
-    const video = videoRef.current;
-    if (!root || !video) return;
+    const canvas = canvasRef.current;
+    const noise = noiseRef.current;
+    if (!root || !canvas || !noise) return;
+
+    const context = canvas.getContext('2d', { alpha: false });
+    if (!context) return;
 
     initGsap();
 
@@ -32,7 +39,47 @@ export function NatureUrbanPlaceholder() {
     lockHeight();
     window.addEventListener('resize', lockHeight);
 
-    // Metadata might not be loaded yet, but we can setup the scrub
+    canvas.width = 1920;
+    canvas.height = 1080;
+
+    const images: HTMLImageElement[] = [];
+    const airplay = { frame: 0 };
+
+    const getFramePath = (index: number) => {
+      return `/assets/videos/sky_to_city_frames/frame_${index.toString().padStart(3, '0')}.webp`;
+    };
+
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      const img = new Image();
+      img.src = getFramePath(i);
+      images.push(img);
+    }
+
+    const render = () => {
+      const img = images[airplay.frame];
+      if (img && img.complete) {
+        const canvasAspect = canvas.width / canvas.height;
+        const imgAspect = img.width / img.height;
+        let drawWidth, drawHeight, offsetX, offsetY;
+
+        if (imgAspect > canvasAspect) {
+          drawHeight = canvas.height;
+          drawWidth = canvas.height * imgAspect;
+          offsetX = (canvas.width - drawWidth) / 2;
+          offsetY = 0;
+        } else {
+          drawWidth = canvas.width;
+          drawHeight = canvas.width / imgAspect;
+          offsetX = 0;
+          offsetY = (canvas.height - drawHeight) / 2;
+        }
+
+        context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      }
+    };
+
+    images[0].onload = render;
+
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
         scrollTrigger: {
@@ -40,49 +87,36 @@ export function NatureUrbanPlaceholder() {
           start: 'top top',
           end: '+=300%',
           pin: true,
-          scrub: true,
+          scrub: 0.5,
           anticipatePin: 1,
         },
       });
 
-      // Video scrubbing
-      tl.to(video, 
-        { 
-          currentTime: () => video.duration || 0,
-          ease: 'none',
-        }, 0);
+      tl.to(airplay, {
+        frame: FRAME_COUNT - 1,
+        snap: 'frame',
+        ease: 'none',
+        duration: 1,
+        onUpdate: render,
+      }, 0);
 
-      // Simple cross-fade logic:
-      // The backdrops (nature/urban) are controlled by BackdropController.
-      // This video (SkyToCity) sits on top and fades in to hide the switch.
-      tl.fromTo(video, { opacity: 0 }, { opacity: 1, duration: 0.1 }, 0);
-      tl.to(video, { opacity: 0, duration: 0.1 }, 0.9);
+      tl.fromTo(canvas, { opacity: 0 }, { opacity: 1, duration: 0.05 }, 0.01);
+      tl.to(canvas, { opacity: 0, duration: 0.05 }, 0.95);
+
+      tl.to(noise, { opacity: 0.3, duration: 0.3 }, 0.1)
+        .to(noise, { opacity: 0, duration: 0.3 }, 0.7);
     }, root);
-
-    // Update duration when loaded
-    const onLoadedMetadata = () => {
-       ScrollTrigger.refresh();
-       if (video) video.currentTime = 0;
-    };
-    video.addEventListener('loadedmetadata', onLoadedMetadata);
 
     return () => {
       ctx.revert();
-      video.removeEventListener('loadedmetadata', onLoadedMetadata);
       window.removeEventListener('resize', lockHeight);
     };
   }, [reduced]);
 
   return (
     <section id="natureUrban" ref={rootRef} className={styles.root} aria-label="Nature to Urban">
-      <video 
-        ref={videoRef} 
-        className={styles.canvas} 
-        src="/assets/videos/SkyToCity.webp" 
-        muted 
-        playsInline 
-        preload="auto"
-      />
+      <canvas ref={canvasRef} className={styles.canvas} />
+      <div ref={noiseRef} className={styles.noise} aria-hidden="true" />
     </section>
   );
 }
