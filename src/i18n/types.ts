@@ -1,4 +1,4 @@
-export type Lang = 'ru' | 'en';
+export type Lang = 'ru' | 'en' | 'es';
 
 export type I18nDict = {
   header: {

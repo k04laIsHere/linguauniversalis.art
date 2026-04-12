@@ -46,7 +46,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   color: #1a1a1a;
   opacity: 0.4;
   cursor: pointer;
@@ -57,35 +57,60 @@
   opacity: 0.8;
 }
 
-.sidebarLangBtn {
+.sidebarLangRow {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.sidebarLangBtnSmall {
+  background: #f0f0f0;
+  border: 1px solid #e0e0e0;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex: 1;
+}
+
+.sidebarLangBtnSmall:hover {
+  background: #e0e0e0;
+  color: #1a1a1a;
+}
+
+.sidebarLangBtnActive {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fcfcf9;
+}
+
+.sidebarImmersionBtn {
   background: #1a1a1a;
   border: 1px solid #1a1a1a;
-  padding: 0.6rem 1rem;
-  font-size: 0.75rem;
+  padding: 0.8rem 1.2rem;
+  font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.1em;
   color: #fcfcf9;
   cursor: pointer;
   transition: all 0.3s ease;
-  width: fit-content;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+  width: 100%;
   text-transform: uppercase;
-  margin-bottom: 3rem;
-  gap: 0.6rem;
-  border-radius: 0;
+  margin-bottom: 3.5rem;
 }
 
-.sidebarLangBtn:hover {
+.sidebarImmersionBtn:hover {
   background: #333;
   border-color: #333;
+  transform: translateY(-2px);
 }
 
 .sidebarGlobeIcon {
-  width: 14px;
-  height: 14px;
-  opacity: 0.8;
+  width: 16px;
+  height: 16px;
+  stroke-width: 2;
 }
 
 .sidebarNav {
@@ -213,23 +238,62 @@
   gap: 2rem;
 }
 
-.enterButton {
-  padding: 0.6rem 1.2rem;
+.langContainer {
+  position: relative;
+}
+
+.globeButton {
+  width: 44px;
+  height: 44px;
   background: #1a1a1a;
   color: #fcfcf9;
   border: none;
-  font-size: 0.7rem;
-  font-weight: 500;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  transition: background 0.3s ease;
+}
+
+.langDropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: #fcfcf9;
+  border: 1px solid rgba(0,0,0,0.1);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  z-index: 1500;
+  min-width: 60px;
+}
+
+.dropdownLangBtn {
+  padding: 0.8rem 1.2rem;
+  background: none;
+  border: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #666;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.2s ease;
+}
+
+.dropdownLangBtn:hover {
+  background: #f0f0f0;
+  color: #1a1a1a;
+}
+
+.dropdownLangBtnActive {
+  background: #1a1a1a;
+  color: #fcfcf9;
 }
 
 .burger {
   display: none;
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   background: none;
   border: none;
   cursor: pointer;
@@ -250,7 +314,7 @@
 
 .burger span {
   top: 50%;
-  left: 4px;
+  left: 10px;
   transform: translateY(-50%);
 }
 
@@ -268,6 +332,25 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+}
+
+.mainImmersionBtn {
+  background: #1a1a1a;
+  color: #fcfcf9;
+  border: none;
+  padding: 0.8rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  margin-bottom: 2rem;
+  transition: all 0.3s ease;
+}
+
+.mainImmersionBtn:hover {
+  background: #333;
+  transform: translateY(-2px);
 }
 
 .manifestoContent {
@@ -563,10 +646,10 @@
 
 .eventStory {
   font-size: 0.95rem;
-  line-height: 1.8;
-  color: #444444;
+  line-height: 1.7;
+  color: #444;
   margin-bottom: 3rem;
-  max-width: 360px;
+  max-width: 350px;
 }
 
 .linksSection {
@@ -714,19 +797,18 @@
   }
 
   .sidebarLogo {
-    margin-bottom: 1rem;
+    margin-bottom: 1.5rem;
     font-size: 0.75rem;
   }
 
-  .sidebarLangBtn {
+  .sidebarLangRow {
+    margin-bottom: 1rem;
+  }
+
+  .sidebarImmersionBtn {
     margin-bottom: 2rem;
     padding: 0.6rem 1rem;
     font-size: 0.7rem;
-  }
-
-  .sidebarGlobeIcon {
-    width: 12px;
-    height: 12px;
   }
 
   .sidebarNav {
@@ -735,7 +817,7 @@
   }
 
   .navLabel {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
   }
 
   .navChildren {
@@ -745,7 +827,7 @@
   }
 
   .sidebarNavChild {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
   }
 
   .menuOpen .sidebar {
@@ -771,17 +853,22 @@
     font-size: 0.85rem;
   }
 
-  .enterButton {
-    padding: 0.5rem 1rem;
-    font-size: 0.65rem;
-  }
-
-  .burger {
-    display: block;
+  .burger, .globeButton {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
 
   .manifestoSection {
     padding: 8rem 1.5rem 6rem;
+  }
+
+  .mainImmersionBtn {
+    width: 100%;
+    padding: 1rem;
+    font-size: 0.7rem;
   }
 
   .artistBlock, .eventBlock {
@@ -796,7 +883,7 @@
     align-items: center;
     text-align: left;
     position: sticky;
-    top: 60px;
+    top: 64px;
     z-index: 500;
     background: #fcfcf9;
     flex-direction: column;

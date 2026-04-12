@@ -18,6 +18,7 @@ export function GalleryMode() {
   const manifestoSectionRef = useRef<HTMLElement | null>(null);
   const [isMobile, setIsMobile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
 
   // Detect mobile on mount and resize
   useEffect(() => {
@@ -26,6 +27,12 @@ export function GalleryMode() {
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const languages: { code: Lang; label: string }[] = [
+    { code: 'en', label: 'EN' },
+    { code: 'ru', label: 'RU' },
+    { code: 'es', label: 'ES' },
+  ];
 
   // Dynamically group works by artist based on the current galleryWorks order
   const artistEntries = useMemo(() => {
@@ -61,7 +68,7 @@ export function GalleryMode() {
           name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
           name === 'Joslen Orsini' ? 'Йослен Орсини' :
           name
-        ) : name
+        ) : name // For 'en' and 'es' we use the Latin/International name
       }))
     },
     { 
@@ -248,17 +255,24 @@ export function GalleryMode() {
         <div className={styles.sidebarInner}>
           <div className={styles.sidebarLogo} onClick={() => handleNavClick('manifesto')}>Lingua Universalis</div>
           
+          <div className={styles.sidebarLangRow}>
+            {languages.map((l) => (
+              <button
+                key={l.code}
+                className={`${styles.sidebarLangBtnSmall} ${lang === l.code ? styles.sidebarLangBtnActive : ''}`}
+                onClick={() => setLang(l.code)}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+
           <button
-            className={styles.sidebarLangBtn}
-            onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-            aria-label="Toggle Language"
+            className={styles.sidebarImmersionBtn}
+            onClick={toggleMode}
+            aria-label="Enter immersive mode"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={styles.sidebarGlobeIcon}>
-              <circle cx="12" cy="12" r="10" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            <span className={styles.langCode}>{lang.toUpperCase()}</span>
+            {lang === 'ru' ? 'Иммерсия' : lang === 'es' ? 'Inmersión' : 'Immersion'}
           </button>
 
           <nav className={styles.sidebarNav}>
@@ -299,13 +313,36 @@ export function GalleryMode() {
           <div className={styles.logo} onClick={() => handleNavClick('manifesto')}>Lingua Universalis</div>
           
           <div className={styles.headerActions}>
-            <button
-              className={styles.enterButton}
-              onClick={toggleMode}
-              aria-label="Enter immersive mode"
-            >
-              {lang === 'ru' ? 'Иммерсия' : 'Immersion'}
-            </button>
+            <div className={styles.langContainer}>
+              <button
+                className={styles.globeButton}
+                onClick={() => setIsLangDropdownOpen(!isLangDropdownOpen)}
+                aria-label="Toggle Language"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={styles.sidebarGlobeIcon}>
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="2" y1="12" x2="22" y2="12" />
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+                </svg>
+              </button>
+              
+              {isLangDropdownOpen && (
+                <div className={styles.langDropdown}>
+                  {languages.map((l) => (
+                    <button
+                      key={l.code}
+                      className={`${styles.dropdownLangBtn} ${lang === l.code ? styles.dropdownLangBtnActive : ''}`}
+                      onClick={() => {
+                        setLang(l.code);
+                        setIsLangDropdownOpen(false);
+                      }}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
             
             <button 
               className={`${styles.burger} ${isMenuOpen ? styles.burgerActive : ''}`}
@@ -320,6 +357,13 @@ export function GalleryMode() {
         {/* Manifesto Section */}
         <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
           <div className={styles.manifestoContent}>
+            <button
+              className={styles.mainImmersionBtn}
+              onClick={toggleMode}
+              aria-label="Enter immersive mode"
+            >
+              {lang === 'ru' ? 'Иммерсия' : lang === 'es' ? 'Inmersión' : 'Immersion'}
+            </button>
             <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
             <p className={styles.manifestoSubtitle}>{t.cave.subtitle}</p>
 
