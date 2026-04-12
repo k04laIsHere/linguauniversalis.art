@@ -94,6 +94,9 @@ export function BackdropController() {
         end: 'bottom bottom',
         onEnter: setUrban,
         onEnterBack: setUrban,
+        onLeaveBack: () => {
+           // Transition will handle it
+        },
         refreshPriority: -1,
       });
 

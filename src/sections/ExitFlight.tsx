@@ -108,6 +108,7 @@ export function ExitFlight() {
         tl.to(nature, {
           scale: 1,
           y: 0,
+          opacity: 1, // Explicitly ensure it stays visible
           duration: 4,
           ease: 'power1.inOut'
         }, 0);
