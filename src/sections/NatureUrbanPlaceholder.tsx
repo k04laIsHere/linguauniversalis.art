@@ -29,7 +29,9 @@ export function NatureUrbanPlaceholder() {
     let lastWidth = window.innerWidth;
     const lockHeight = () => {
       if (window.innerWidth !== lastWidth || !root.style.height) {
-        root.style.height = `${window.innerHeight}px`;
+        // Use the larger dimension to ensure the pinned area covers the screen expansion
+        const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+        root.style.height = `${targetHeight}px`;
         lastWidth = window.innerWidth;
         if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
           ScrollTrigger.refresh();

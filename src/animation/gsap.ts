@@ -11,9 +11,6 @@ export function initGsap() {
 
   // iOS Safari: avoid layout thrash on address bar show/hide.
   ScrollTrigger.config({ ignoreMobileResize: true });
-
-  // Normalize scroll to fix mobile address bar jitter and gaps
-  ScrollTrigger.normalizeScroll(true);
 }
 
 export { gsap, ScrollTrigger, ScrollToPlugin };
