@@ -46,7 +46,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  margin-bottom: 3.5rem;
+  margin-bottom: 1.5rem;
   color: #1a1a1a;
   opacity: 0.4;
   cursor: pointer;
@@ -54,6 +54,37 @@
 }
 
 .sidebarLogo:hover {
+  opacity: 0.8;
+}
+
+.sidebarLangBtn {
+  background: #1a1a1a;
+  border: 1px solid #1a1a1a;
+  padding: 0.6rem 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: #fcfcf9;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-transform: uppercase;
+  margin-bottom: 3rem;
+  gap: 0.6rem;
+  border-radius: 0;
+}
+
+.sidebarLangBtn:hover {
+  background: #333;
+  border-color: #333;
+}
+
+.sidebarGlobeIcon {
+  width: 14px;
+  height: 14px;
   opacity: 0.8;
 }
 
@@ -141,34 +172,6 @@
 .sidebarNavChildActive {
   color: #1a1a1a;
   font-weight: 600;
-}
-
-.sidebarFooter {
-  margin-top: auto;
-  padding-top: 2rem;
-}
-
-.sidebarLangBtn {
-  background: #1a1a1a;
-  border: 1px solid #1a1a1a;
-  padding: 0.9rem 1.4rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.15em;
-  color: #fcfcf9;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  text-transform: uppercase;
-}
-
-.sidebarLangBtn:hover {
-  background: #333;
-  border-color: #333;
-  transform: translateY(-2px);
 }
 
 /* Main Content Area */
@@ -703,7 +706,7 @@
     height: 100vh;
     transform: translateX(-100%);
     background: #fcfcf9;
-    padding: 3rem 2rem 1.5rem; /* Tighter padding for vertical fit */
+    padding: 3rem 2rem 1.5rem;
   }
 
   .sidebarInner {
@@ -711,32 +714,38 @@
   }
 
   .sidebarLogo {
-    margin-bottom: 1.5rem;
+    margin-bottom: 1rem;
     font-size: 0.75rem;
   }
 
+  .sidebarLangBtn {
+    margin-bottom: 2rem;
+    padding: 0.6rem 1rem;
+    font-size: 0.7rem;
+  }
+
+  .sidebarGlobeIcon {
+    width: 12px;
+    height: 12px;
+  }
+
   .sidebarNav {
-    gap: 1.2rem;
+    gap: 1rem;
     margin-bottom: 1.5rem;
   }
 
   .navLabel {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
   }
 
   .navChildren {
-    gap: 0.4rem;
-    margin-top: 0.4rem;
+    gap: 0.35rem;
+    margin-top: 0.35rem;
     padding-left: 1.8rem;
   }
 
   .sidebarNavChild {
-    font-size: 0.75rem;
-  }
-
-  .sidebarFooter {
-    padding-top: 1rem;
-    margin-top: auto;
+    font-size: 0.7rem;
   }
 
   .menuOpen .sidebar {
