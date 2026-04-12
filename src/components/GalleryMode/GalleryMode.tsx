@@ -27,6 +27,7 @@ export function GalleryMode() {
     return () => window.removeEventListener('resize', checkMobile);
   }, []);
 
+  // Dynamically group works by artist based on the current galleryWorks order
   const artistEntries = useMemo(() => {
     const worksByArtist = galleryWorks.reduce((acc, work) => {
       if (!acc[work.artist]) {
@@ -40,9 +41,10 @@ export function GalleryMode() {
       return acc;
     }, {} as Record<string, Record<string, typeof galleryWorks>>);
 
+    // Keep the order from galleryWorks (first appearance defines order)
     const uniqueArtists = Array.from(new Set(galleryWorks.map(w => w.artist)));
     return uniqueArtists.map(name => [name, worksByArtist[name]] as [string, Record<string, typeof galleryWorks>]);
-  }, []);
+  }, [galleryWorks]);
 
   const navItems = useMemo(() => [
     { id: 'manifesto', label: t.header.manifesto },
@@ -336,7 +338,7 @@ export function GalleryMode() {
                   key={artistName}
                   className={styles.artistBlock}
                   data-artist={artistName}
-                  id={artistName.split(' ')[0]}
+                  id={`artist-${artistName.replace(/\s+/g, '-').toLowerCase()}`}
                 >
                   {/* Artist Info - Pinned on Left (Desktop) / Top (Mobile) */}
                   <div className={styles.artistCol}>
