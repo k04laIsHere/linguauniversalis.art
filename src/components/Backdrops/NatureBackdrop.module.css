@@ -1,9 +1,11 @@
 .root {
   position: fixed;
-  top: -10%;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 120%;
+  height: 100%;
+  /* Fallback for mobile height stability */
+  height: 100lvh;
   z-index: 0;
   opacity: 0;
   pointer-events: none;

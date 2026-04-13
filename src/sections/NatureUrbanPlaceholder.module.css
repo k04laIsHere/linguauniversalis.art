@@ -12,12 +12,11 @@
 
 .canvas {
   position: absolute;
-  top: -10%;
+  top: 0;
   left: 0;
   width: 100%;
-  /* Fix: Use lvh to ensure canvas is always as tall as the screen 
-     WITHOUT the address bar. MATCH backdrop height for zoom consistency. */
-  height: 120%;
+  /* Match the 100lvh strategy used in the early successful attempts */
+  height: 100lvh;
   object-fit: cover;
   z-index: 0;
   opacity: 0;
