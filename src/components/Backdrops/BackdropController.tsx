@@ -52,11 +52,11 @@ export function BackdropController() {
         gsap.timeline({
           scrollTrigger: {
             trigger: exitFlightEl,
-            start: 'top bottom',
+            start: 'top top', // Start fixed sync ONLY when section is pinned
             end: 'bottom top',
             scrub: true,
             onEnter: () => {
-               // Show fixed nature now that we are pinned
+               // Show fixed nature now that we are locked at the top
                gsap.to(nature, { opacity: 1, duration: 0, overwrite: 'auto' });
             },
             onLeave: () => gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
