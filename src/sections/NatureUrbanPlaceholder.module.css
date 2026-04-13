@@ -4,7 +4,10 @@
   /* Use svh as a fallback for the container */
   height: 100svh;
   background: black;
-  overflow: hidden;
+  overflow: visible;
+  /* Pull sections closer on mobile to hide gaps created by screen-height lock */
+  margin-top: -5vh;
+  margin-bottom: -15vh;
 }
 
 .canvas {
