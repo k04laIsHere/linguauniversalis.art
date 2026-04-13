@@ -4,8 +4,8 @@
   /* Use svh as a fallback for the container */
   height: 100svh;
   background: black;
-  overflow: visible;
-  /* Zero margins - we'll bridge the gap using background color and sticky logic */
+  /* Disable overflow: visible to see if it affects pin calculations */
+  overflow: hidden;
   margin-top: 0;
   margin-bottom: 0;
 }

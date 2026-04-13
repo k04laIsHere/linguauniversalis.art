@@ -53,8 +53,8 @@ export function BackdropController() {
         const nuTl = gsap.timeline({
           scrollTrigger: {
             trigger: nuEl,
-            start: 'top top',
-            end: '+=300%',
+            start: 'top bottom', // Start trigger as soon as section enters viewport
+            end: 'bottom top',   // End trigger as soon as section leaves
             scrub: true,
             onEnter: () => {
               // Ensure we start with nature visible

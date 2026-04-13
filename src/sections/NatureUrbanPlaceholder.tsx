@@ -91,12 +91,6 @@ export function NatureUrbanPlaceholder() {
           pin: true,
           scrub: 0.5,
           anticipatePin: 1,
-          onUpdate: (self) => {
-            // Adjust canvas position to stay top-aligned even during address bar changes
-            if (canvas) {
-              canvas.style.top = '0px';
-            }
-          }
         },
       });
 
