@@ -5,6 +5,7 @@ import { ViewModeProvider, useViewMode } from './contexts/ViewModeContext';
 import { Header } from './components/Header/Header';
 import { NatureBackdrop } from './components/Backdrops/NatureBackdrop';
 import { UrbanBackdrop } from './components/Backdrops/UrbanBackdrop';
+import { CityBackdrop } from './components/Backdrops/CityBackdrop';
 import { BackdropController } from './components/Backdrops/BackdropController';
 import { Loader } from './components/Loader/Loader';
 import { useViewportFlashlight } from './hooks/useViewportFlashlight';
@@ -134,6 +135,7 @@ function AppContent() {
             <Header />
             <NatureBackdrop />
             <UrbanBackdrop />
+            <CityBackdrop />
             <main style={{ visibility: isLoading ? 'hidden' : 'visible' }}>
               <Cave />
               <ExitFlight />

@@ -108,7 +108,7 @@ export function NatureUrbanPlaceholder() {
         scrollTrigger: {
           trigger: root,
           start: 'top top',
-          end: '+=300%',
+          end: '+=400%', // Match ExitFlight duration
           pin: true,
           scrub: 0.5,
           anticipatePin: 1,

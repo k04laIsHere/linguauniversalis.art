@@ -11,22 +11,27 @@ export function BackdropController() {
     initGsap();
 
     const nature = document.getElementById('natureBackdrop');
-    const city = document.getElementById('urbanBackdrop'); // Rename for mental clarity
-    if (!nature || !city) return;
+    const sky = document.getElementById('urbanBackdrop');
+    const city = document.getElementById('cityBackdrop');
+    if (!nature || !sky || !city) return;
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
     if (reduced) return;
 
     const setNature = () => {
       gsap.to(nature, { opacity: 1, duration: 0.5, overwrite: 'auto' });
-      gsap.to(city, { opacity: 0, duration: 0.5, overwrite: 'auto' });
+      gsap.to([sky, city], { opacity: 0, duration: 0.5, overwrite: 'auto' });
     };
     const setSky = () => {
+      gsap.to(sky, { opacity: 1, duration: 0.5, overwrite: 'auto' });
+      gsap.to([nature, city], { opacity: 0, duration: 0.5, overwrite: 'auto' });
+    };
+    const setCity = () => {
       gsap.to(city, { opacity: 1, duration: 0.5, overwrite: 'auto' });
-      gsap.to(nature, { opacity: 0, duration: 0.5, overwrite: 'auto' });
+      gsap.to([nature, sky], { opacity: 0, duration: 0.5, overwrite: 'auto' });
     };
     const setNone = () => {
-      gsap.to([nature, city], { opacity: 0, duration: 0.5, overwrite: 'auto' });
+      gsap.to([nature, sky, city], { opacity: 0, duration: 0.5, overwrite: 'auto' });
     };
 
     let raf: number | null = null;
@@ -52,15 +57,14 @@ export function BackdropController() {
         gsap.timeline({
           scrollTrigger: {
             trigger: exitFlightEl,
-            start: 'top top', // Start fixed sync ONLY when section is pinned
+            start: 'top top',
             end: 'bottom top',
             scrub: true,
             onEnter: () => {
-               // Show fixed nature now that we are locked at the top
                gsap.to(nature, { opacity: 1, duration: 0, overwrite: 'auto' });
             },
-            onLeave: () => gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
-            onEnterBack: () => gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onLeave: () => gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onEnterBack: () => gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
             onLeaveBack: () => {
                gsap.to(nature, { opacity: 0, duration: 0, overwrite: 'auto' });
             },
@@ -68,62 +72,56 @@ export function BackdropController() {
           }
         })
         .to(nature, { opacity: 0, ease: 'none' }, 0.6)
-        .to(city, { opacity: 1, ease: 'none' }, 0.65);
+        .to(sky, { opacity: 1, ease: 'none' }, 0.65);
       }
 
       // 3. Sky Zone: From ExitFlight to NatureUrban
       ScrollTrigger.create({
-        trigger: '#team', // Section between transitions
+        trigger: '#team',
         start: 'top bottom',
         endTrigger: '#natureUrban',
         end: 'top top',
         onEnter: setSky,
         onEnterBack: setSky,
-        onLeave: () => {}, // Transition handles it
-        onLeaveBack: () => {}, // Transition handles it
         refreshPriority: -1,
       });
 
       // 4. Sky-City Transition Zone (NatureUrbanPlaceholder)
       const nuEl = document.getElementById('natureUrban');
       if (nuEl) {
-        const nuTl = gsap.timeline({
+        gsap.timeline({
           scrollTrigger: {
             trigger: nuEl,
-            start: 'top bottom',
+            start: 'top top',
             end: 'bottom top',
             scrub: true,
             onEnter: () => {
-              gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+              gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onLeave: () => {
-              // Now we need a City backdrop for the end!
+              gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onEnterBack: () => {
               gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onLeaveBack: () => {
-              gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+              gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             refreshPriority: -1,
           }
-        });
-
-        nuTl
-          .to(city, { opacity: 0, ease: 'none' }, 0.6);
+        })
+        .to(sky, { opacity: 0, ease: 'none' }, 0.6)
+        .to(city, { opacity: 1, ease: 'none' }, 0.65);
       }
 
-      // 5. Final Zone
+      // 5. Final Zone: City
       ScrollTrigger.create({
         trigger: '#gallery',
         start: 'top bottom',
         endTrigger: 'html',
         end: 'bottom bottom',
-        onEnter: () => {
-          gsap.to(city, { opacity: 0, duration: 0.5, overwrite: 'auto' });
-          // If we had a city backdrop, we'd show it here
-        },
-        onEnterBack: setSky,
+        onEnter: setCity,
+        onEnterBack: setCity,
         refreshPriority: -1,
       });
 
@@ -136,7 +134,7 @@ export function BackdropController() {
         const natureStartEl = document.getElementById('exitFlight');
 
         if (galleryEl && y >= getTop(galleryEl) - 10) {
-          gsap.to(city, { opacity: 0, duration: 0 }); // Final state
+          setCity();
         } else if (nuEl && y >= getTop(nuEl) - 10) {
           setSky();
         } else if (natureStartEl && y + window.innerHeight >= getTop(natureStartEl)) {
