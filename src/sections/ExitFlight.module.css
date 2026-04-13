@@ -1,122 +1,33 @@
 .root {
   position: relative;
-  height: 100vh;
+  height: 100svh;
   background: transparent;
-  z-index: 10; /* Above Cave's fixed shadowMask (z-index 3) */
-}
-
-.pin {
-  position: relative;
-  height: 100vh;
   overflow: hidden;
 }
 
-.layer {
+.canvas {
   position: absolute;
-  inset: 0;
-  will-change: transform, opacity;
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.baseDark {
-  display: none; /* User requested only arch mask, landscape and backdrop to be visible */
-}
-
-.wallsContainer {
-  position: absolute;
-  inset: 0;
-  z-index: 5; /* Above everything to prevent z-fighting */
-  will-change: transform, opacity;
-  pointer-events: none; /* User shouldn't click through the "opening" */
-  /* Added to force composite layer and avoid flicker through the mask */
-  transform: translateZ(0);
-}
-
-.exitFill {
-  position: absolute;
-  top: -10%;
-  left: -15%;
-  width: 130%;
-  height: 120%;
-  background-image: url('/assets/images/backgrounds/cave-exit-landscape.webp');
-  background-size: cover;
-  background-position: center top; /* Anchored to top for stability on mobile resize */
-  background-repeat: no-repeat;
-  z-index: 1; /* Below the arch mask */
-  filter: brightness(1.1);
-  will-change: transform, opacity;
-  transform: translateZ(0); /* Same for this layer */
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
-.edgesContainer {
-  /* This class is now applied to wallsContainer in TSX, but keeping for reference if needed */
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  pointer-events: none;
-}
-
-.caveEdges {
-  position: absolute;
-  top: -10%;
+  top: 0;
   left: 0;
   width: 100%;
-  height: 120%;
-  z-index: 2; /* On top of baseDark */
-  background-image: url('/assets/images/backgrounds/cave-arch-mask.png');
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  filter: contrast(1.1) brightness(0.8);
-}
-
-.ui {
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 18px;
-  z-index: 10; /* Topmost */
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  gap: 12px;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  opacity: 0;
   pointer-events: none;
 }
 
-.title {
-  margin: 0;
-  font-size: 14px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.82);
-}
-
-.hint {
-  margin: 6px 0 0;
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.65);
-  max-width: 520px;
-}
-
-.chip {
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(10, 12, 14, 0.28);
-  color: rgba(255, 255, 255, 0.74);
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.noise {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3%3Ffilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/feTurbulence%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0;
+  pointer-events: none;
+  z-index: 1;
 }
 
 @media (prefers-reduced-motion: reduce) {
   .root {
     height: auto;
-  }
-  .pin {
-    height: 80vh;
   }
 }

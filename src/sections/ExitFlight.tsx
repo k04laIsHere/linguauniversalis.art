@@ -1,16 +1,13 @@
 import { useEffect, useMemo, useRef } from 'react';
-import { gsap, ScrollTrigger, initGsap } from '../animation/gsap';
-import { useI18n } from '../i18n/useI18n';
+import { ScrollTrigger, initGsap, gsap } from '../animation/gsap';
 import styles from './ExitFlight.module.css';
 
+const FRAME_COUNT = 121;
+
 export function ExitFlight() {
-  const { t } = useI18n();
   const rootRef = useRef<HTMLElement | null>(null);
-  const pinRef = useRef<HTMLDivElement | null>(null);
-  const exitFillRef = useRef<HTMLDivElement | null>(null);
-  const caveEdgesRef = useRef<HTMLDivElement | null>(null);
-  const baseDarkRef = useRef<HTMLDivElement | null>(null);
-  const edgesContainerRef = useRef<HTMLDivElement | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const noiseRef = useRef<HTMLDivElement | null>(null);
 
   const reduced = useMemo(
     () => window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false,
@@ -20,162 +17,126 @@ export function ExitFlight() {
   useEffect(() => {
     if (reduced) return;
     const root = rootRef.current;
-    const pin = pinRef.current;
-    const exitFill = exitFillRef.current;
-    const caveEdges = caveEdgesRef.current;
-    const baseDark = baseDarkRef.current;
-    const edgesContainer = edgesContainerRef.current;
-    if (!root || !pin || !exitFill || !caveEdges || !baseDark || !edgesContainer) return;
+    const canvas = canvasRef.current;
+    const noise = noiseRef.current;
+    if (!root || !canvas || !noise) return;
+
+    const context = canvas.getContext('2d', { alpha: false });
+    if (!context) return;
 
     initGsap();
 
-    // Lock height to avoid jump on mobile address bar hide
     let lastWidth = window.innerWidth;
-    const updateHeight = () => {
-       if (window.innerWidth !== lastWidth || !root.style.height) {
-         root.style.height = `${window.innerHeight}px`;
-         pin.style.height = `${window.innerHeight}px`;
-         lastWidth = window.innerWidth;
-         if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
-           ScrollTrigger.refresh();
-         }
-       }
+    const lockHeight = () => {
+      if (window.innerWidth !== lastWidth || !root.style.height) {
+        const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+        root.style.height = `${targetHeight}px`;
+        lastWidth = window.innerWidth;
+        if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
+          ScrollTrigger.refresh();
+        }
+      }
     };
-    updateHeight();
-    window.addEventListener('resize', updateHeight);
+    lockHeight();
+    window.addEventListener('resize', lockHeight);
+
+    // Initial logical resolution, will be updated by updateCanvasSize
+    canvas.width = 1920;
+    canvas.height = 1080;
+
+    const images: HTMLImageElement[] = [];
+    const airplay = { frame: 0 };
+
+    const getFramePath = (index: number) => {
+      return `/assets/videos/nature_to_sky_frames/frame_${index.toString().padStart(3, '0')}.webp`;
+    };
+
+    for (let i = 0; i < FRAME_COUNT; i++) {
+      const img = new Image();
+      img.src = getFramePath(i);
+      images.push(img);
+    }
+
+    const render = () => {
+      const img = images[airplay.frame];
+      if (img && img.complete) {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        
+        const imgAspect = img.width / img.height;
+        const canvasAspect = canvas.width / canvas.height;
+        
+        let drawWidth, drawHeight, offsetX, offsetY;
+
+        if (imgAspect > canvasAspect) {
+          drawHeight = canvas.height;
+          drawWidth = canvas.height * imgAspect;
+          offsetX = (canvas.width - drawWidth) / 2;
+          offsetY = 0;
+        } else {
+          drawWidth = canvas.width;
+          drawHeight = canvas.width / imgAspect;
+          offsetX = 0;
+          offsetY = (canvas.height - drawHeight) / 2;
+        }
+
+        context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+      }
+    };
+
+    const updateCanvasSize = () => {
+      const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+      const targetWidth = window.innerWidth;
+      canvas.width = targetWidth * (window.devicePixelRatio || 1);
+      canvas.height = targetHeight * (window.devicePixelRatio || 1);
+      render();
+    };
+
+    images[0].onload = () => {
+      updateCanvasSize();
+      render();
+    };
 
     const ctx = gsap.context(() => {
-      const nature = document.getElementById('natureBackdrop');
-
-      const origin = '50% 45%';
-      gsap.set([exitFill, caveEdges, baseDark, edgesContainer], { 
-        transformOrigin: origin,
-        force3D: true, 
-      });
-
-      // 1. Initial State: Flashlight is OFF (gone by the end of Cave section).
-      // Sync baseDark with Cave section's end state
-      gsap.set(baseDark, { 
-        opacity: 1, 
-        yPercent: 0,
-        filter: 'brightness(1.2) contrast(1.1)' // Removed saturate(1)
-      });
-      
-      // Ensure exit fill is visible from start
-      gsap.set(exitFill, { 
-        opacity: 1, 
-        y: -200, 
-        scale: 1, 
-        filter: 'brightness(0.8) contrast(1.1)' // Removed saturate
-      });
-
-      // Nature backdrop should be ready and BRIGHT
-      if (nature) {
-        gsap.set(nature, { 
-          opacity: 1, 
-          filter: 'brightness(1.1) contrast(1.05)', 
-          scale: 1.4, 
-        });
-      }
-
       const tl = gsap.timeline({
-        defaults: { ease: 'none' }, 
         scrollTrigger: {
           trigger: root,
           start: 'top top',
-          end: '+=500%', 
-          scrub: 1.5, 
-          pin: root,
-          pinSpacing: true,
+          end: '+=400%', // Longer to feel the transition
+          pin: true,
+          scrub: 0.5,
           anticipatePin: 1,
-          invalidateOnRefresh: true,
-          onEnter: () => {
-            // Coordinator with BackdropController
-            if (nature) gsap.to(nature, { opacity: 1, duration: 0.3 });
-          }
         },
       });
 
-      // The transition:
-      // 1. Initial fade in for brightness
-      tl.to([baseDark, exitFill], { 
-        filter: 'brightness(1.5) contrast(1.1)', // Removed saturate(1)
-        duration: 1 
+      tl.to(airplay, {
+        frame: FRAME_COUNT - 1,
+        snap: 'frame',
+        ease: 'none',
+        duration: 1,
+        onUpdate: render,
       }, 0);
 
-      // 2. Zoom out the nature backdrop
-      if (nature) {
-        tl.to(nature, {
-          scale: 1,
-          y: 0,
-          opacity: 1, // Explicitly ensure it stays visible
-          duration: 4,
-          ease: 'power1.inOut'
-        }, 0);
-      }
+      // Visibility control (Sandwich Pattern logic)
+      tl.fromTo(canvas, { opacity: 0 }, { opacity: 1, duration: 0.05 }, 0.01);
+      tl.to(canvas, { opacity: 0, duration: 0.05 }, 0.95);
 
-      // 3. Zoom in the wall and arch - keep them sharp
-      tl.fromTo([baseDark, caveEdges, edgesContainer], 
-      {
-         scale: 1,
-         opacity: 1,
-         yPercent: 0
-      },
-      { 
-        scale: 15, // Increased scale to fully clear view
-        opacity: 1, 
-        yPercent: 20, // Moved lower
-        duration: 3,
-        ease: 'power2.in',
-        immediateRender: false 
-      }, 0.1);
-
-      // 4. The landscape (vegetation mask) moves DOWN smoothly
-      tl.to(exitFill,
-      { 
-        y: () => window.innerHeight * 2.5, // Lock to height calculated at start
-        scale: 1.1, // Slight zoom to keep edges hidden during movement
-        duration: 2.5, 
-        ease: 'power2.inOut',
-        immediateRender: false 
-      }, 0);
-
+      tl.to(noise, { opacity: 0.3, duration: 0.3 }, 0.1)
+        .to(noise, { opacity: 0, duration: 0.3 }, 0.7);
     }, root);
+
+    window.addEventListener('resize', updateCanvasSize);
 
     return () => {
       ctx.revert();
-      window.removeEventListener('resize', updateHeight);
+      window.removeEventListener('resize', lockHeight);
+      window.removeEventListener('resize', updateCanvasSize);
     };
   }, [reduced]);
 
   return (
-    <section id="exitFlight" ref={rootRef} className={styles.root} aria-label="Exit flight">
-      <div ref={pinRef} className={styles.pin}>
-        <div
-          ref={exitFillRef}
-          className={`${styles.layer} ${styles.exitFill}`}
-          aria-hidden="true"
-        />
-
-        <div className={styles.wallsContainer} ref={edgesContainerRef}>
-          <div ref={baseDarkRef} className={styles.baseDark} aria-hidden="true" />
-          <div
-            ref={caveEdgesRef}
-            className={styles.caveEdges}
-            aria-hidden="true"
-          />
-        </div>
-
-        <div className={styles.ui}>
-          <div>
-            <p className={styles.title}>{t.exitFlight.title}</p>
-            <p className={styles.hint}>{t.exitFlight.hint}</p>
-          </div>
-          <div className={styles.chip}>Scroll</div>
-        </div>
-      </div>
+    <section id="exitFlight" ref={rootRef} className={styles.root} aria-label="Nature to Sky">
+      <canvas ref={canvasRef} className={styles.canvas} />
+      <div ref={noiseRef} className={styles.noise} aria-hidden="true" />
     </section>
   );
 }
-
-

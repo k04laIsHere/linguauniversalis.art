@@ -11,86 +11,108 @@ export function BackdropController() {
     initGsap();
 
     const nature = document.getElementById('natureBackdrop');
-    const urban = document.getElementById('urbanBackdrop');
-    if (!nature || !urban) return;
+    const city = document.getElementById('urbanBackdrop'); // Rename for mental clarity
+    if (!nature || !city) return;
 
     const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
     if (reduced) return;
 
     const setNature = () => {
-      // Only set opacity, don't kill other tweens like scale or filter
       gsap.to(nature, { opacity: 1, duration: 0.5, overwrite: 'auto' });
-      gsap.to(urban, { opacity: 0, duration: 0.5, overwrite: 'auto' });
+      gsap.to(city, { opacity: 0, duration: 0.5, overwrite: 'auto' });
     };
-    const setUrban = () => {
-      gsap.to(urban, { opacity: 1, duration: 0.5, overwrite: 'auto' });
+    const setSky = () => {
+      gsap.to(city, { opacity: 1, duration: 0.5, overwrite: 'auto' });
       gsap.to(nature, { opacity: 0, duration: 0.5, overwrite: 'auto' });
     };
     const setNone = () => {
-      gsap.to([nature, urban], { opacity: 0, duration: 0.5, overwrite: 'auto' });
+      gsap.to([nature, city], { opacity: 0, duration: 0.5, overwrite: 'auto' });
     };
 
     let raf: number | null = null;
     const ctx = gsap.context(() => {
-      // 1. Nature Zone: From ExitFlight to the START of NatureUrban
+      // 1. Initial Zone: Cave to the START of Nature-Sky transition
       ScrollTrigger.create({
-        trigger: '#exitFlight',
-        endTrigger: '#natureUrban',
-        start: 'top bottom',
+        trigger: '#cave',
+        endTrigger: '#exitFlight',
+        start: 'top top',
         end: 'top top',
         onEnter: setNature,
         onEnterBack: setNature,
-        onLeave: () => {
-          // Handled by nuTl
-        },
         onLeaveBack: setNone,
-        refreshPriority: -1, // Wait for all pins to settle
+        refreshPriority: -1,
       });
 
-      // 2. NatureUrban Transition Zone
+      // 2. Nature-Sky Transition Zone (ExitFlight)
+      const exitFlightEl = document.getElementById('exitFlight');
+      if (exitFlightEl) {
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: exitFlightEl,
+            start: 'top bottom',
+            end: 'bottom top',
+            scrub: true,
+            onEnter: () => gsap.to(nature, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onLeave: () => gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onEnterBack: () => gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onLeaveBack: () => gsap.to(nature, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            refreshPriority: -1,
+          }
+        })
+        .to(nature, { opacity: 0, ease: 'none' }, 0.6)
+        .to(city, { opacity: 1, ease: 'none' }, 0.65);
+      }
+
+      // 3. Sky Zone: From ExitFlight to NatureUrban
+      ScrollTrigger.create({
+        trigger: '#team', // Section between transitions
+        start: 'top bottom',
+        endTrigger: '#natureUrban',
+        end: 'top top',
+        onEnter: setSky,
+        onEnterBack: setSky,
+        refreshPriority: -1,
+      });
+
+      // 4. Sky-City Transition Zone (NatureUrbanPlaceholder)
       const nuEl = document.getElementById('natureUrban');
       if (nuEl) {
         const nuTl = gsap.timeline({
           scrollTrigger: {
             trigger: nuEl,
-            start: 'top bottom', // Start trigger as soon as section enters viewport
-            end: 'bottom top',   // End trigger as soon as section leaves
+            start: 'top bottom',
+            end: 'bottom top',
             scrub: true,
             onEnter: () => {
-              // Ensure nature starts fully visible
-              gsap.to(nature, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+              gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onLeave: () => {
-              // Ensure urban ends fully visible
-              gsap.to(urban, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+              // Now we need a City backdrop for the end!
+              // For now, let's keep it Sky or add the real City
             },
             onEnterBack: () => {
-              gsap.to(urban, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+              // gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onLeaveBack: () => {
-              gsap.to(nature, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+              gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             refreshPriority: -1,
           }
         });
 
-        // Crossfade: Nature stays until transition is visible, Urban arrives at the end
         nuTl
-          .to(nature, { opacity: 0, ease: 'none' }, 0.6) // Nature stays even longer to prevent dimming
-          .to(urban, { opacity: 1, ease: 'none' }, 0.65); // Urban arrives sooner
+          .to(city, { opacity: 0, ease: 'none' }, 0.6);
+          // .to(urbanActual, { opacity: 1, ease: 'none' }, 0.65);
       }
 
-      // 3. Urban Zone: From end of NatureUrban to the end of site
+      // 5. Final Zone
       ScrollTrigger.create({
         trigger: '#gallery',
         start: 'top bottom',
         endTrigger: 'html',
         end: 'bottom bottom',
-        onEnter: setUrban,
-        onEnterBack: setUrban,
-        onLeaveBack: () => {
-           // Transition will handle it
-        },
+        onEnter: () => gsap.to(city, { opacity: 0, duration: 0.5 }), // Hide sky
+        onEnterBack: setSky,
         refreshPriority: -1,
       });
 
@@ -103,15 +125,9 @@ export function BackdropController() {
         const natureStartEl = document.getElementById('exitFlight');
 
         if (galleryEl && y >= getTop(galleryEl) - 10) {
-          setUrban();
+          gsap.to(city, { opacity: 0, duration: 0 }); // Final state
         } else if (nuEl && y >= getTop(nuEl) - 10) {
-          // Inside transition section, let scrub handle it
-          // But set a safe fallback state if scrub hasn't kicked in
-          if (y < getTop(nuEl) + (nuEl.offsetHeight * 0.1)) {
-             setNature();
-          } else if (y > getTop(nuEl) + (nuEl.offsetHeight * 0.9)) {
-             setUrban();
-          }
+          setSky();
         } else if (natureStartEl && y + window.innerHeight >= getTop(natureStartEl)) {
           setNature();
         } else {
