@@ -9,7 +9,7 @@
   opacity: 0;
   pointer-events: none;
   will-change: opacity;
-  background-image: url('/home/andrew/Downloads/assets_new/Sky.webp');
+  background-image: url('/assets/images/backgrounds/sky.webp');
   background-size: cover;
   background-position: center;
 }

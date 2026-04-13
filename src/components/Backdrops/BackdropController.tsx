@@ -71,6 +71,8 @@ export function BackdropController() {
         end: 'top top',
         onEnter: setSky,
         onEnterBack: setSky,
+        onLeave: () => {}, // Transition handles it
+        onLeaveBack: () => {}, // Transition handles it
         refreshPriority: -1,
       });
 
@@ -109,7 +111,10 @@ export function BackdropController() {
         start: 'top bottom',
         endTrigger: 'html',
         end: 'bottom bottom',
-        onEnter: () => gsap.to(city, { opacity: 0, duration: 0.5 }), // Hide sky
+        onEnter: () => {
+          gsap.to(city, { opacity: 0, duration: 0.5, overwrite: 'auto' });
+          // If we had a city backdrop, we'd show it here
+        },
         onEnterBack: setSky,
         refreshPriority: -1,
       });
