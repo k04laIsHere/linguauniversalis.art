@@ -49,6 +49,10 @@ export function Cave() {
       );
 
       // Transition Section: Place nature image at the bottom of the cave
+      // Remove previous JS-injected div if it exists to avoid duplicates on fast reload
+      const existing = root.querySelector(`.${styles.natureBottom}`);
+      if (existing) existing.remove();
+
       const naturePlaceholder = document.createElement('div');
       naturePlaceholder.className = styles.natureBottom;
       root.appendChild(naturePlaceholder);

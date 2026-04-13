@@ -17,7 +17,6 @@
   pointer-events: none;
   z-index: 0;
   will-change: transform;
-  /* background-color: #020305; */ /* Removed to let nature show through */
 }
 
 .bg {
@@ -299,7 +298,7 @@
   background-image: url('/assets/images/backgrounds/nature.webp');
   background-size: cover;
   background-position: center;
-  z-index: -1;
+  z-index: 1; /* Above bgWrapper (0) but below inner (2) */
 }
 
 .artifact {
