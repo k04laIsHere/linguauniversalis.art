@@ -53,6 +53,7 @@ export function BackdropController() {
 
       // 2. Nature-Sky Transition Zone (ExitFlight)
       const exitFlightEl = document.getElementById('exitFlight');
+      const caveEl = document.getElementById('cave');
       if (exitFlightEl) {
         gsap.timeline({
           scrollTrigger: {
@@ -62,11 +63,18 @@ export function BackdropController() {
             scrub: true,
             onEnter: () => {
                gsap.to(nature, { opacity: 1, duration: 0, overwrite: 'auto' });
+               // Kill the curtain: Hide the scrollable cave content instantly
+               if (caveEl) gsap.to(caveEl, { opacity: 0, duration: 0 });
             },
             onLeave: () => gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
-            onEnterBack: () => gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onEnterBack: () => {
+               gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+               if (caveEl) gsap.to(caveEl, { opacity: 0, duration: 0 });
+            },
             onLeaveBack: () => {
                gsap.to(nature, { opacity: 0, duration: 0, overwrite: 'auto' });
+               // Restore cave visibility when scrolling back up
+               if (caveEl) gsap.to(caveEl, { opacity: 1, duration: 0 });
             },
             refreshPriority: -1,
           }
