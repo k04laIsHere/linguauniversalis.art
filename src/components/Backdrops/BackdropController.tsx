@@ -88,10 +88,9 @@ export function BackdropController() {
             },
             onLeave: () => {
               // Now we need a City backdrop for the end!
-              // For now, let's keep it Sky or add the real City
             },
             onEnterBack: () => {
-              // gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+              gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onLeaveBack: () => {
               gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' });
@@ -102,7 +101,6 @@ export function BackdropController() {
 
         nuTl
           .to(city, { opacity: 0, ease: 'none' }, 0.6);
-          // .to(urbanActual, { opacity: 1, ease: 'none' }, 0.65);
       }
 
       // 5. Final Zone
