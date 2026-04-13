@@ -15,8 +15,7 @@
   top: 0;
   left: 0;
   width: 100%;
-  /* Match the 100lvh strategy used in the early successful attempts */
-  height: 100lvh;
+  height: 100%;
   object-fit: cover;
   z-index: 0;
   opacity: 0;

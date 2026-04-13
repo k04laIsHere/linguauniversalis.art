@@ -64,6 +64,7 @@ export function NatureUrbanPlaceholder() {
         // and let CSS handle the 'zoom' via object-fit: cover or height: 120%
         context.clearRect(0, 0, canvas.width, canvas.height);
         
+        // CSS object-fit: cover logic in JS for the canvas content
         const imgAspect = img.width / img.height;
         const canvasAspect = canvas.width / canvas.height;
         
@@ -85,7 +86,22 @@ export function NatureUrbanPlaceholder() {
       }
     };
 
-    images[0].onload = render;
+    const updateCanvasSize = () => {
+      // Sync canvas internal resolution with its physical locked height
+      const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+      const targetWidth = window.innerWidth;
+      
+      // We keep internal 1920x1080 for quality, but the draw logic
+      // now uses the physical aspect ratio of the locked container
+      canvas.width = targetWidth * (window.devicePixelRatio || 1);
+      canvas.height = targetHeight * (window.devicePixelRatio || 1);
+      render();
+    };
+
+    images[0].onload = () => {
+      updateCanvasSize();
+      render();
+    };
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -114,9 +130,12 @@ export function NatureUrbanPlaceholder() {
         .to(noise, { opacity: 0, duration: 0.3 }, 0.7);
     }, root);
 
+    window.addEventListener('resize', updateCanvasSize);
+
     return () => {
       ctx.revert();
       window.removeEventListener('resize', lockHeight);
+      window.removeEventListener('resize', updateCanvasSize);
     };
   }, [reduced]);
 
