@@ -74,10 +74,10 @@ export function BackdropController() {
           }
         });
 
-        // Crossfade: Nature fades out while Urban fades in
+        // Crossfade: Nature stays until transition is visible, Urban arrives at the end
         nuTl
-          .to(nature, { opacity: 0, ease: 'none' }, 0.1)
-          .to(urban, { opacity: 1, ease: 'none' }, 0.8);
+          .to(nature, { opacity: 0, ease: 'none' }, 0.25) // Delay fade out significantly
+          .to(urban, { opacity: 1, ease: 'none' }, 0.75);
       }
 
       // 3. Urban Zone: From end of NatureUrban to the end of site

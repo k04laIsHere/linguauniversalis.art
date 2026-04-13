@@ -60,8 +60,13 @@ export function NatureUrbanPlaceholder() {
     const render = () => {
       const img = images[airplay.frame];
       if (img && img.complete) {
-        const canvasAspect = canvas.width / canvas.height;
+        // MATCH BackdropController logic: center the image in the canvas
+        // and let CSS handle the 'zoom' via object-fit: cover or height: 120%
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        
         const imgAspect = img.width / img.height;
+        const canvasAspect = canvas.width / canvas.height;
+        
         let drawWidth, drawHeight, offsetX, offsetY;
 
         if (imgAspect > canvasAspect) {

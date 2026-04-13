@@ -12,12 +12,12 @@
 
 .canvas {
   position: absolute;
-  top: 0;
+  top: -10%;
   left: 0;
   width: 100%;
   /* Fix: Use lvh to ensure canvas is always as tall as the screen 
-     WITHOUT the address bar. This prevents the gap when it hides. */
-  height: 100lvh;
+     WITHOUT the address bar. MATCH backdrop height for zoom consistency. */
+  height: 120%;
   object-fit: cover;
   z-index: 0;
   opacity: 0;
