@@ -3,7 +3,7 @@
   height: 100vh;
   /* Use svh as a fallback for the container */
   height: 100svh;
-  background: black;
+  background: transparent;
   /* Disable overflow: visible to see if it affects pin calculations */
   overflow: hidden;
   margin-top: 0;

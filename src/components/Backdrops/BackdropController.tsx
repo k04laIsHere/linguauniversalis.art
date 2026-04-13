@@ -57,33 +57,27 @@ export function BackdropController() {
             end: 'bottom top',   // End trigger as soon as section leaves
             scrub: true,
             onEnter: () => {
-              // Ensure we start with nature visible
-              gsap.set(nature, { opacity: 1 });
-              gsap.set(urban, { opacity: 0 });
+              // Ensure nature starts fully visible
+              gsap.to(nature, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onLeave: () => {
-              // Ensure we end with urban visible
-              gsap.set(urban, { opacity: 1 });
-              gsap.set(nature, { opacity: 0 });
+              // Ensure urban ends fully visible
+              gsap.to(urban, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onEnterBack: () => {
-              // Entering back from gallery
-              gsap.set(urban, { opacity: 1 });
-              gsap.set(nature, { opacity: 0 });
+              gsap.to(urban, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             onLeaveBack: () => {
-              // Leaving back to events
-              gsap.set(nature, { opacity: 1 });
-              gsap.set(urban, { opacity: 0 });
+              gsap.to(nature, { opacity: 1, duration: 0.1, overwrite: 'auto' });
             },
             refreshPriority: -1,
           }
         });
 
-        // Crossfade
+        // Crossfade: Nature fades out while Urban fades in
         nuTl
-          .to(nature, { opacity: 0, duration: 0.1 }, 0.05)
-          .to(urban, { opacity: 1, duration: 0.1 }, 0.85);
+          .to(nature, { opacity: 0, ease: 'none' }, 0.1)
+          .to(urban, { opacity: 1, ease: 'none' }, 0.8);
       }
 
       // 3. Urban Zone: From end of NatureUrban to the end of site
