@@ -5,9 +5,9 @@
   height: 100svh;
   background: black;
   overflow: visible;
-  /* Pull sections closer on mobile to hide gaps created by screen-height lock */
-  margin-top: -5vh;
-  margin-bottom: -15vh;
+  /* Zero margins - we'll bridge the gap using background color and sticky logic */
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .canvas {
