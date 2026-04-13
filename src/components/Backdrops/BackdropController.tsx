@@ -37,7 +37,10 @@ export function BackdropController() {
         endTrigger: '#exitFlight',
         start: 'top top',
         end: 'top top',
-        onEnter: setNature,
+        onEnter: () => {
+           // Hide fixed nature, we use the relative one at the bottom of cave
+           gsap.to(nature, { opacity: 0, duration: 0 });
+        },
         onEnterBack: setNature,
         onLeaveBack: setNone,
         refreshPriority: -1,
@@ -52,10 +55,15 @@ export function BackdropController() {
             start: 'top bottom',
             end: 'bottom top',
             scrub: true,
-            onEnter: () => gsap.to(nature, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onEnter: () => {
+               // Show fixed nature now that we are pinned
+               gsap.to(nature, { opacity: 1, duration: 0, overwrite: 'auto' });
+            },
             onLeave: () => gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
             onEnterBack: () => gsap.to(city, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
-            onLeaveBack: () => gsap.to(nature, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onLeaveBack: () => {
+               gsap.to(nature, { opacity: 0, duration: 0, overwrite: 'auto' });
+            },
             refreshPriority: -1,
           }
         })

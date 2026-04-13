@@ -37,7 +37,7 @@ export function Cave() {
         `.${styles.bgWrapper}`,
         { y: 0 },
         {
-          y: () => window.innerHeight * 0.2,
+          y: '20vh',
           ease: 'none',
           scrollTrigger: {
             trigger: root,
@@ -47,6 +47,11 @@ export function Cave() {
           },
         }
       );
+
+      // Transition Section: Place nature image at the bottom of the cave
+      const naturePlaceholder = document.createElement('div');
+      naturePlaceholder.className = styles.natureBottom;
+      root.appendChild(naturePlaceholder);
 
       // Hero Title Animation: Individual characters
       const titleChars = gsap.utils.toArray<HTMLElement>(`.${styles.titleChar}`);
