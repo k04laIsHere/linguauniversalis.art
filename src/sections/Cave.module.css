@@ -432,7 +432,7 @@
 
 .archiveBreach {
   position: relative;
-  width: clamp(340px, 45vw, 750px);
+  width: clamp(510px, 67.5vw, 1125px);
   aspect-ratio: 16/9;
   z-index: 101; 
   cursor: pointer;
@@ -517,7 +517,7 @@
 
 @media (max-width: 960px) {
   .archiveBreach {
-    width: clamp(340px, 92vw, 550px);
+    width: clamp(510px, 92vw, 825px);
   }
 
   .breachContent {
