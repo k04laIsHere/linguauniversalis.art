@@ -181,6 +181,8 @@ export function Cave() {
     // Static Title Mask (Pure CSS handled)
     root.style.setProperty('--title-y', `30vh`);
 
+    }, root);
+
     return () => {
       ctx.revert();
       window.removeEventListener('click', handleGlobalClick);
