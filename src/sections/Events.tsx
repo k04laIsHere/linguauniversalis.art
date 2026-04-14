@@ -67,52 +67,13 @@ export function Events() {
         
         const sectionStartTime = i * 2;
         
-        // Mouse tilt effect
-        if (hoverTarget) {
-          hoverTarget.addEventListener('mousemove', (e: any) => {
-            const rect = hoverTarget.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const xc = rect.width / 2;
-            const yc = rect.height / 2;
-            const dx = x - xc;
-            const dy = y - yc;
-
-            images.forEach((img, idx) => {
-              // Extremely subtle factors for very low sensitivity
-              const rotateFactor = (idx + 1) * 0.005;
-              const moveFactor = 2; // Low multiplier for movement
-
-              gsap.to(img, {
-                rotateY: dx * rotateFactor,
-                rotateX: -dy * rotateFactor,
-                x: dx * rotateFactor * moveFactor,
-                y: dy * rotateFactor * moveFactor,
-                duration: 0.8,
-                ease: 'power2.out'
-              });
-            });
-          });
-
-          hoverTarget.addEventListener('mouseleave', () => {
-            images.forEach((img) => {
-              gsap.to(img, {
-                rotateY: 0,
-                rotateX: 0,
-                x: 0,
-                y: 0,
-                duration: 1.2,
-                ease: 'expo.out'
-              });
-            });
-          });
-        }
-
+        // Mouse tilt effect removed as requested to save computing power
+        
         // Initial hidden state
         gsap.set(section, { opacity: 0, pointerEvents: 'none' });
-        // Images reveal from further "in front" (positive Z) to their base position
-        gsap.set(images, { opacity: 0, scale: 1.1, z: 200 });
-        gsap.set(infoBox, { opacity: 0, y: 50 });
+        // Fullscreen images reveal
+        gsap.set(images, { opacity: 0, scale: 1.1 });
+        gsap.set(infoBox, { opacity: 0, y: 30 });
 
         // Section Fade In
         tl.to(section, { 
@@ -120,26 +81,24 @@ export function Events() {
           duration: 0.2
         }, sectionStartTime);
 
-        // STAGGERED REVEAL: Each image reveals one by one as user scrolls
+        // STAGGERED REVEAL: Crossfade between images or layer them
         images.forEach((img, imgIdx) => {
-          const imgRevealStart = sectionStartTime + 0.1 + (imgIdx * 0.4);
+          const imgRevealStart = sectionStartTime + (imgIdx * 0.5);
           tl.to(img, {
             opacity: 1,
             scale: 1,
-            // Increased Z separation to prevent intersection on rotation
-            z: (imgIdx - 1) * 80,
-            duration: 0.8,
-            ease: 'expo.out'
+            duration: 1.2,
+            ease: 'sine.inOut'
           }, imgRevealStart);
         });
 
-        // Info box appears together with the first image
+        // Info box appears with a delay for focus
         tl.to(infoBox, {
           opacity: 1,
           y: 0,
-          duration: 0.8,
-          ease: 'expo.out'
-        }, sectionStartTime + 0.1);
+          duration: 1,
+          ease: 'power2.out'
+        }, sectionStartTime + 0.3);
 
         // Section Fade Out (except last one)
         if (i < sections.length - 1) {
