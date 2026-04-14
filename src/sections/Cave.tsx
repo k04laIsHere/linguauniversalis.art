@@ -174,7 +174,7 @@ export function Cave() {
       );
 
       // Static Title Mask (Pure CSS handled)
-      root.style.setProperty('--title-y', `43vh`);
+      root.style.setProperty('--title-y', `40vh`);
 
     }, root);
 

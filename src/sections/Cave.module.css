@@ -110,8 +110,8 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  padding-top: 18vh;
-  gap: 12vh;
+  padding-top: 15vh;
+  gap: 10vh;
   z-index: 100;
 }
 
@@ -173,7 +173,7 @@
 
 .scrollHint {
   position: absolute;
-  bottom: 8vh;
+  bottom: 4vh;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-title);
