@@ -242,10 +242,10 @@ export function Cave() {
   };
 
   const artifactsData = [
-    { top: 0, left: 55, id: 1, title: 'PALEOLITHIC ECHO', sub: 'ALTAMIRA SERIES • 2024' },
-    { top: 25, left: 10, id: 2, title: 'THE FIRST SYMBOL', sub: 'VOID FRAGMENT • 2024' },
-    { top: 50, left: 60, id: 3, title: 'ANCIENT FREQUENCY', sub: 'RESONANCE • 2024' },
-    { top: 75, left: 15, id: 4, title: 'ETERNAL HANDPRINT', sub: 'ORIGIN • 2024' },
+    { top: 0, left: 55, mobileLeft: 20, id: 1, title: 'PALEOLITHIC ECHO', sub: 'ALTAMIRA SERIES • 2024' },
+    { top: 25, left: 10, mobileLeft: 5, id: 2, title: 'THE FIRST SYMBOL', sub: 'VOID FRAGMENT • 2024' },
+    { top: 50, left: 60, mobileLeft: 15, id: 3, title: 'ANCIENT FREQUENCY', sub: 'RESONANCE • 2024' },
+    { top: 75, left: 15, mobileLeft: 5, id: 4, title: 'ETERNAL HANDPRINT', sub: 'ORIGIN • 2024' },
   ];
 
   return (
@@ -330,7 +330,11 @@ export function Cave() {
             <div
               key={i}
               className={styles.artifact}
-              style={{ top: `${art.top}%`, left: `${art.left}%` } as React.CSSProperties}
+              style={{ 
+                '--top': `${art.top}%`, 
+                '--left': `${art.left}%`,
+                '--mobile-left': `${art.mobileLeft}%`
+              } as React.CSSProperties}
             >
               <div className={styles.artifactImgWrapper}>
                 <img

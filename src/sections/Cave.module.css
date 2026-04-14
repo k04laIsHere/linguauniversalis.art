@@ -287,6 +287,7 @@
   margin-top: 15vh;
   min-height: 200vh;
   padding: 0 5vw;
+  overflow: hidden;
 }
 
 .natureBottom {
@@ -303,6 +304,8 @@
 
 .artifact {
   position: absolute;
+  top: var(--top);
+  left: var(--left);
   width: min(700px, 80vw);
   z-index: 2;
   cursor: pointer;
@@ -380,6 +383,14 @@
 }
 
 @media (max-width: 960px) {
+  .artifact {
+    left: var(--mobile-left);
+    width: 75vw; /* Slightly smaller to ensure breathing room */
+  }
+
+  .artifactCap {
+    padding: 15px 0;
+  }
   .introStack {
     padding-top: 8vh;
     gap: 5vh;
