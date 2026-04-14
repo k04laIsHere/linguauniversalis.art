@@ -85,10 +85,11 @@ export function Events() {
         if (images.length > 1 && carousel) {
           const carouselEl = carousel as HTMLElement;
           tl.to(carouselEl, {
-            x: () => -(carouselEl.scrollWidth - carouselEl.offsetWidth + 40),
-            duration: 1.2,
+            // Speed up the carousel so all images are seen
+            x: () => -(carouselEl.scrollWidth - carouselEl.offsetWidth),
+            duration: 1.6, // Increased duration for a longer visible window
             ease: 'none'
-          }, sectionStartTime + 0.3);
+          }, sectionStartTime);
         }
 
         // Info box reveal
