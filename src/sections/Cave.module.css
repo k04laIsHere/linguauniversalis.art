@@ -53,7 +53,7 @@
   height: 120%;
   background: rgba(0, 0, 0, 0.65);
   pointer-events: none;
-  z-index: 10;
+  z-index: 50;
   opacity: 1;
   
   mask-image: 
@@ -307,10 +307,11 @@
   top: var(--top);
   left: var(--left);
   width: min(700px, 80vw);
-  z-index: 11;
+  z-index: 100;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
+  pointer-events: auto;
 }
 
 .artifactImgWrapper {
@@ -320,6 +321,7 @@
   background: transparent;
   transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
   background: rgba(255, 255, 255, 0.03);
+  pointer-events: none; /* Let clicks pass to the parent artifact div */
 }
 
 .artifactImg {

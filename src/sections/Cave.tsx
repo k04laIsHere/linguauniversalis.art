@@ -147,39 +147,44 @@ export function Cave() {
       });
 
       // Transition out: Fade flashlight away
-      const lastArtifact = artifacts[artifacts.length - 1];
-      if (lastArtifact) {
-        gsap.to(`.${styles.shadowMask}`, {
-          opacity: 0,
-          ease: 'power1.inOut',
-          scrollTrigger: {
-            trigger: lastArtifact,
-            start: 'top 80%',
-            end: 'bottom 50%',
-            scrub: true,
-          },
-        });
+    const lastArtifact = artifacts[artifacts.length - 1];
+    if (lastArtifact) {
+      gsap.to(`.${styles.shadowMask}`, {
+        opacity: 0,
+        ease: 'power1.inOut',
+        scrollTrigger: {
+          trigger: lastArtifact,
+          start: 'top 80%',
+          end: 'bottom 50%',
+          scrub: true,
+        },
+      });
+    }
+
+    // Close active artifact on click outside
+    const handleGlobalClick = () => setActiveArtifact(null);
+    window.addEventListener('click', handleGlobalClick);
+
+    // Archive Breach appearance
+    gsap.fromTo(
+      `.${styles.archiveBreach}`,
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 2.5,
+        delay: 1.0,
+        ease: 'expo.out',
       }
+    );
 
-      // Archive Breach appearance
-      gsap.fromTo(
-        `.${styles.archiveBreach}`,
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 2.5,
-          delay: 1.0,
-          ease: 'expo.out',
-        }
-      );
+    // Static Title Mask (Pure CSS handled)
+    root.style.setProperty('--title-y', `30vh`);
 
-      // Static Title Mask (Pure CSS handled)
-      root.style.setProperty('--title-y', `30vh`);
-
-    }, root);
-
-    return () => ctx.revert();
+    return () => {
+      ctx.revert();
+      window.removeEventListener('click', handleGlobalClick);
+    };
   }, []);
 
   const navigate = (newMode: 'immersive' | 'gallery') => {
@@ -336,7 +341,10 @@ export function Cave() {
                 '--left': `${art.left}%`,
                 '--mobile-left': `${art.mobileLeft}%`
               } as React.CSSProperties}
-              onClick={() => setActiveArtifact(activeArtifact === i ? null : i)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setActiveArtifact(activeArtifact === i ? null : i);
+              }}
             >
               <div className={styles.artifactImgWrapper}>
                 <img
