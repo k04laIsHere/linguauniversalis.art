@@ -165,23 +165,8 @@ export function Cave() {
     const handleGlobalClick = () => setActiveArtifact(null);
     window.addEventListener('click', handleGlobalClick);
 
-    // Archive Breach appearance
-    gsap.fromTo(
-      `.${styles.archiveBreach}`,
-      { opacity: 0, y: 20 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 2.5,
-        delay: 1.0,
-        ease: 'expo.out',
-      }
-    );
-
     // Static Title Mask (Pure CSS handled)
     root.style.setProperty('--title-y', `30vh`);
-
-    }, root);
 
     return () => {
       ctx.revert();

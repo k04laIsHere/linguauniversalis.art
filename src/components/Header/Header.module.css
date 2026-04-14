@@ -254,6 +254,12 @@
   transform: scale(1.1);
 }
 
+.globeIcon {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+}
+
 .langContainer {
   position: relative;
 }
@@ -365,6 +371,7 @@
   .langToggleSingle {
     height: 42px;
     width: 42px;
+    border-radius: 50%; /* Force circle on mobile */
   }
   .globeIcon {
     width: 18px;
@@ -380,10 +387,12 @@
     width: 42px;
     height: 42px;
     margin-left: 10px;
+    border-radius: 50%;
   }
   .langToggleSingle {
     width: 42px;
     height: 42px;
+    border-radius: 50%; /* Force circle on mobile */
   }
 }
 
