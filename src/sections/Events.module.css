@@ -223,10 +223,10 @@
     line-height: 1.2;
   }
   .content {
-    padding-top: 30vh;
+    padding-top: 35vh; /* Increased from 30vh */
   }
   .eventSection {
-    padding-top: 5vh;
+    padding-top: 10vh; /* Increased from 5vh */
   }
   .infoBox {
     padding: 1.5rem;
