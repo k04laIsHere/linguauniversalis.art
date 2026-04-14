@@ -386,6 +386,25 @@
   .artifact {
     left: var(--mobile-left);
     width: 75vw; /* Slightly smaller to ensure breathing room */
+    transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1), z-index 0.3s ease;
+  }
+
+  .artifactActive {
+    z-index: 1000 !important;
+    /* Center horizontally relative to the screen */
+    /* Since .artifact is absolutely positioned inside .artifactField which has 5vw padding */
+    /* We calculate the transform to reach the horizontal center of the viewport */
+    /* mobile-left is a percentage of the container width */
+    --offset: calc(50vw - (var(--mobile-left) * 0.9 + 5vw) - (75vw / 2));
+    transform: translateX(var(--offset)) scale(1.15);
+  }
+
+  .artifactActive .artifactImg {
+    filter: brightness(1.2) contrast(1.1) grayscale(0) drop-shadow(0 40px 80px rgba(0,0,0,0.8));
+  }
+
+  .artifactActive .artifactCap {
+    opacity: 1;
   }
 
   .artifactCap {

@@ -9,6 +9,7 @@ export function Cave() {
   const { setMode } = useViewMode();
   const rootRef = useRef<HTMLElement | null>(null);
   const manifestEndRef = useRef<HTMLDivElement | null>(null);
+  const [activeArtifact, setActiveArtifact] = useState<number | null>(null);
 
   useEffect(() => {
     const root = rootRef.current;
@@ -329,12 +330,13 @@ export function Cave() {
           {artifactsData.map((art, i) => (
             <div
               key={i}
-              className={styles.artifact}
+              className={`${styles.artifact} ${activeArtifact === i ? styles.artifactActive : ''}`}
               style={{ 
                 '--top': `${art.top}%`, 
                 '--left': `${art.left}%`,
                 '--mobile-left': `${art.mobileLeft}%`
               } as React.CSSProperties}
+              onClick={() => setActiveArtifact(activeArtifact === i ? null : i)}
             >
               <div className={styles.artifactImgWrapper}>
                 <img
