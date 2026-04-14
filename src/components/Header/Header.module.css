@@ -216,13 +216,18 @@
   .desktopRight {
     /* Keep it visible for language toggle */
     display: flex;
-    flex-direction: row-reverse;
+    flex-direction: row; /* Back to normal row */
+    gap: 15px;
   }
   .menuToggle {
     display: flex;
+    order: 2; /* Put menu on the right */
   }
   .desktopOnly {
     display: none !important;
+  }
+  .langToggleSingle {
+    order: 1; /* Lang on the left */
   }
 }
 
