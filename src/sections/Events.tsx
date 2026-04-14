@@ -16,7 +16,6 @@ export function Events() {
     [],
   );
 
-  // Scroll Trigger setup
   useEffect(() => {
     if (reduced) return;
     const root = rootRef.current;
@@ -25,7 +24,6 @@ export function Events() {
 
     initGsap();
 
-    // Lock height on mobile to prevent address bar resize jump
     let lastWidth = window.innerWidth;
     const lockHeight = () => {
       if (window.innerWidth !== lastWidth || !root.style.height) {
@@ -49,18 +47,12 @@ export function Events() {
         scrollTrigger: {
           trigger: root,
           start: 'top top',
-          end: `+=${sections.length * 100}%`, 
-          scrub: true,
+          end: `+=${sections.length * 150}%`, 
+          scrub: 1,
           pin: root,
           pinSpacing: true,
-          snap: {
-            snapTo: 1 / (sections.length - 1),
-            duration: { min: 0.2, max: 0.5 },
-            delay: 0.05,
-            ease: 'power1.inOut'
-          },
           onUpdate: (self) => {
-            const idx = Math.min(sections.length - 1, Math.max(0, Math.round(self.progress * (sections.length - 1))));
+            const idx = Math.min(sections.length - 1, Math.max(0, Math.floor(self.progress * sections.length * 0.99)));
             setActiveIndex(idx);
           },
         },
@@ -68,43 +60,53 @@ export function Events() {
 
       sections.forEach((section, i) => {
         const infoBox = section.querySelector(`.${styles.infoBox}`);
-        const images = Array.from(section.querySelectorAll<HTMLElement>(`.${styles.imageWrapper}`));
+        const carousel = section.querySelector(`.${styles.imageCarousel}`);
+        const images = Array.from(section.querySelectorAll<HTMLElement>(`.${styles.carouselItem}`));
         
-        // Initial hidden state - Opaque by default once revealed
+        const sectionStartTime = i * 2;
+        
         gsap.set(section, { autoAlpha: 0 });
-        gsap.set(images, { autoAlpha: 0 });
-        gsap.set(infoBox, { autoAlpha: 0, y: 20 });
+        gsap.set(infoBox, { autoAlpha: 0, y: 30 });
+        gsap.set(images, { x: 100, autoAlpha: 0 });
 
-        const startTime = i;
+        // Section Fade In
+        tl.to(section, { autoAlpha: 1, duration: 0.2 }, sectionStartTime);
 
-        // Reveal section
-        tl.to(section, { autoAlpha: 1, duration: 0.1 }, startTime);
+        // Horizontal Carousel Reveal
+        tl.to(images, {
+          x: 0,
+          autoAlpha: 1,
+          stagger: 0.1,
+          duration: 0.8,
+          ease: 'power2.out'
+        }, sectionStartTime + 0.1);
 
-        // Crossfade images if multiple, or just reveal first
-        images.forEach((img, imgIdx) => {
-          const imgStart = startTime + (imgIdx * 0.2);
-          tl.to(img, {
-            autoAlpha: 1,
-            duration: 0.5,
+        // Horizontal Auto-Scroll logic
+        if (images.length > 1 && carousel) {
+          const carouselEl = carousel as HTMLElement;
+          tl.to(carouselEl, {
+            x: () => -(carouselEl.scrollWidth - carouselEl.offsetWidth + 40),
+            duration: 1.2,
             ease: 'none'
-          }, imgStart);
-        });
+          }, sectionStartTime + 0.3);
+        }
 
-        // Reveal info box
+        // Info box reveal
         tl.to(infoBox, {
           autoAlpha: 1,
           y: 0,
-          duration: 0.4,
+          duration: 0.6,
           ease: 'power2.out'
-        }, startTime + 0.1);
+        }, sectionStartTime + 0.2);
 
-        // Hide section (except last)
+        // Section Fade Out (except last)
         if (i < sections.length - 1) {
           tl.to(section, {
             autoAlpha: 0,
-            duration: 0.4,
-            ease: 'none'
-          }, startTime + 0.6);
+            scale: 0.95,
+            duration: 0.6,
+            ease: 'power2.inOut'
+          }, sectionStartTime + 1.4);
         }
       });
     }, root);
@@ -129,7 +131,6 @@ export function Events() {
           {t.events.title}
         </div>
 
-        {/* Section Header */}
         <div className={styles.sectionHeader}>
            <span className={styles.sectionLabel}>
              {lang === 'ru' ? 'Прошедшие события' : lang === 'es' ? 'Eventos pasados' : 'Past events'}
@@ -144,44 +145,44 @@ export function Events() {
               className={`${styles.eventSection} ${activeIndex === idx ? styles.active : ''}`}
               data-event-section
             >
-              <div className={styles.mediaContainer}>
-                {event.images.map((img, imgIdx) => (
-                  <div 
-                    key={`${event.id}-img-${imgIdx}`} 
-                    className={styles.imageWrapper}
-                  >
-                    <img src={img} alt="" className={styles.eventImage} loading="lazy" />
-                  </div>
-                ))}
+              <div className={styles.carouselContainer}>
+                <div className={styles.imageCarousel}>
+                  {event.images.map((img, imgIdx) => (
+                    <div 
+                      key={`${event.id}-img-${imgIdx}`} 
+                      className={styles.carouselItem}
+                    >
+                      <img src={img} alt="" className={styles.eventImage} loading="lazy" />
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <div className={styles.infoBox}>
-                <div className={styles.infoContent}>
-                  <div className={styles.eventMeta}>
-                    <span className={styles.metaItem}>
-                      {lang === 'ru' ? event.dateRu : event.dateEn}
-                    </span>
-                    <span className={styles.metaDivider}>•</span>
-                    <span className={styles.metaItem}>
-                      {lang === 'ru' ? event.locationRu : event.locationEn}
-                    </span>
-                  </div>
-                  
-                  <h3 className={styles.eventTitle}>
-                    {lang === 'ru' ? event.titleRu : event.titleEn}
-                  </h3>
-                  
-                  <p className={styles.eventDesc}>
-                    {lang === 'ru' ? event.descRu : event.descEn}
-                  </p>
-                  
-                  <button 
-                    className={styles.exploreBtn}
-                    onClick={(e) => handleExplore(e, event)}
-                  >
-                    {t.events.explore}
-                  </button>
+                <div className={styles.eventMeta}>
+                  <span className={styles.metaItem}>
+                    {lang === 'ru' ? event.dateRu : event.dateEn}
+                  </span>
+                  <span className={styles.metaDivider}>•</span>
+                  <span className={styles.metaItem}>
+                    {lang === 'ru' ? event.locationRu : event.locationEn}
+                  </span>
                 </div>
+                
+                <h3 className={styles.eventTitle}>
+                  {lang === 'ru' ? event.titleRu : event.titleEn}
+                </h3>
+                
+                <p className={styles.eventDesc}>
+                  {lang === 'ru' ? event.descRu : event.descEn}
+                </p>
+                
+                <button 
+                  className={styles.exploreBtn}
+                  onClick={(e) => handleExplore(e, event)}
+                >
+                  {t.events.explore}
+                </button>
               </div>
             </div>
           ))}
