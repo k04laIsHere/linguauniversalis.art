@@ -49,12 +49,18 @@ export function Events() {
         scrollTrigger: {
           trigger: root,
           start: 'top top',
-          end: `+=${sections.length * 200}%`, // Increased duration for smoother staggered reveals
-          scrub: 1,
+          end: `+=${sections.length * 100}%`, 
+          scrub: true,
           pin: root,
           pinSpacing: true,
+          snap: {
+            snapTo: 1 / (sections.length - 1),
+            duration: { min: 0.2, max: 0.5 },
+            delay: 0.05,
+            ease: 'power1.inOut'
+          },
           onUpdate: (self) => {
-            const idx = Math.min(sections.length - 1, Math.max(0, Math.floor(self.progress * sections.length * 0.99)));
+            const idx = Math.min(sections.length - 1, Math.max(0, Math.round(self.progress * (sections.length - 1))));
             setActiveIndex(idx);
           },
         },
@@ -62,53 +68,43 @@ export function Events() {
 
       sections.forEach((section, i) => {
         const infoBox = section.querySelector(`.${styles.infoBox}`);
-        const hoverTarget = section.querySelector(`.${styles.hoverTarget}`);
         const images = Array.from(section.querySelectorAll<HTMLElement>(`.${styles.imageWrapper}`));
         
-        const sectionStartTime = i * 2;
-        
-        // Mouse tilt effect removed as requested to save computing power
-        
-        // Initial hidden state
-        gsap.set(section, { opacity: 0, pointerEvents: 'none' });
-        // Fullscreen images reveal
-        gsap.set(images, { opacity: 0, scale: 1.1 });
-        gsap.set(infoBox, { opacity: 0, y: 30 });
+        // Initial hidden state - Opaque by default once revealed
+        gsap.set(section, { autoAlpha: 0 });
+        gsap.set(images, { autoAlpha: 0 });
+        gsap.set(infoBox, { autoAlpha: 0, y: 20 });
 
-        // Section Fade In
-        tl.to(section, { 
-          opacity: 1, 
-          duration: 0.2
-        }, sectionStartTime);
+        const startTime = i;
 
-        // STAGGERED REVEAL: Crossfade between images or layer them
+        // Reveal section
+        tl.to(section, { autoAlpha: 1, duration: 0.1 }, startTime);
+
+        // Crossfade images if multiple, or just reveal first
         images.forEach((img, imgIdx) => {
-          const imgRevealStart = sectionStartTime + (imgIdx * 0.5);
+          const imgStart = startTime + (imgIdx * 0.2);
           tl.to(img, {
-            opacity: 1,
-            scale: 1,
-            duration: 1.2,
-            ease: 'sine.inOut'
-          }, imgRevealStart);
+            autoAlpha: 1,
+            duration: 0.5,
+            ease: 'none'
+          }, imgStart);
         });
 
-        // Info box appears with a delay for focus
+        // Reveal info box
         tl.to(infoBox, {
-          opacity: 1,
+          autoAlpha: 1,
           y: 0,
-          duration: 1,
+          duration: 0.4,
           ease: 'power2.out'
-        }, sectionStartTime + 0.3);
+        }, startTime + 0.1);
 
-        // Section Fade Out (except last one)
+        // Hide section (except last)
         if (i < sections.length - 1) {
           tl.to(section, {
-            opacity: 0,
-            y: -80, // Increased for clearer movement
-            scale: 0.9,
-            duration: 0.8, // Increased duration for smoother exit
-            ease: 'power2.inOut' // Smoother transition out
-          }, sectionStartTime + 1.4);
+            autoAlpha: 0,
+            duration: 0.4,
+            ease: 'none'
+          }, startTime + 0.6);
         }
       });
     }, root);
@@ -133,6 +129,14 @@ export function Events() {
           {t.events.title}
         </div>
 
+        {/* Section Header */}
+        <div className={styles.sectionHeader}>
+           <span className={styles.sectionLabel}>
+             {lang === 'ru' ? 'Прошедшие события' : lang === 'es' ? 'Eventos pasados' : 'Past events'}
+           </span>
+           <div className={styles.sectionLine}></div>
+        </div>
+
         <div className={styles.content}>
           {events.map((event, idx) => (
             <div 
@@ -141,44 +145,43 @@ export function Events() {
               data-event-section
             >
               <div className={styles.mediaContainer}>
-                <div className={styles.hoverTarget}>
-                  {event.images.map((img, imgIdx) => (
-                    <div 
-                      key={`${event.id}-img-${imgIdx}`} 
-                      className={styles.imageWrapper}
-                      data-image-index={imgIdx}
-                    >
-                      <img src={img} alt="" className={styles.eventImage} loading="lazy" />
-                    </div>
-                  ))}
-                </div>
+                {event.images.map((img, imgIdx) => (
+                  <div 
+                    key={`${event.id}-img-${imgIdx}`} 
+                    className={styles.imageWrapper}
+                  >
+                    <img src={img} alt="" className={styles.eventImage} loading="lazy" />
+                  </div>
+                ))}
               </div>
 
               <div className={styles.infoBox}>
-                <h3 className={styles.eventTitle}>
-                  {lang === 'ru' ? event.titleRu : event.titleEn}
-                </h3>
-                <div className={styles.eventMeta}>
-                  {event.dateEn && (
+                <div className={styles.infoContent}>
+                  <div className={styles.eventMeta}>
                     <span className={styles.metaItem}>
                       {lang === 'ru' ? event.dateRu : event.dateEn}
                     </span>
-                  )}
-                  {event.locationEn && (
+                    <span className={styles.metaDivider}>•</span>
                     <span className={styles.metaItem}>
                       {lang === 'ru' ? event.locationRu : event.locationEn}
                     </span>
-                  )}
+                  </div>
+                  
+                  <h3 className={styles.eventTitle}>
+                    {lang === 'ru' ? event.titleRu : event.titleEn}
+                  </h3>
+                  
+                  <p className={styles.eventDesc}>
+                    {lang === 'ru' ? event.descRu : event.descEn}
+                  </p>
+                  
+                  <button 
+                    className={styles.exploreBtn}
+                    onClick={(e) => handleExplore(e, event)}
+                  >
+                    {t.events.explore}
+                  </button>
                 </div>
-                <p className={styles.eventDesc}>
-                  {lang === 'ru' ? event.descRu : event.descEn}
-                </p>
-                <button 
-                  className={styles.exploreBtn}
-                  onClick={(e) => handleExplore(e, event)}
-                >
-                  {t.events.explore}
-                </button>
               </div>
             </div>
           ))}
