@@ -235,35 +235,104 @@
   appearance: none;
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.05);
-  height: 44px;
-  padding: 0 12px;
-  border-radius: 22px;
+  height: 48px;
+  width: 48px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: center;
   color: white;
   cursor: pointer;
   transition: all 0.3s ease;
   backdrop-filter: blur(10px);
+  position: relative;
 }
 
 .langToggleSingle:hover {
   background: rgba(255, 255, 255, 0.1);
   border-color: var(--accent);
-  transform: translateY(-1px);
+  transform: scale(1.1);
 }
 
-.globeIcon {
-  width: 18px;
-  height: 18px;
-  opacity: 0.8;
+.langContainer {
+  position: relative;
+}
+
+.langDropdown {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  background: rgba(15, 15, 15, 0.95);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 8px;
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+  z-index: 2000;
+}
+
+.dropdownItem {
+  appearance: none;
+  border: none;
+  background: transparent;
+  padding: 10px 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-family: var(--font-title);
+  font-size: 13px;
+  letter-spacing: 0.05em;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.dropdownItem:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+
+.dropdownItemActive {
+  background: rgba(217, 192, 141, 0.15);
+  color: var(--accent);
+}
+
+.mobileLangRow {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+  max-width: 280px;
+}
+
+.mobileLangBtn {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 10px 20px;
+  border-radius: 20px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: var(--font-title);
+  font-size: 14px;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.mobileLangBtnActive {
+  background: var(--accent);
+  color: black;
+  border-color: var(--accent);
 }
 
 .langCode {
-  font-family: var(--font-title);
-  font-size: 12px;
-  letter-spacing: 0.05em;
-  font-weight: 500;
+  display: none;
 }
 
 @media (max-width: 820px) {
@@ -294,16 +363,12 @@
     font-size: 12px;
   }
   .langToggleSingle {
-    height: 38px;
-    padding: 0 10px;
-    gap: 6px;
+    height: 42px;
+    width: 42px;
   }
   .globeIcon {
-    width: 16px;
-    height: 16px;
-  }
-  .langCode {
-    font-size: 11px;
+    width: 18px;
+    height: 18px;
   }
 }
 
@@ -315,6 +380,10 @@
     width: 42px;
     height: 42px;
     margin-left: 10px;
+  }
+  .langToggleSingle {
+    width: 42px;
+    height: 42px;
   }
 }
 

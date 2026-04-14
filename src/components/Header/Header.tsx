@@ -13,6 +13,7 @@ export function Header() {
   const { mode, toggleMode } = useViewMode();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [isLangOpen, setIsLangOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
@@ -60,6 +61,12 @@ export function Header() {
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
+  const languages: { code: typeof lang; label: string }[] = [
+    { code: 'ru', label: 'RU' },
+    { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' },
+  ];
+
   return (
     <header 
       ref={headerRef}
@@ -85,14 +92,6 @@ export function Header() {
         </nav>
 
         <div className={styles.desktopRight}>
-          <button
-            className={styles.menuToggle}
-            onClick={toggleMenu}
-            aria-label="Toggle Navigation"
-          >
-            <span className={styles.menuIcon} />
-          </button>
-
           {/* View as List Button - Hidden on mobile in immersive mode, shown on desktop */}
           {mode === 'immersive' && (
             <button
@@ -105,18 +104,45 @@ export function Header() {
             </button>
           )}
 
+          <div className={styles.langContainer}>
+            <button
+              type="button"
+              className={styles.langToggleSingle}
+              onClick={() => setIsLangOpen(!isLangOpen)}
+              aria-label="Toggle Language"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={styles.globeIcon}>
+                <circle cx="12" cy="12" r="10" />
+                <line x1="2" y1="12" x2="22" y2="12" />
+                <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
+              </svg>
+              <span className={styles.langCode}>{lang.toUpperCase()}</span>
+            </button>
+            
+            {isLangOpen && (
+              <div className={styles.langDropdown}>
+                {languages.map((l) => (
+                  <button
+                    key={l.code}
+                    className={`${styles.dropdownItem} ${lang === l.code ? styles.dropdownItemActive : ''}`}
+                    onClick={() => {
+                      setLang(l.code);
+                      setIsLangOpen(false);
+                    }}
+                  >
+                    {l.label === 'RU' ? 'Русский' : l.label === 'EN' ? 'English' : 'Español'}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
           <button
-            type="button"
-            className={styles.langToggleSingle}
-            onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
-            aria-label="Toggle Language"
+            className={styles.menuToggle}
+            onClick={toggleMenu}
+            aria-label="Toggle Navigation"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={styles.globeIcon}>
-              <circle cx="12" cy="12" r="10" />
-              <line x1="2" y1="12" x2="22" y2="12" />
-              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
-            </svg>
-            <span className={styles.langCode}>{lang.toUpperCase()}</span>
+            <span className={styles.menuIcon} />
           </button>
         </div>
       </div>
@@ -137,6 +163,20 @@ export function Header() {
             </button>
           ))}
           
+          <div className={styles.mobileLangRow}>
+            {languages.map((l) => (
+              <button
+                key={l.code}
+                className={`${styles.mobileLangBtn} ${lang === l.code ? styles.mobileLangBtnActive : ''}`}
+                onClick={() => {
+                  setLang(l.code);
+                }}
+              >
+                {l.label}
+              </button>
+            ))}
+          </div>
+
           {/* View as List Button - Mobile Menu Only */}
           {mode === 'immersive' && (
             <button
@@ -155,5 +195,3 @@ export function Header() {
     </header>
   );
 }
-
-

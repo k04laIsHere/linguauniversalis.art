@@ -1,18 +1,27 @@
 .root {
   min-height: 100vh;
   background-color: #fcfcf9;
-  /* Add padding-top to bridge potential layout gaps from preceding sections */
-  padding-top: 15vh;
-  margin-top: -15vh;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noiseFilter'%3e%3cturbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3e%3c/svg%3e");
-  background-blend-mode: overlay;
-  opacity: 0.98;
+  /* Ensure it fills screen and has consistent baseline */
+  margin: 0;
+  padding: 0;
   color: #1a1a1a;
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   display: flex;
   overflow-x: hidden;
+  position: relative;
+  z-index: 1;
+}
+
+.grain {
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3e%3cfilter id='noiseFilter'%3e%3cturbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3e%3c/filter%3e%3crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3e%3c/svg%3e");
+  background-blend-mode: overlay;
+  opacity: 0.05;
+  pointer-events: none;
+  z-index: 2000;
 }
 
 /* Sidebar Navigation */

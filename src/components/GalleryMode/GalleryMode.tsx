@@ -250,6 +250,7 @@ export function GalleryMode() {
 
   return (
     <div className={`${styles.root} ${isMenuOpen ? styles.menuOpen : ''}`}>
+      <div className={styles.grain} />
       {/* Sidebar Navigation */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarInner}>
