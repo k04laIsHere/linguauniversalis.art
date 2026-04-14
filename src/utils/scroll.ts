@@ -10,6 +10,25 @@ export function scrollToId(id: string) {
   // We do it before and after a tiny delay to be sure.
   ScrollTrigger.refresh();
 
+  // Special case for scrolling to top
+  if (id === 'manifesto' || id === 'top') {
+    gsap.to(window, {
+      duration: 1.5,
+      scrollTo: {
+        y: 0,
+        autoKill: true
+      },
+      ease: 'power3.inOut',
+      onComplete: () => {
+        ScrollTrigger.refresh();
+        const currentHashParts = window.location.hash.split('?');
+        const query = currentHashParts[1] ? `?${currentHashParts[1]}` : '';
+        window.history.pushState(null, '', `#manifesto${query}`);
+      }
+    });
+    return;
+  }
+
   const el = document.getElementById(id);
   if (!el) {
     console.warn(`[scrollToId] Element with id "${id}" not found.`);
