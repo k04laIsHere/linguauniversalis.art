@@ -84,16 +84,20 @@ export function Events() {
         // Horizontal Auto-Scroll logic
         if (images.length > 1 && carousel) {
           const carouselEl = carousel as HTMLElement;
-          // Calculate exact scroll distance to show ALL images
+          
+          // Force a small delay to ensure DOM dimensions are settled
           tl.to(carouselEl, {
             x: () => {
+              // totalWidth is the entire length of the internal flex track
               const totalWidth = carouselEl.scrollWidth;
-              const viewportWidth = carouselEl.offsetWidth;
+              // viewportWidth is the visible 630px / 85vw container
+              const viewportWidth = (carouselEl.parentElement as HTMLElement).offsetWidth;
+              // We need to move exactly the hidden distance
               return -(totalWidth - viewportWidth);
             },
-            duration: 1.8, // Slower duration relative to section scroll for a full spin
+            duration: 1.8,
             ease: 'none'
-          }, sectionStartTime + 0.1);
+          }, sectionStartTime);
         }
 
         // Info box reveal

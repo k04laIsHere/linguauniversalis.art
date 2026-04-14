@@ -101,6 +101,7 @@
   gap: 30px;
   width: max-content;
   padding: 0;
+  will-change: transform;
 }
 
 .carouselItem {
