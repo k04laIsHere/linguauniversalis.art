@@ -62,6 +62,7 @@ export function ExitFlight() {
       if (img && img.complete) {
         context.clearRect(0, 0, canvas.width, canvas.height);
         
+        // Match browser's background-size: cover math perfectly
         const imgAspect = img.width / img.height;
         const canvasAspect = canvas.width / canvas.height;
         
@@ -79,15 +80,22 @@ export function ExitFlight() {
           offsetY = (canvas.height - drawHeight) / 2;
         }
 
-        context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        // We use Math.floor to prevent sub-pixel rounding differences 
+        // between the browser's CSS engine and Canvas's drawImage
+        context.drawImage(img, Math.floor(offsetX), Math.floor(offsetY), Math.ceil(drawWidth), Math.ceil(drawHeight));
       }
     };
 
     const updateCanvasSize = () => {
+      // Use the exact same locked height that the parent container uses
       const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
       const targetWidth = window.innerWidth;
-      canvas.width = targetWidth * (window.devicePixelRatio || 1);
-      canvas.height = targetHeight * (window.devicePixelRatio || 1);
+      
+      // Force integer pixel values for the backing store to prevent scaling blur/offset
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = Math.floor(targetWidth * dpr);
+      canvas.height = Math.floor(targetHeight * dpr);
+      
       render();
     };
 

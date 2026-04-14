@@ -60,11 +60,8 @@ export function NatureUrbanPlaceholder() {
     const render = () => {
       const img = images[airplay.frame];
       if (img && img.complete) {
-        // MATCH BackdropController logic: center the image in the canvas
-        // and let CSS handle the 'zoom' via object-fit: cover or height: 120%
         context.clearRect(0, 0, canvas.width, canvas.height);
         
-        // CSS object-fit: cover logic in JS for the canvas content
         const imgAspect = img.width / img.height;
         const canvasAspect = canvas.width / canvas.height;
         
@@ -82,19 +79,17 @@ export function NatureUrbanPlaceholder() {
           offsetY = (canvas.height - drawHeight) / 2;
         }
 
-        context.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+        context.drawImage(img, Math.floor(offsetX), Math.floor(offsetY), Math.ceil(drawWidth), Math.ceil(drawHeight));
       }
     };
 
     const updateCanvasSize = () => {
-      // Sync canvas internal resolution with its physical locked height
       const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
       const targetWidth = window.innerWidth;
+      const dpr = window.devicePixelRatio || 1;
       
-      // We keep internal 1920x1080 for quality, but the draw logic
-      // now uses the physical aspect ratio of the locked container
-      canvas.width = targetWidth * (window.devicePixelRatio || 1);
-      canvas.height = targetHeight * (window.devicePixelRatio || 1);
+      canvas.width = Math.floor(targetWidth * dpr);
+      canvas.height = Math.floor(targetHeight * dpr);
       render();
     };
 
