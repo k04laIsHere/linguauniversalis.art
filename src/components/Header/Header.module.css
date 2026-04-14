@@ -64,10 +64,16 @@
   gap: 4px;
   cursor: pointer;
   opacity: 0.85;
-  transition: opacity 0.3s ease;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
   z-index: 100;
   flex-shrink: 0;
   margin-right: 20px;
+}
+
+.headerOpen .brand {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .brand:hover {
@@ -268,6 +274,13 @@
   position: relative;
   display: flex;
   align-items: center;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.headerOpen .langContainer {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
 }
 
 .langDropdown {
