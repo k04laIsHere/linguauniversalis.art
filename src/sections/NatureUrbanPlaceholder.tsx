@@ -84,6 +84,9 @@ export function NatureUrbanPlaceholder() {
     };
 
     const updateCanvasSize = () => {
+      // THE FIX: Use the exact height lock logic from the container to determine
+      // the canvas height. This ensures the 100% canvas height matches the
+      // physical height expected by the browser's cover math.
       const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
       const targetWidth = window.innerWidth;
       const dpr = window.devicePixelRatio || 1;

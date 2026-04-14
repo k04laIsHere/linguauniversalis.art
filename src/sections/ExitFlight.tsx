@@ -87,7 +87,7 @@ export function ExitFlight() {
     };
 
     const updateCanvasSize = () => {
-      // Use the exact same locked height that the parent container uses
+      // THE FIX: Use the exact height lock logic from the container
       const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
       const targetWidth = window.innerWidth;
       
