@@ -312,6 +312,7 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   pointer-events: auto;
+  touch-action: manipulation;
 }
 
 .artifactImgWrapper {

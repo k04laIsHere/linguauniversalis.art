@@ -138,7 +138,7 @@ export function Cave() {
             duration: 2,
             scrollTrigger: {
               trigger: art,
-              start: 'top bottom',
+              start: 'top bottom+=20%',
               end: 'bottom top',
               scrub: 1,
             },
