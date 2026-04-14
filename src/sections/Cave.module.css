@@ -110,8 +110,8 @@
   align-items: center;
   justify-content: flex-start;
   min-height: 100vh;
-  padding-top: 15vh;
-  gap: 10vh;
+  padding-top: 8vh;
+  gap: 6vh;
   z-index: 100;
 }
 
@@ -381,8 +381,8 @@
 
 @media (max-width: 960px) {
   .introStack {
-    padding-top: 12vh;
-    gap: 15vh;
+    padding-top: 8vh;
+    gap: 5vh;
     justify-content: flex-start;
   }
 
