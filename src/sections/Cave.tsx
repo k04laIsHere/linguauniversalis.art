@@ -15,6 +15,8 @@ export function Cave() {
     const root = rootRef.current;
     if (!root) return;
 
+    let handleGlobalClick: () => void;
+
     const ctx = gsap.context(() => {
       // Toggle active state for cave background activation
       ScrollTrigger.create({
@@ -147,30 +149,33 @@ export function Cave() {
       });
 
       // Transition out: Fade flashlight away
-    const lastArtifact = artifacts[artifacts.length - 1];
-    if (lastArtifact) {
-      gsap.to(`.${styles.shadowMask}`, {
-        opacity: 0,
-        ease: 'power1.inOut',
-        scrollTrigger: {
-          trigger: lastArtifact,
-          start: 'top 80%',
-          end: 'bottom 50%',
-          scrub: true,
-        },
-      });
-    }
+      const lastArtifact = artifacts[artifacts.length - 1];
+      if (lastArtifact) {
+        gsap.to(`.${styles.shadowMask}`, {
+          opacity: 0,
+          ease: 'power1.inOut',
+          scrollTrigger: {
+            trigger: lastArtifact,
+            start: 'top 80%',
+            end: 'bottom 50%',
+            scrub: true,
+          },
+        });
+      }
 
-    // Close active artifact on click outside
-    const handleGlobalClick = () => setActiveArtifact(null);
-    window.addEventListener('click', handleGlobalClick);
+      // Close active artifact on click outside
+      handleGlobalClick = () => setActiveArtifact(null);
+      window.addEventListener('click', handleGlobalClick);
 
-    // Static Title Mask (Pure CSS handled)
-    root.style.setProperty('--title-y', `30vh`);
+      // Static Title Mask (Pure CSS handled)
+      root.style.setProperty('--title-y', `30vh`);
+    }, root);
 
     return () => {
       ctx.revert();
-      window.removeEventListener('click', handleGlobalClick);
+      if (handleGlobalClick) {
+        window.removeEventListener('click', handleGlobalClick);
+      }
     };
   }, []);
 
