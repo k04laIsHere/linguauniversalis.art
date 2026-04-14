@@ -84,12 +84,16 @@ export function Events() {
         // Horizontal Auto-Scroll logic
         if (images.length > 1 && carousel) {
           const carouselEl = carousel as HTMLElement;
+          // Calculate exact scroll distance to show ALL images
           tl.to(carouselEl, {
-            // Speed up the carousel so all images are seen
-            x: () => -(carouselEl.scrollWidth - carouselEl.offsetWidth),
-            duration: 1.6, // Increased duration for a longer visible window
+            x: () => {
+              const totalWidth = carouselEl.scrollWidth;
+              const viewportWidth = carouselEl.offsetWidth;
+              return -(totalWidth - viewportWidth);
+            },
+            duration: 1.8, // Slower duration relative to section scroll for a full spin
             ease: 'none'
-          }, sectionStartTime);
+          }, sectionStartTime + 0.1);
         }
 
         // Info box reveal
