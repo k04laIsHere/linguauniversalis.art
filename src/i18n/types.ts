@@ -13,6 +13,7 @@ export type I18nDict = {
     contact: string;
     movie: string;
     brandHint: string;
+    viewAsList: string;
   };
   cave: {
     title: string;

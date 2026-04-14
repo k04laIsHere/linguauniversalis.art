@@ -85,15 +85,23 @@ export function Header() {
         </nav>
 
         <div className={styles.desktopRight}>
-          {/* View as List Button - Only in immersive mode */}
+          <button
+            className={styles.menuToggle}
+            onClick={toggleMenu}
+            aria-label="Toggle Navigation"
+          >
+            <span className={styles.menuIcon} />
+          </button>
+
+          {/* View as List Button - Hidden on mobile in immersive mode, shown on desktop */}
           {mode === 'immersive' && (
             <button
               type="button"
-              className={styles.viewListBtn}
+              className={`${styles.viewListBtn} ${styles.desktopOnly}`}
               onClick={toggleMode}
               aria-label="View as list"
             >
-              View as List
+              {t.header.viewAsList}
             </button>
           )}
 
@@ -109,14 +117,6 @@ export function Header() {
               <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" />
             </svg>
             <span className={styles.langCode}>{lang.toUpperCase()}</span>
-          </button>
-
-          <button
-            className={styles.menuToggle}
-            onClick={toggleMenu}
-            aria-label="Toggle Navigation"
-          >
-            <span className={styles.menuIcon} />
           </button>
         </div>
       </div>
@@ -136,6 +136,20 @@ export function Header() {
               {item.label}
             </button>
           ))}
+          
+          {/* View as List Button - Mobile Menu Only */}
+          {mode === 'immersive' && (
+            <button
+              type="button"
+              className={styles.mobileViewListBtn}
+              onClick={() => {
+                toggleMode();
+                setIsOpen(false);
+              }}
+            >
+              {t.header.viewAsList}
+            </button>
+          )}
         </nav>
       </div>
     </header>
