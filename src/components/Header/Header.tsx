@@ -59,6 +59,17 @@ export function Header() {
 
   const active = useActiveSection(items.map((i) => i.id));
 
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isOpen]);
+
   const toggleMenu = () => setIsOpen(!isOpen);
 
   const languages: { code: typeof lang; label: string }[] = [

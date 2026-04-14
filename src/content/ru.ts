@@ -13,7 +13,7 @@ export const ru: I18nDict = {
     contact: 'Связаться',
     movie: 'Фильм',
     brandHint: 'Искусство творения',
-    viewAsList: 'Список работ',
+    viewAsList: 'Перейти в архив',
   },
   cave: {
     title: 'Lingua Universalis',

@@ -13,7 +13,7 @@ export const en: I18nDict = {
     contact: 'Contact',
     movie: 'Documentary',
     brandHint: 'Art of Creation',
-    viewAsList: 'View as List',
+    viewAsList: 'Enter the Archive',
   },
   cave: {
     title: 'Lingua Universalis',
