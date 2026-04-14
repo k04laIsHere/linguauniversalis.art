@@ -53,7 +53,7 @@
   height: 120%;
   background: rgba(0, 0, 0, 0.65);
   pointer-events: none;
-  z-index: 3;
+  z-index: 10;
   opacity: 1;
   
   mask-image: 
@@ -307,7 +307,7 @@
   top: var(--top);
   left: var(--left);
   width: min(700px, 80vw);
-  z-index: 2;
+  z-index: 11;
   cursor: pointer;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
@@ -391,6 +391,7 @@
 
   .artifactActive {
     z-index: 1000 !important;
+    pointer-events: auto;
     /* Center horizontally relative to the screen */
     /* Since .artifact is absolutely positioned inside .artifactField which has 5vw padding */
     /* We calculate the transform to reach the horizontal center of the viewport */
