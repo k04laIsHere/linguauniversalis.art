@@ -173,7 +173,7 @@
 
 .scrollHint {
   position: absolute;
-  bottom: 2vh;
+  bottom: 1vh;
   left: 50%;
   transform: translateX(-50%);
   font-family: var(--font-title);
