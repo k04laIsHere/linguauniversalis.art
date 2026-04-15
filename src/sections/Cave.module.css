@@ -321,7 +321,7 @@
   box-shadow: none;
   background: transparent;
   transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-  background: rgba(255, 255, 255, 0.03);
+  background: transparent;
   pointer-events: none; /* Let clicks pass to the parent artifact div */
 }
 

@@ -63,26 +63,9 @@ select {
 }
 
 .featherRect {
-  /* Even feather on all edges (rectangular) - Even deeper blur as requested */
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 0, #fff 100px),
-    linear-gradient(to left, transparent 0, #fff 100px),
-    linear-gradient(to bottom, transparent 0, #fff 100px),
-    linear-gradient(to top, transparent 0, #fff 100px);
-  -webkit-mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  -webkit-mask-position: 0 0;
-  -webkit-mask-composite: source-in, source-in, source-in;
-
-  mask-image:
-    linear-gradient(to right, transparent 0, #fff 100px),
-    linear-gradient(to left, transparent 0, #fff 100px),
-    linear-gradient(to bottom, transparent 0, #fff 100px),
-    linear-gradient(to top, transparent 0, #fff 100px);
-  mask-repeat: no-repeat;
-  mask-size: 100% 100%;
-  mask-position: 0 0;
-  mask-composite: intersect, intersect, intersect;
+  /* Even feather on all edges (rectangular) - Enhanced with radial falloff for "cave art" vibe */
+  mask-image: radial-gradient(ellipse 95% 90% at center, black 40%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 95% 90% at center, black 40%, transparent 100%);
 }
 
 .appRoot {
