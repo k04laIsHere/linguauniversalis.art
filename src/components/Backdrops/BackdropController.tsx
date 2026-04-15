@@ -71,7 +71,8 @@ export function BackdropController() {
                gsap.to(nature, { opacity: 0, duration: 0, overwrite: 'auto' });
             },
             onEnterBack: () => {
-               gsap.to(sky, { opacity: 1, duration: 0, overwrite: 'auto' });
+               gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+               gsap.to(nature, { opacity: 0, duration: 0, overwrite: 'auto' }); // Explicitly kill nature when entering sky area from below
                if (caveEl) gsap.to(caveEl, { opacity: 0, duration: 0 });
             },
             onLeaveBack: () => {
@@ -95,6 +96,8 @@ export function BackdropController() {
         end: 'top top',
         onEnter: setSky,
         onEnterBack: setSky,
+        // Added onToggle and onUpdate to ensure backdrop stays Sky even after fast jumps
+        onToggle: (self) => self.isActive && setSky(),
         refreshPriority: -1,
       });
 

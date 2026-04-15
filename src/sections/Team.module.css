@@ -10,8 +10,8 @@
   width: min(1200px, 94vw);
   margin: 0 auto;
   overflow: visible;
-  /* Pull the content up internally to bypass pin-induced whitespace */
-  transform: translateY(-200px);
+  /* Use viewport units for responsive pull-up across devices */
+  transform: translateY(-25vh);
 }
 
 .header {
@@ -200,7 +200,7 @@
   }
 
   .container {
-    transform: translateY(-200px); /* Stronger pull on mobile */
+    transform: translateY(-35vh); /* Robust pull using viewport units */
   }
 
   .grid {
