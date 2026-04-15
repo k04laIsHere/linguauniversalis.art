@@ -47,27 +47,24 @@ export function Team() {
         gsap.set(card, { zIndex: index + 1 });
 
         // Initial state for the fly-in
-        gsap.set(card, { 
+        gsap.set(card, { opacity: 1, scale: 1, z: 0, y: 0 }); 
+        
+        // Use a wrapper if not already existing (React might re-run effect)
+        let inner = card.querySelector(`.${styles.innerWrapper}`) as HTMLElement;
+        if (!inner) {
+          inner = document.createElement('div');
+          inner.className = styles.innerWrapper;
+          const children = Array.from(card.children);
+          children.forEach(child => inner.appendChild(child));
+          card.appendChild(inner);
+        }
+
+        gsap.set(inner, { 
           opacity: 0, 
           scale: 0.1, 
           z: -1000, 
-          y: 0,
-        }); 
-        
-        // Wrap children in an inner container for the animation
-        // This isolates the 3D children from the card's transform-origin
-        const children = Array.from(card.children);
-        const inner = document.createElement('div');
-        inner.style.width = '100%';
-        inner.style.height = '100%';
-        inner.style.display = 'flex';
-        inner.style.flexDirection = 'column';
-        inner.style.alignItems = 'center';
-        inner.style.transformStyle = 'preserve-3d';
-        inner.style.transformOrigin = 'center bottom';
-        
-        children.forEach(child => inner.appendChild(child));
-        card.appendChild(inner);
+          transformOrigin: 'center bottom' 
+        });
 
         gsap.set(textBack, { opacity: 0, z: -150 });
         gsap.set(textFront, { opacity: 0, z: 150, y: 0 }); 
@@ -86,16 +83,14 @@ export function Team() {
         });
 
         tl
-          .fromTo(inner, 
-            { opacity: 0, scale: 0.1, z: -1000 },
-            { 
-              opacity: 1, 
-              scale: 1, 
-              z: 0,
-              duration: 1.2,
-              ease: 'power4.out',
-              force3D: true,
-            }, 0)
+          .to(inner, { 
+            opacity: 1, 
+            scale: 1, 
+            z: 0,
+            duration: 1.2,
+            ease: 'power4.out',
+            force3D: true,
+          }, 0)
           .to(textBack, { 
             opacity: 0.2, 
             z: -50, 
