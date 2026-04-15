@@ -371,7 +371,14 @@ export function GalleryMode() {
 
             <div className={styles.manifestoText}>
               {t.cave.manifesto.map((line, i) => (
-                <p key={i} className={styles.manifestoLine}>{line}</p>
+                <p key={i} className={styles.manifestoLine}>
+                  {line.split('\n').map((segment, idx) => (
+                    <span key={idx}>
+                      {segment}
+                      {idx < line.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
+                </p>
               ))}
             </div>
           </div>

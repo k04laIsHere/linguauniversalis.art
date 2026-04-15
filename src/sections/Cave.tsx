@@ -311,7 +311,14 @@ export function Cave() {
                 style={{ '--index': i } as React.CSSProperties}
               >
                 <span className={styles.manifestoNumber}>{i + 1}</span>
-                <p className={styles.manifestoText}>{line}</p>
+                <p className={styles.manifestoText}>
+                  {line.split('\n').map((segment, idx) => (
+                    <span key={idx} className={styles.manifestoLine}>
+                      {segment}
+                      {idx < line.split('\n').length - 1 && <br />}
+                    </span>
+                  ))}
+                </p>
               </div>
             ))}
           </div>
