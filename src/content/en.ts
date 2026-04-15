@@ -23,7 +23,7 @@ export const en: I18nDict = {
       'Art is humanity’s first word—\na silent, eternal language that precedes\nall borders and spoken tongues.',
       'Creation is not the pursuit of the "new," but a ritual\nto recover the "real"—reconnecting the soul\nto the cosmos.',
       'Beyond modern fragmentation, the Art of Creation acts\nas a bridge, weaving together the threads\nof our collective consciousness.',
-      'The prehistoric and the futuristic are two ends\nof the same path—to look back at our origins\nis to trace the blueprint of our future.',
+      'The aesthetic of the project is a bridge\nbetween the prehistoric and the meta-modern:\nancient and futuristic at once.',
       'Thousands of years ago, we began\na conversation on the walls.\nThat conversation has never ended.',
     ],
     flashlightTitle: 'Flashlight',

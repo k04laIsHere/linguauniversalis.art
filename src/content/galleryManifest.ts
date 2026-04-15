@@ -256,7 +256,7 @@ export const galleryWorks: GalleryWork[] = [
   },
   {
     id: 'petertsvetkov-1',
-    artist: 'Petr Tsvetkov',
+    artist: 'Peter Tsvetkov',
     titleEn: 'Landscape I',
     titleRu: 'Пейзаж I',
     titleEs: 'Paisaje I',
@@ -270,7 +270,7 @@ export const galleryWorks: GalleryWork[] = [
   },
   {
     id: 'petertsvetkov-2',
-    artist: 'Petr Tsvetkov',
+    artist: 'Peter Tsvetkov',
     titleEn: 'Landscape II',
     titleRu: 'Пейзаж II',
     titleEs: 'Paisaje II',
@@ -284,7 +284,7 @@ export const galleryWorks: GalleryWork[] = [
   },
   {
     id: 'petertsvetkov-3',
-    artist: 'Petr Tsvetkov',
+    artist: 'Peter Tsvetkov',
     titleEn: 'Landscape III',
     titleRu: 'Пейзаж III',
     titleEs: 'Paisaje III',
@@ -298,7 +298,7 @@ export const galleryWorks: GalleryWork[] = [
   },
   {
     id: 'petertsvetkov-4',
-    artist: 'Petr Tsvetkov',
+    artist: 'Peter Tsvetkov',
     titleEn: 'Landscape IV',
     titleRu: 'Пейзаж IV',
     titleEs: 'Paisaje IV',

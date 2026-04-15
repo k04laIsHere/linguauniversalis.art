@@ -13,8 +13,8 @@ export const teamMembers: TeamMember[] = [
   {
     id: 'joslen-orsini',
     name: 'Joslen Orsini',
-    nameRu: 'Йослен Арриохас Орсини',
-    nameEs: 'Joslen Arriojas Orsini',
+    nameRu: 'Йослен Орсини',
+    nameEs: 'Joslen Orsini',
     photoSrc: '/assets/team/JoslenOrsini.jpg',
     blurbRu: 'Исследователь доисторического искусства и универсальной человеческой идентичности.',
     blurbEn: 'Researcher of prehistoric art and universal human identity.',
@@ -52,9 +52,9 @@ export const teamMembers: TeamMember[] = [
   },
   {
     id: 'petr-tsvetkov',
-    name: 'Petr Tsvetkov',
+    name: 'Peter Tsvetkov',
     nameRu: 'Петр Цветков',
-    nameEs: 'Petr Tsvetkov',
+    nameEs: 'Peter Tsvetkov',
     photoSrc: '/assets/team/PeterTsvetkov.jpg',
     blurbRu: 'Модернист/абстракционист, ищет основу мира через универсальный язык искусства.',
     blurbEn: 'Modernist/Abstract artist seeking a foundation for peace through the universal language of art.',
