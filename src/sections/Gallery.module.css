@@ -195,7 +195,7 @@
   width: 100%;
   height: auto;
   transition: filter 0.4s ease;
-  border: 12px solid #ffffff;
+  border: 25px solid #ffffff;
 }
 
 .card:hover .thumb {

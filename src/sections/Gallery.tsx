@@ -27,7 +27,10 @@ function setGalleryHash(params: { workId?: string | null; artist?: string | null
   const newHash = qs ? `#gallery?${qs}` : '#gallery';
   
   if (window.location.hash !== newHash) {
-    window.location.hash = newHash;
+    // Use replaceState to update hash without triggering scroll or mode switch logic redundantly
+    window.history.replaceState(null, '', newHash);
+    // Dispatch event manually since replaceState doesn't trigger hashchange
+    window.dispatchEvent(new HashChangeEvent('hashchange'));
   }
 }
 

@@ -29,12 +29,13 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const handleHashChange = () => {
       const hash = window.location.hash;
-      // Strict check: if hash is exactly #gallery or #archive, it's a mode switch.
-      // If it contains '?', it's a filter or work selection inside the gallery.
-      if ((hash === '#gallery' || hash === '#archive')) {
+      const [anchor] = hash.split('?');
+      
+      // Strict check: if anchor is exactly #gallery or #archive, it's a mode switch.
+      if ((anchor === '#gallery' || anchor === '#archive')) {
         setModeState('gallery');
         localStorage.setItem(STORAGE_KEY, 'gallery');
-      } else if (hash === '#immersive') {
+      } else if (anchor === '#immersive') {
         setModeState('immersive');
         localStorage.setItem(STORAGE_KEY, 'immersive');
       }
