@@ -76,9 +76,12 @@ export function GalleryLightbox({
   useEffect(() => {
     if (!isOpen) return;
     const prev = document.body.style.overflow;
+    const prevHeight = document.body.style.height;
     document.body.style.overflow = 'hidden';
+    document.body.style.height = '100vh';
     return () => {
       document.body.style.overflow = prev;
+      document.body.style.height = prevHeight;
     };
   }, [isOpen]);
 
@@ -88,10 +91,10 @@ export function GalleryLightbox({
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" onMouseDown={onClose}>
-      <button className={styles.closeBtn} type="button" onClick={onClose} aria-label="Close">
-        ✕
-      </button>
       <div className={styles.dialog} onMouseDown={(e) => e.stopPropagation()}>
+        <button className={styles.closeBtn} type="button" onClick={onClose} aria-label="Close">
+          ✕
+        </button>
         <div className={styles.stage} ref={containerRef}>
           <div className={styles.imgWrapper}>
             <img 

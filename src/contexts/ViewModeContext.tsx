@@ -28,6 +28,9 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const handleHashChange = () => {
+      // Only set to gallery if the hash is #gallery or #archive exactly,
+      // and NOT if it's #gallery?artist=... or #gallery?work=...
+      // which should stay in immersive if we're already there.
       if (window.location.hash === '#gallery' || window.location.hash === '#archive') {
         setModeState('gallery');
         localStorage.setItem(STORAGE_KEY, 'gallery');
