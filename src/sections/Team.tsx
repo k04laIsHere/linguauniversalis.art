@@ -77,7 +77,7 @@ export function Team() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: card,
-            start: 'top bottom-=50px', 
+            start: 'top 95%', // Wait until card is actually visible in the viewport
             toggleActions: 'play reverse play reverse' 
           }
         });
