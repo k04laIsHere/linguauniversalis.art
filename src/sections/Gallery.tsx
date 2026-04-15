@@ -29,8 +29,6 @@ function setGalleryHash(params: { workId?: string | null; artist?: string | null
   if (window.location.hash !== newHash) {
     // Use replaceState to update hash without triggering scroll or mode switch logic redundantly
     window.history.replaceState(null, '', newHash);
-    // Dispatch event manually since replaceState doesn't trigger hashchange
-    // window.dispatchEvent(new HashChangeEvent('hashchange'));
   }
 }
 
@@ -138,6 +136,7 @@ export function Gallery() {
   const handleArtistClick = (a: string, e: React.MouseEvent) => {
     e.preventDefault();
     if (artist === a) return;
+    setArtist(a); // Update state immediately
     setGalleryHash({ artist: a });
   };
 
