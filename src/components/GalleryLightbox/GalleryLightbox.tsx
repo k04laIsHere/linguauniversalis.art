@@ -89,37 +89,30 @@ export function GalleryLightbox({
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" onMouseDown={onClose}>
       <div className={styles.dialog} onMouseDown={(e) => e.stopPropagation()}>
-        <div className={styles.topbar}>
-          <div className={styles.meta}>
-            <div className={styles.artist}>{displayWork.artist}</div>
-            <div className={styles.title}>{displayTitle}</div>
-          </div>
-          <div className={styles.controls}>
-            <button className={styles.btn} type="button" onClick={onPrev}>
-              {t.gallery.lightboxPrev}
-            </button>
-            <button className={styles.btn} type="button" onClick={onNext}>
-              {t.gallery.lightboxNext}
-            </button>
-            <button className={styles.btn} type="button" onClick={onClose}>
-              {t.gallery.lightboxClose}
-            </button>
+        <button className={styles.closeBtn} type="button" onClick={onClose} aria-label="Close">
+          ✕
+        </button>
+
+        <div className={styles.stage} ref={containerRef}>
+          <div className={styles.imgWrapper}>
+            <img 
+              ref={imgRef}
+              key={displayWork.id}
+              className={styles.img} 
+              src={displayWork.src} 
+              alt={`${displayWork.artist} — ${displayTitle}`} 
+            />
           </div>
         </div>
-        <div className={styles.stage} ref={containerRef}>
-          <button className={`${styles.navBtn} ${styles.prev}`} type="button" onClick={onPrev}>
-            ‹
-          </button>
-          <img 
-            ref={imgRef}
-            key={displayWork.id}
-            className={styles.img} 
-            src={displayWork.src} 
-            alt={`${displayWork.artist} — ${displayTitle}`} 
-          />
-          <button className={`${styles.navBtn} ${styles.next}`} type="button" onClick={onNext}>
-            ›
-          </button>
+
+        <div className={styles.info}>
+          <div className={styles.artist}>{displayWork.artist}</div>
+          <div className={styles.title}>{displayTitle}</div>
+          <div className={styles.details}>
+            {displayWork.year && <span>{displayWork.year}</span>}
+            {displayWork.medium && <span>{displayWork.medium}</span>}
+            {displayWork.size && <span>{displayWork.size}</span>}
+          </div>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { galleryWorks } from '../content/galleryManifest';
+import { teamMembers } from '../content/teamData';
 import { GalleryLightbox } from '../components/GalleryLightbox/GalleryLightbox';
 import { useI18n } from '../i18n/useI18n';
 import styles from './Gallery.module.css';
@@ -64,6 +65,17 @@ export function Gallery() {
     return Array.from(set).sort((a, b) => a.localeCompare(b));
   }, []);
 
+  const groupedWorks = useMemo(() => {
+    return artists.map(a => ({
+      artist: a,
+      works: galleryWorks.filter(w => w.artist === a).sort((w1, w2) => {
+        const t1 = lang === 'ru' ? w1.titleRu : w1.titleEn;
+        const t2 = lang === 'ru' ? w2.titleRu : w2.titleEn;
+        return t1.localeCompare(t2);
+      })
+    }));
+  }, [artists, lang]);
+
   const filtered = useMemo(() => {
     let arr = galleryWorks.slice();
     if (artist !== '__all__') arr = arr.filter((w) => w.artist === artist);
@@ -93,7 +105,9 @@ export function Gallery() {
     open(filtered[i].id);
   };
 
-  const handleArtistClick = (a: string) => {
+  const handleArtistClick = (a: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    if (artist === a) return;
     setGalleryHash({ artist: a });
   };
 
@@ -108,7 +122,7 @@ export function Gallery() {
               <button
                 type="button"
                 className={`${styles.tag} ${styles.allArtistsTag} ${artist === '__all__' ? styles.tagActive : ''}`}
-                onClick={() => handleArtistClick('__all__')}
+                onClick={(e) => handleArtistClick('__all__', e)}
               >
                 {t.gallery.artistFilterAll}
               </button>
@@ -119,7 +133,7 @@ export function Gallery() {
                     key={a}
                     type="button"
                     className={`${styles.tag} ${artist === a ? styles.tagActive : ''}`}
-                    onClick={() => handleArtistClick(a)}
+                    onClick={(e) => handleArtistClick(a, e)}
                   >
                     {a}
                   </button>
@@ -129,22 +143,63 @@ export function Gallery() {
           </div>
         </div>
 
-        <div className={styles.grid}>
-          {filtered.map((w) => (
-            <button
-              key={w.id}
-              type="button"
-              className={styles.card}
-              onClick={() => open(w.id)}
-              aria-label={`${w.artist} — ${lang === 'ru' ? w.titleRu : w.titleEn}`}
-            >
-              <img className={styles.thumb} src={w.src} alt="" loading="lazy" decoding="async" />
-              <div className={styles.meta}>
-                <div className={styles.artist}>{w.artist}</div>
-                <div className={styles.workTitle}>{lang === 'ru' ? w.titleRu : w.titleEn}</div>
-              </div>
-            </button>
-          ))}
+        <div className={styles.contentArea}>
+          {artist === '__all__' ? (
+            groupedWorks.map((group) => {
+              const member = teamMembers.find(m => m.name === group.artist);
+              return (
+                <div key={group.artist} className={styles.artistSection}>
+                  <div className={styles.divider}>
+                    <div className={styles.dividerLine} />
+                    <div className={styles.artistHeader}>
+                      {member && (
+                        <div className={styles.artistAvatar}>
+                          <img src={member.photoSrc} alt={member.name} />
+                        </div>
+                      )}
+                      <span className={styles.artistName}>{group.artist}</span>
+                    </div>
+                    <div className={styles.dividerLine} />
+                  </div>
+                  <div className={styles.grid}>
+                    {group.works.map((w) => (
+                      <button
+                        key={w.id}
+                        type="button"
+                        className={styles.card}
+                        onClick={() => open(w.id)}
+                        aria-label={`${w.artist} — ${lang === 'ru' ? w.titleRu : w.titleEn}`}
+                      >
+                        <img className={styles.thumb} src={w.src} alt="" loading="lazy" decoding="async" />
+                        <div className={styles.meta}>
+                          <div className={styles.artist}>{w.artist}</div>
+                          <div className={styles.workTitle}>{lang === 'ru' ? w.titleRu : w.titleEn}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            <div className={styles.grid}>
+              {filtered.map((w) => (
+                <button
+                  key={w.id}
+                  type="button"
+                  className={styles.card}
+                  onClick={() => open(w.id)}
+                  aria-label={`${w.artist} — ${lang === 'ru' ? w.titleRu : w.titleEn}`}
+                >
+                  <img className={styles.thumb} src={w.src} alt="" loading="lazy" decoding="async" />
+                  <div className={styles.meta}>
+                    <div className={styles.artist}>{w.artist}</div>
+                    <div className={styles.workTitle}>{lang === 'ru' ? w.titleRu : w.titleEn}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
