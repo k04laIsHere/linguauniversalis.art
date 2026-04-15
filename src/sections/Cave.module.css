@@ -287,7 +287,7 @@
   margin-top: 15vh;
   min-height: 200vh;
   padding: 0 5vw;
-  overflow: hidden;
+  /* overflow: hidden removed to prevent artifact clipping */
 }
 
 .natureBottom {
@@ -321,8 +321,7 @@
   box-shadow: none;
   background: transparent;
   transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
-  background: transparent;
-  pointer-events: none; /* Let clicks pass to the parent artifact div */
+  pointer-events: none;
 }
 
 .artifactImg {
@@ -335,18 +334,23 @@
   transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1), filter 1.2s ease, opacity 0.8s ease;
   filter: drop-shadow(0 20px 40px rgba(0,0,0,0.6));
   opacity: 0;
+  will-change: transform, filter;
 }
 
-.artifactImg[src] {
-  opacity: 1;
+.artifact:nth-child(odd) .artifactImgWrapper {
+  transform-origin: right center;
+}
+
+.artifact:nth-child(even) .artifactImgWrapper {
+  transform-origin: left center;
 }
 
 @media (min-width: 961px) {
   .artifact:hover {
-    z-index: 20;
+    z-index: 200;
   }
   .artifact:hover .artifactImgWrapper {
-    transform: scale(1.5) translateY(-60px);
+    transform: scale(1.6);
   }
 }
 
