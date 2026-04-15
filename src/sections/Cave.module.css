@@ -406,12 +406,10 @@
   .artifactActive {
     z-index: 1000 !important;
     pointer-events: auto;
-    /* Center horizontally relative to the screen */
-    /* Since .artifact is absolutely positioned inside .artifactField which has 5vw padding */
-    /* We calculate the transform to reach the horizontal center of the viewport */
-    /* mobile-left is a percentage of the container width */
-    --offset: calc(50vw - (var(--mobile-left) * 0.9 + 5vw) - (75vw / 2));
-    transform: translateX(var(--offset)) scale(1.15);
+  }
+
+  .artifactActive .artifactImgWrapper {
+    transform: scale(1.4);
   }
 
   .artifactActive .artifactImg {
