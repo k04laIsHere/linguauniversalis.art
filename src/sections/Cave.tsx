@@ -242,7 +242,7 @@ export function Cave() {
   const artifactsData = [
     { top: 0, left: 55, mobileLeft: 20, id: 1 },
     { top: 25, left: 10, mobileLeft: 5, id: 2 },
-    { top: 50, left: 50, mobileLeft: 15, id: 3 },
+    { top: 50, left: 50, mobileLeft: 20, id: 3 },
     { top: 75, left: 15, mobileLeft: 5, id: 4 },
   ];
 
