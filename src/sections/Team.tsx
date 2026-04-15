@@ -54,9 +54,21 @@ export function Team() {
           y: 0,
         }); 
         
-        // Use a separate set for transformOrigin to ensure it's applied correctly
-        gsap.set(card, { transformOrigin: '50% 100%' }); 
+        // Wrap children in an inner container for the animation
+        // This isolates the 3D children from the card's transform-origin
+        const children = Array.from(card.children);
+        const inner = document.createElement('div');
+        inner.style.width = '100%';
+        inner.style.height = '100%';
+        inner.style.display = 'flex';
+        inner.style.flexDirection = 'column';
+        inner.style.alignItems = 'center';
+        inner.style.transformStyle = 'preserve-3d';
+        inner.style.transformOrigin = 'center bottom';
         
+        children.forEach(child => inner.appendChild(child));
+        card.appendChild(inner);
+
         gsap.set(textBack, { opacity: 0, z: -150 });
         gsap.set(textFront, { opacity: 0, z: 150, y: 0 }); 
         
@@ -74,16 +86,16 @@ export function Team() {
         });
 
         tl
-          .to(card, { 
-            opacity: 1, 
-            scale: 1, 
-            z: 0,
-            y: 0,
-            duration: 1.2,
-            ease: 'power4.out',
-            force3D: true,
-            clearProps: 'transformOrigin' // Clean up after animation
-          }, 0)
+          .fromTo(inner, 
+            { opacity: 0, scale: 0.1, z: -1000 },
+            { 
+              opacity: 1, 
+              scale: 1, 
+              z: 0,
+              duration: 1.2,
+              ease: 'power4.out',
+              force3D: true,
+            }, 0)
           .to(textBack, { 
             opacity: 0.2, 
             z: -50, 
@@ -119,9 +131,8 @@ export function Team() {
           const tiltX = Math.max(-10, Math.min(10, -dy / 20));
           const tiltY = Math.max(-10, Math.min(10, dx / 20));
 
-          gsap.to(card, {
+          gsap.to(inner, {
             scale: 1.02,
-            y: 0,
             duration: 0.4,
             ease: 'power2.out',
             overwrite: 'auto'
@@ -164,9 +175,8 @@ export function Team() {
 
         card.addEventListener('mouseleave', () => {
           cardRect = null;
-          gsap.to(card, {
+          gsap.to(inner, {
             scale: 1,
-            y: 0,
             duration: 0.6,
             ease: 'power2.out',
             overwrite: 'auto'
