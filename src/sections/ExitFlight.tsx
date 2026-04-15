@@ -72,12 +72,12 @@ export function ExitFlight() {
           drawHeight = canvas.height;
           drawWidth = canvas.height * imgAspect;
           offsetX = (canvas.width - drawWidth) / 2;
-          offsetY = 0;
+          offsetY = -(drawHeight * 0.05); // Move higher in wide aspect
         } else {
           drawWidth = canvas.width;
           drawHeight = canvas.width / imgAspect;
           offsetX = 0;
-          offsetY = (canvas.height - drawHeight) / 2 - (drawHeight * 0.02); // Slightly higher for better alignment
+          offsetY = (canvas.height - drawHeight) / 2 - (drawHeight * 0.05); // Move higher in tall aspect
         }
 
         // We use Math.floor to prevent sub-pixel rounding differences 
