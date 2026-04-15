@@ -194,15 +194,16 @@
 }
 
 @media (max-width: 820px) {
+  .root {
+    padding: 0 0 100px 0;
+    margin-top: -120px; /* Stronger pull-up on mobile to fight whitespace */
+  }
+
   .grid {
     grid-template-columns: 1fr;
     gap: 80px; /* Unified small gap for all authors on mobile */
   }
   
-  .root {
-    padding: 100px 0;
-  }
-
   .header {
     flex-direction: column;
     gap: 20px;

@@ -66,9 +66,12 @@ export function BackdropController() {
                // Kill the curtain: Hide the scrollable cave content instantly
                if (caveEl) gsap.to(caveEl, { opacity: 0, duration: 0 });
             },
-            onLeave: () => gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' }),
+            onLeave: () => {
+               gsap.to(sky, { opacity: 1, duration: 0, overwrite: 'auto' });
+               gsap.to(nature, { opacity: 0, duration: 0, overwrite: 'auto' });
+            },
             onEnterBack: () => {
-               gsap.to(sky, { opacity: 1, duration: 0.1, overwrite: 'auto' });
+               gsap.to(sky, { opacity: 1, duration: 0, overwrite: 'auto' });
                if (caveEl) gsap.to(caveEl, { opacity: 0, duration: 0 });
             },
             onLeaveBack: () => {
@@ -79,8 +82,8 @@ export function BackdropController() {
             refreshPriority: -1,
           }
         })
-        .to(nature, { opacity: 0, ease: 'none' }, 0.6)
-        .to(sky, { opacity: 1, ease: 'none' }, 0.65);
+        .to(nature, { opacity: 0, ease: 'none' }, 0.4) // Nature starts fading out earlier
+        .to(sky, { opacity: 1, ease: 'none' }, 0.6); // Sky starts fading in as Nature finishes
       }
 
       // 3. Sky Zone: From ExitFlight to NatureUrban
