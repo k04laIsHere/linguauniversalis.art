@@ -59,7 +59,7 @@ export function Team() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: card,
-            start: 'top 95%', // Reveal when card bottom is near viewport bottom
+            start: 'top bottom-=100px', // Uniform start point for all cards
             toggleActions: 'play reverse play reverse' 
           }
         });
@@ -213,16 +213,6 @@ export function Team() {
     };
   }, []);
 
-  const handleArtistClick = (name: string) => {
-    // 1. Update hash first so Gallery filters its content
-    window.location.hash = `#gallery?artist=${encodeURIComponent(name)}`;
-    
-    // 2. Wait a tiny bit for React to update Gallery height, then scroll
-    setTimeout(() => {
-      scrollToId('gallery');
-    }, 50);
-  };
-
   return (
     <section id="team" ref={rootRef} className={styles.root} aria-label="Team">
       <div className={styles.container}>
@@ -235,7 +225,7 @@ export function Team() {
 
         <div ref={containerRef} className={styles.grid}>
           {teamMembers.map((m) => (
-            <div key={m.id} className={styles.card} onClick={() => handleArtistClick(m.name)} role="button" tabIndex={0} onKeyDown={(e) => e.key === 'Enter' && handleArtistClick(m.name)}>
+            <div key={m.id} className={styles.card}>
               <div className={styles.textBack} aria-hidden="true">
                 {m.name.split(' ').map((word, i) => (
                   <span key={i}>{word}<br /></span>
