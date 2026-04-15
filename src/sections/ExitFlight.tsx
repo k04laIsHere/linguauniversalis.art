@@ -77,7 +77,7 @@ export function ExitFlight() {
           drawWidth = canvas.width;
           drawHeight = canvas.width / imgAspect;
           offsetX = 0;
-          offsetY = (canvas.height - drawHeight) / 2;
+          offsetY = (canvas.height - drawHeight) / 2 - (drawHeight * 0.02); // Slightly higher for better alignment
         }
 
         // We use Math.floor to prevent sub-pixel rounding differences 
