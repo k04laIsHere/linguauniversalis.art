@@ -30,7 +30,7 @@ function setGalleryHash(params: { workId?: string | null; artist?: string | null
     // Use replaceState to update hash without triggering scroll or mode switch logic redundantly
     window.history.replaceState(null, '', newHash);
     // Dispatch event manually since replaceState doesn't trigger hashchange
-    window.dispatchEvent(new HashChangeEvent('hashchange'));
+    // window.dispatchEvent(new HashChangeEvent('hashchange'));
   }
 }
 
@@ -116,8 +116,14 @@ export function Gallery() {
   const currentIndex = useMemo(() => filtered.findIndex((w) => w.id === openId), [filtered, openId]);
   const current = currentIndex >= 0 ? filtered[currentIndex] : null;
 
-  const open = (id: string) => setGalleryHash({ workId: id });
-  const close = () => setGalleryHash({ workId: null });
+  const open = (id: string) => {
+    setOpenId(id);
+    setGalleryHash({ workId: id });
+  };
+  const close = () => {
+    setOpenId(null);
+    setGalleryHash({ workId: null });
+  };
   const prev = () => {
     if (filtered.length === 0) return;
     const i = currentIndex <= 0 ? filtered.length - 1 : currentIndex - 1;
