@@ -77,11 +77,14 @@ export function GalleryLightbox({
     if (!isOpen) return;
     const prev = document.body.style.overflow;
     const prevHeight = document.body.style.height;
+    const prevTouchAction = document.body.style.touchAction;
     document.body.style.overflow = 'hidden';
     document.body.style.height = '100vh';
+    document.body.style.touchAction = 'none'; // Lock touch scrolling
     return () => {
       document.body.style.overflow = prev;
       document.body.style.height = prevHeight;
+      document.body.style.touchAction = prevTouchAction;
     };
   }, [isOpen]);
 

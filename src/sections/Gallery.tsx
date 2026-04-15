@@ -21,7 +21,14 @@ function setGalleryHash(params: { workId?: string | null; artist?: string | null
   }
 
   const qs = searchParams.toString();
-  window.location.hash = qs ? `${anchor}?${qs}` : anchor;
+  
+  // CRITICAL: Always preserve the #gallery anchor to prevent ViewModeContext 
+  // from seeing an naked #archive hash and switching modes.
+  const newHash = qs ? `#gallery?${qs}` : '#gallery';
+  
+  if (window.location.hash !== newHash) {
+    window.location.hash = newHash;
+  }
 }
 
 function getGalleryParamsFromHash() {
