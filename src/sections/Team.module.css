@@ -65,6 +65,7 @@
   perspective: 2000px;
   overflow: visible;
   align-items: start;
+  transform-style: flat; /* Ensure grid itself doesn't have a transform origin that interferes */
 }
 
 .card {
@@ -80,7 +81,7 @@
   width: 100%;
   min-height: 500px;
   will-change: transform, opacity;
-  transform-origin: center bottom; /* Anchor animations to bottom */
+  transform-origin: 50% 100% !important; /* Force bottom anchor */
 }
 
 /* Stagger moved to CSS for layout stability */

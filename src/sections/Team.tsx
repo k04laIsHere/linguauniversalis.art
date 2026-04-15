@@ -52,8 +52,11 @@ export function Team() {
           scale: 0.1, 
           z: -1000, 
           y: 0,
-          transformOrigin: 'center bottom' // Explicitly set transform origin in GSAP
         }); 
+        
+        // Use a separate set for transformOrigin to ensure it's applied correctly
+        gsap.set(card, { transformOrigin: '50% 100%' }); 
+        
         gsap.set(textBack, { opacity: 0, z: -150 });
         gsap.set(textFront, { opacity: 0, z: 150, y: 0 }); 
         
@@ -65,7 +68,7 @@ export function Team() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: card,
-            start: 'top bottom-=50px', // Trigger slightly earlier for better response
+            start: 'top bottom-=50px', 
             toggleActions: 'play reverse play reverse' 
           }
         });
@@ -78,7 +81,8 @@ export function Team() {
             y: 0,
             duration: 1.2,
             ease: 'power4.out',
-            force3D: true
+            force3D: true,
+            clearProps: 'transformOrigin' // Clean up after animation
           }, 0)
           .to(textBack, { 
             opacity: 0.2, 
