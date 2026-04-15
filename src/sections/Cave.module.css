@@ -368,6 +368,12 @@
   opacity: 1;
 }
 
+/* Hide text when artifact is active (zoomed/expanded) */
+.artifactActive .artifactCap {
+  opacity: 0 !important;
+  pointer-events: none;
+}
+
 .artifact:nth-child(even) .artifactCap {
   text-align: left;
 }
@@ -378,14 +384,16 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--accent);
+  line-height: 1.1;
 }
 
-.artifactSub {
-  margin: 10px 0 0;
-  font-size: 12px;
+.artifactLocation {
+  margin: 8px 0 0;
+  font-size: 14px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
   color: var(--muted);
+  opacity: 0.8;
 }
 
 @media (max-width: 960px) {
@@ -408,10 +416,6 @@
 
   .artifactActive .artifactImg {
     filter: brightness(1.2) contrast(1.1) grayscale(0) drop-shadow(0 40px 80px rgba(0,0,0,0.8));
-  }
-
-  .artifactActive .artifactCap {
-    opacity: 1;
   }
 
   .artifactCap {

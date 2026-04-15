@@ -31,6 +31,12 @@ export const en: I18nDict = {
     flashlightHint2: 'Scroll down—the journey begins.',
     breachLabel: 'Enter\nThe archive',
     breachDesc: 'Direct access to the results.\nView the portfolio and events',
+    artifacts: [
+      { title: 'Carnarvon Gorge', location: 'Australia' },
+      { title: 'Chauvet Cave', location: 'France' },
+      { title: "Bunjil's Shelter", location: 'Australia' },
+      { title: 'Xique-Xique 1', location: 'Brazil' },
+    ],
   },
   ancient: { title: 'Ancient marks' },
   exitFlight: {

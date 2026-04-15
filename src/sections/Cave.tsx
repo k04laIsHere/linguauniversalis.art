@@ -240,10 +240,10 @@ export function Cave() {
   };
 
   const artifactsData = [
-    { top: 0, left: 55, mobileLeft: 20, id: 1, title: 'PALEOLITHIC ECHO', sub: 'ALTAMIRA SERIES • 2024' },
-    { top: 25, left: 10, mobileLeft: 5, id: 2, title: 'THE FIRST SYMBOL', sub: 'VOID FRAGMENT • 2024' },
-    { top: 50, left: 50, mobileLeft: 15, id: 3, title: 'ANCIENT FREQUENCY', sub: 'RESONANCE • 2024' },
-    { top: 75, left: 15, mobileLeft: 5, id: 4, title: 'ETERNAL HANDPRINT', sub: 'ORIGIN • 2024' },
+    { top: 0, left: 55, mobileLeft: 20, id: 1 },
+    { top: 25, left: 10, mobileLeft: 5, id: 2 },
+    { top: 50, left: 50, mobileLeft: 15, id: 3 },
+    { top: 75, left: 15, mobileLeft: 5, id: 4 },
   ];
 
   return (
@@ -324,35 +324,38 @@ export function Cave() {
           className={styles.artifactField}
           aria-label="Ancient cave artifacts"
         >
-          {artifactsData.map((art, i) => (
-            <div
-              key={i}
-              className={`${styles.artifact} ${activeArtifact === i ? styles.artifactActive : ''}`}
-              style={{ 
-                '--top': `${art.top}%`, 
-                '--left': `${art.left}%`,
-                '--mobile-left': `${art.mobileLeft}%`
-              } as React.CSSProperties}
-              onClick={(e) => {
-                e.stopPropagation();
-                setActiveArtifact(activeArtifact === i ? null : i);
-              }}
-            >
-              <div className={styles.artifactImgWrapper}>
-                <img
-                  className={`${styles.artifactImg} featherRect`}
-                  src={`/assets/art/art-${art.id}.jpg`}
-                  alt={art.title}
-                  loading="lazy"
-                  decoding="async"
-                />
+          {artifactsData.map((art, i) => {
+            const artInfo = t.cave.artifacts[i];
+            return (
+              <div
+                key={i}
+                className={`${styles.artifact} ${activeArtifact === i ? styles.artifactActive : ''}`}
+                style={{ 
+                  '--top': `${art.top}%`, 
+                  '--left': `${art.left}%`,
+                  '--mobile-left': `${art.mobileLeft}%`
+                } as React.CSSProperties}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveArtifact(activeArtifact === i ? null : i);
+                }}
+              >
+                <div className={styles.artifactImgWrapper}>
+                  <img
+                    className={`${styles.artifactImg} featherRect`}
+                    src={`/assets/art/art-${art.id}.jpg`}
+                    alt={artInfo.title}
+                    loading="lazy"
+                    decoding="async"
+                  />
+                </div>
+                <div className={styles.artifactCap}>
+                  <h3 className={styles.artifactTitle}>{artInfo.title}</h3>
+                  <p className={styles.artifactLocation}>{artInfo.location}</p>
+                </div>
               </div>
-              <div className={styles.artifactCap}>
-                <h3 className={styles.artifactTitle}>{art.title}</h3>
-                <p className={styles.artifactSub}>{art.sub}</p>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

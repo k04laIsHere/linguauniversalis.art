@@ -31,6 +31,12 @@ export const es: I18nDict = {
     flashlightHint2: 'Desplázate hacia abajo: el viaje comienza.',
     breachLabel: 'Entrar al\narchivo',
     breachDesc: 'Acceso directo a los resultados.\nVer el portafolio y eventos',
+    artifacts: [
+      { title: 'Desfiladero de Carnarvon', location: 'Australia' },
+      { title: 'Cueva de Chauvet', location: 'Francia' },
+      { title: 'Refugio de Bunjil', location: 'Australia' },
+      { title: 'Xique-Xique 1', location: 'Brasil' },
+    ],
   },
   ancient: { title: 'Marcas antiguas' },
   exitFlight: {

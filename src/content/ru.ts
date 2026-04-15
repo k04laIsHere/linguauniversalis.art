@@ -31,6 +31,12 @@ export const ru: I18nDict = {
     flashlightHint2: 'Прокрутите вниз — путь начинается.',
     breachLabel: 'Перейти\nв архив',
     breachDesc: 'Прямой доступ к результатам.\nПросмотр портфолио и событий',
+    artifacts: [
+      { title: 'Ущелье Карнарвон', location: 'Австралия' },
+      { title: 'Пещера Шове', location: 'Франция' },
+      { title: 'Убежище Банджила', location: 'Австралия' },
+      { title: 'Шике-Шике 1', location: 'Бразилия' },
+    ],
   },
   ancient: { title: 'Древние образы' },
   exitFlight: {
