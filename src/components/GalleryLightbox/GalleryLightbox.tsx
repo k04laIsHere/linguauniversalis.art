@@ -76,16 +76,30 @@ export function GalleryLightbox({
 
   useEffect(() => {
     if (!isOpen) return;
-    const prev = document.body.style.overflow;
-    const prevHeight = document.body.style.height;
-    const prevTouchAction = document.body.style.touchAction;
+    const prevOverflow = document.body.style.overflow;
+    const prevPosition = document.body.style.position;
+    const prevWidth = document.body.style.width;
+    const prevTop = document.body.style.top;
+    
+    // Save current scroll position
+    const scrollY = window.scrollY;
+
+    // Fix body to prevent background scrolling
     document.body.style.overflow = 'hidden';
-    document.body.style.height = '100vh';
-    document.body.style.touchAction = 'none'; // Lock touch scrolling
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.touchAction = 'none';
+
     return () => {
-      document.body.style.overflow = prev;
-      document.body.style.height = prevHeight;
-      document.body.style.touchAction = prevTouchAction;
+      // Restore body and scroll to saved position
+      document.body.style.overflow = prevOverflow;
+      document.body.style.position = prevPosition;
+      document.body.style.width = prevWidth;
+      document.body.style.top = prevTop;
+      document.body.style.touchAction = '';
+      
+      window.scrollTo(0, scrollY);
     };
   }, [isOpen]);
 

@@ -23,7 +23,7 @@ export const es: I18nDict = {
       'El arte es la primera palabra de la humanidad:\nun lenguaje silencioso y eterno que precede a toda\nfrontera y lengua hablada.',
       'La creación no es la búsqueda de lo "nuevo", sino\nun ritual para recuperar lo "real", reconectando\nel alma con el cosmos.',
       'Más allá de la fragmentación moderna, el Arte\nde la Creación actúa como un puente, entrelazando\nlos hilos de nuestra conciencia colectiva.',
-      'La estética del proyecto constituye un puente\nentre lo prehistórico y lo metamoderno: antiguo\ny futurista a la vez.',
+      'La estética del proyecto constituye un puente\nentre lo prehistórico y lo metamoderno: pasado\ny futuro a la vez.',
       'Hace milenios, comenzamos una conversación\nen los muros. Un diálogo que nunca se ha detenido.',
     ],
     flashlightTitle: 'Linterna',
