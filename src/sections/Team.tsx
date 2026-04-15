@@ -47,7 +47,13 @@ export function Team() {
         gsap.set(card, { zIndex: index + 1 });
 
         // Initial state for the fly-in
-        gsap.set(card, { opacity: 0, scale: 0.1, z: -1000, y: 0 }); 
+        gsap.set(card, { 
+          opacity: 0, 
+          scale: 0.1, 
+          z: -1000, 
+          y: 0,
+          transformOrigin: 'center bottom' // Explicitly set transform origin in GSAP
+        }); 
         gsap.set(textBack, { opacity: 0, z: -150 });
         gsap.set(textFront, { opacity: 0, z: 150, y: 0 }); 
         
@@ -59,7 +65,7 @@ export function Team() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: card,
-            start: 'top bottom-=100px', // Uniform start point for all cards
+            start: 'top bottom-=50px', // Trigger slightly earlier for better response
             toggleActions: 'play reverse play reverse' 
           }
         });
@@ -88,23 +94,6 @@ export function Team() {
             ease: 'power2.out',
             force3D: true
           }, 0.2);
-
-        // Fly-out animation for ALL authors to ensure consistency
-        gsap.timeline({
-          scrollTrigger: {
-            trigger: card,
-            start: 'bottom 15%',
-            end: 'bottom -30%',
-            scrub: 1.5
-          }
-        })
-        .to(card, {
-          opacity: 0,
-          scale: 1.5,
-          z: 1000,
-          y: -200,
-          ease: 'none'
-        });
 
         // Mouse hover interaction
         let cardRect: DOMRect | null = null;
