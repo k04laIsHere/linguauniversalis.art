@@ -126,6 +126,9 @@ export function ExitFlight() {
 
       // Visibility control (Sandwich Pattern logic)
       tl.fromTo(canvas, { opacity: 0 }, { opacity: 1, duration: 0.05 }, 0.01);
+      
+      // Ensure canvas stays opaque until the very last frame to prevent backdrop bleed
+      tl.to(canvas, { opacity: 1, duration: 0.84 }, 0.1); 
       tl.to(canvas, { opacity: 0, duration: 0.05 }, 0.95);
 
       tl.to(noise, { opacity: 0.3, duration: 0.3 }, 0.1)

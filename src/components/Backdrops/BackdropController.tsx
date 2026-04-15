@@ -82,8 +82,9 @@ export function BackdropController() {
             refreshPriority: -1,
           }
         })
-        .to(nature, { opacity: 0, ease: 'none' }, 0.4) // Nature starts fading out earlier
-        .to(sky, { opacity: 1, ease: 'none' }, 0.6); // Sky starts fading in as Nature finishes
+        .to(nature, { opacity: 1, duration: 0 }, 0) // Force nature to stay at 1
+        .to(nature, { opacity: 0, ease: 'none' }, 0.8) // Start fading MUCH later
+        .to(sky, { opacity: 1, ease: 'none' }, 0.85); // Fade sky in exactly as nature finishes
       }
 
       // 3. Sky Zone: From ExitFlight to NatureUrban
