@@ -1,3 +1,4 @@
+import { Lang } from '../../i18n/types';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../../i18n/useI18n';
 import { useViewMode } from '../../contexts/ViewModeContext';
@@ -102,13 +103,13 @@ export function GalleryMode() {
   };
 
   // Translation map for mediums
-  const mediumTranslations: Record<string, { en: string; ru: string }> = {
-    'Digital Art': { en: 'Digital Art', ru: 'Цифровое искусство' },
-    'Oil': { en: 'Oil', ru: 'Масло' },
-    'Sculpture': { en: 'Sculpture', ru: 'Скульптура' },
-    'Acrylic': { en: 'Acrylic', ru: 'Акрил' },
-    'Mixed Media': { en: 'Mixed Media', ru: 'Смешанная техника' },
-    'Other': { en: 'Other', ru: 'Прочее' }
+  const mediumTranslations: Record<string, Record<string, string>> = {
+    'Digital Art': { en: 'Digital Art', ru: 'Цифровое искусство', es: 'Arte Digital' },
+    'Oil': { en: 'Oil', ru: 'Масло', es: 'Óleo' },
+    'Sculpture': { en: 'Sculpture', ru: 'Скульптура', es: 'Escultura' },
+    'Acrylic': { en: 'Acrylic', ru: 'Акрил', es: 'Acrílico' },
+    'Mixed Media': { en: 'Mixed Media', ru: 'Смешанная техника', es: 'Técnica Mixta' },
+    'Other': { en: 'Other', ru: 'Прочее', es: 'Otro' }
   };
 
   const getTranslatedMedium = (medium: string) => {

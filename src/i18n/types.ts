@@ -35,6 +35,7 @@ export type I18nDict = {
   };
   team: {
     title: string;
+    subtitle: string;
     hint: string;
     pause: string;
   };

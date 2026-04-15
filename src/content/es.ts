@@ -37,7 +37,7 @@ export const es: I18nDict = {
     title: 'Salida',
     hint: 'Desplázate para pasar por la abertura.',
   },
-  team: { title: 'Creadores (constelación)', hint: 'Pasa el cursor para pausar y leer.', pause: 'Pausa' },
+  team: { title: 'Creadores', subtitle: 'Equipo del Proyecto', hint: 'Pasa el cursor para pausar y leer.', pause: 'Pausa' },
   events: { title: 'Eventos', hint: 'Pasa el cursor para pausar. Desplázate para continuar.', pause: 'Pausa', explore: 'Explorar', scrollDiscover: 'Desplázate para descubrir' },
   gallery: {
     title: 'Galería de Obras',

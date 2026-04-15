@@ -47,7 +47,7 @@ export function Team() {
         gsap.set(card, { zIndex: index + 1 });
 
         // Initial state for the fly-in
-        gsap.set(card, { opacity: 0, scale: 0.1, z: -1000, y: 0 }); // Removed y: 150 to keep it centered
+        gsap.set(card, { opacity: 0, scale: 0.1, z: -1000, y: 0 }); 
         gsap.set(textBack, { opacity: 0, z: -150 });
         gsap.set(textFront, { opacity: 0, z: 150, y: 0 }); 
         
@@ -59,8 +59,8 @@ export function Team() {
         const tl = gsap.timeline({
           scrollTrigger: {
             trigger: card,
-            start: index < 2 ? 'top bottom' : 'top 90%', // First row reveals immediately, others slightly later
-            toggleActions: 'play reverse play reverse' // Plays backwards when scrolling up
+            start: 'top 95%', // Reveal when card bottom is near viewport bottom
+            toggleActions: 'play reverse play reverse' 
           }
         });
 
@@ -89,28 +89,22 @@ export function Team() {
             force3D: true
           }, 0.2);
 
-        // Fly-out animation for last row stays separate as it triggers at the bottom
-        const isLastRow = teamMembers.length % 2 === 0 
-          ? index >= teamMembers.length - 2 
-          : index >= teamMembers.length - 1;
-
-        if (isLastRow) {
-          gsap.timeline({
-            scrollTrigger: {
-              trigger: card,
-              start: 'bottom 15%',
-              end: 'bottom -30%',
-              scrub: 1.5
-            }
-          })
-          .to(card, {
-            opacity: 0,
-            scale: 1.5,
-            z: 1000,
-            y: -200,
-            ease: 'none'
-          });
-        }
+        // Fly-out animation for ALL authors to ensure consistency
+        gsap.timeline({
+          scrollTrigger: {
+            trigger: card,
+            start: 'bottom 15%',
+            end: 'bottom -30%',
+            scrub: 1.5
+          }
+        })
+        .to(card, {
+          opacity: 0,
+          scale: 1.5,
+          z: 1000,
+          y: -200,
+          ease: 'none'
+        });
 
         // Mouse hover interaction
         let cardRect: DOMRect | null = null;
@@ -235,9 +229,8 @@ export function Team() {
         <header className={styles.header}>
           <div className={styles.headerContent}>
             <h2 className={styles.title}>{t.team.title}</h2>
-            <p className={styles.subtitle}>Команда проекта / Project Team</p>
+            <p className={styles.subtitle}>{t.team.subtitle}</p>
           </div>
-          <div className={styles.chip}>Click member to view works</div>
         </header>
 
         <div ref={containerRef} className={styles.grid}>

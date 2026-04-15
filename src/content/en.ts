@@ -37,7 +37,7 @@ export const en: I18nDict = {
     title: 'Exit',
     hint: 'Scroll to pass through the opening.',
   },
-  team: { title: 'Creators (constellation)', hint: 'Hover/focus to pause and read.', pause: 'Pause' },
+  team: { title: 'Creators', subtitle: 'Project Team', hint: 'Hover/focus to pause and read.', pause: 'Pause' },
   events: { title: 'Events', hint: 'Hover/focus to pause. Scroll to continue.', pause: 'Pause', explore: 'Explore', scrollDiscover: 'Scroll to Discover' },
   gallery: {
     title: 'Works Gallery',
