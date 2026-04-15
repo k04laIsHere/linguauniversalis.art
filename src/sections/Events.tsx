@@ -218,6 +218,25 @@ export function Events() {
                 </div>
                 <div className={styles.modalText}>
                   <p>{lang === 'ru' ? selectedEvent.fullStoryRu : selectedEvent.fullStoryEn}</p>
+                  
+                  {selectedEvent.links && selectedEvent.links.length > 0 && (
+                    <div className={styles.linksSection}>
+                      <h4 className={styles.linksTitle}>{lang === 'ru' ? 'Источники' : 'Sources'}</h4>
+                      <nav className={styles.blueLinksList}>
+                        {selectedEvent.links.map((link, i) => (
+                          <a 
+                            key={i} 
+                            href={link.url} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className={styles.blueLink}
+                          >
+                            {lang === 'ru' ? link.titleRu : link.titleEn}
+                          </a>
+                        ))}
+                      </nav>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

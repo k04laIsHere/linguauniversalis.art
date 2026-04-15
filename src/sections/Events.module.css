@@ -188,12 +188,14 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background: rgba(5, 7, 9, 0.95);
+  height: 100vh;
+  height: 100dvh;
+  background: rgba(5, 7, 9, 0.9);
   z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0; /* Full bleed on small screens */
+  padding: 0;
   backdrop-filter: blur(20px);
   animation: fadeIn 0.4s ease;
 }
@@ -209,6 +211,7 @@
   max-width: 1200px;
   height: 100%;
   max-height: 100vh;
+  max-height: 100dvh;
   background: #0a0c0f;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -234,7 +237,7 @@
 }
 
 .closeBtn {
-  position: fixed;
+  position: absolute;
   top: 1.5rem;
   right: 1.5rem;
   background: #d9c08d;
@@ -330,7 +333,73 @@
   letter-spacing: 0.01em;
 }
 
+/* Links Section in Modal */
+.linksSection {
+  margin-top: 4rem;
+  padding-top: 2rem;
+  border-top: 1px solid rgba(217, 192, 141, 0.2);
+}
+
+.linksTitle {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #d9c08d;
+  opacity: 0.6;
+  margin-bottom: 1.5rem;
+}
+
+.blueLinksList {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.blueLink {
+  font-size: 0.95rem;
+  color: #60a5fa;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  width: fit-content;
+  position: relative;
+  line-height: 1.4;
+  font-weight: 400;
+}
+
+.blueLink::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: currentColor;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.blueLink:hover {
+  color: #93c5fd;
+}
+
+.blueLink:hover::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
 @media (max-width: 768px) {
+  .overlay {
+    padding-top: 80px; /* Offset for mobile header */
+    background: rgba(5, 7, 9, 1); /* Opaque for immersion on small screens */
+    align-items: flex-start;
+  }
+
+  .detailsModal {
+    border-top: 1px solid rgba(217, 192, 141, 0.3);
+    height: calc(100dvh - 80px);
+  }
+
   .sectionHeader {
     top: 8vh;
     left: 50%;
@@ -365,6 +434,11 @@
     width: 44px;
     height: 44px;
     font-size: 1.5rem;
+    position: absolute; /* Relative to detailsModal now */
+  }
+
+  .modalContent {
+    padding: 4rem 1.5rem 3rem;
   }
 }
 
