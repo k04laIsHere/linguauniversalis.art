@@ -88,11 +88,10 @@ export function GalleryLightbox({
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" onMouseDown={onClose}>
+      <button className={styles.closeBtn} type="button" onClick={onClose} aria-label="Close">
+        ✕
+      </button>
       <div className={styles.dialog} onMouseDown={(e) => e.stopPropagation()}>
-        <button className={styles.closeBtn} type="button" onClick={onClose} aria-label="Close">
-          ✕
-        </button>
-
         <div className={styles.stage} ref={containerRef}>
           <div className={styles.imgWrapper}>
             <img 

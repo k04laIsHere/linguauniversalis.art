@@ -61,8 +61,17 @@ export function Gallery() {
   }, []);
 
   const artists = useMemo(() => {
-    const set = new Set(galleryWorks.map((w) => w.artist));
-    return Array.from(set).sort((a, b) => a.localeCompare(b));
+    const teamOrder = teamMembers.map(m => m.name);
+    const existingArtists = Array.from(new Set(galleryWorks.map((w) => w.artist)));
+    
+    return existingArtists.sort((a, b) => {
+      const indexA = teamOrder.indexOf(a);
+      const indexB = teamOrder.indexOf(b);
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      return a.localeCompare(b);
+    });
   }, []);
 
   const groupedWorks = useMemo(() => {
@@ -75,6 +84,11 @@ export function Gallery() {
       })
     }));
   }, [artists, lang]);
+
+  const displayGroups = useMemo(() => {
+    if (artist === '__all__') return groupedWorks;
+    return groupedWorks.filter(g => g.artist === artist);
+  }, [groupedWorks, artist]);
 
   const filtered = useMemo(() => {
     let arr = galleryWorks.slice();
@@ -144,62 +158,42 @@ export function Gallery() {
         </div>
 
         <div className={styles.contentArea}>
-          {artist === '__all__' ? (
-            groupedWorks.map((group) => {
-              const member = teamMembers.find(m => m.name === group.artist);
-              return (
-                <div key={group.artist} className={styles.artistSection}>
-                  <div className={styles.divider}>
-                    <div className={styles.dividerLine} />
-                    <div className={styles.artistHeader}>
-                      {member && (
-                        <div className={styles.artistAvatar}>
-                          <img src={member.photoSrc} alt={member.name} />
-                        </div>
-                      )}
-                      <span className={styles.artistName}>{group.artist}</span>
-                    </div>
-                    <div className={styles.dividerLine} />
+          {displayGroups.map((group) => {
+            const member = teamMembers.find(m => m.name === group.artist);
+            return (
+              <div key={group.artist} className={styles.artistSection}>
+                <div className={styles.divider}>
+                  <div className={styles.dividerLine} />
+                  <div className={styles.artistHeader}>
+                    {member && (
+                      <div className={styles.artistAvatar}>
+                        <img src={member.photoSrc} alt={member.name} />
+                      </div>
+                    )}
+                    <span className={styles.artistName}>{group.artist}</span>
                   </div>
-                  <div className={styles.grid}>
-                    {group.works.map((w) => (
-                      <button
-                        key={w.id}
-                        type="button"
-                        className={styles.card}
-                        onClick={() => open(w.id)}
-                        aria-label={`${w.artist} — ${lang === 'ru' ? w.titleRu : w.titleEn}`}
-                      >
-                        <img className={styles.thumb} src={w.src} alt="" loading="lazy" decoding="async" />
-                        <div className={styles.meta}>
-                          <div className={styles.artist}>{w.artist}</div>
-                          <div className={styles.workTitle}>{lang === 'ru' ? w.titleRu : w.titleEn}</div>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
+                  <div className={styles.dividerLine} />
                 </div>
-              );
-            })
-          ) : (
-            <div className={styles.grid}>
-              {filtered.map((w) => (
-                <button
-                  key={w.id}
-                  type="button"
-                  className={styles.card}
-                  onClick={() => open(w.id)}
-                  aria-label={`${w.artist} — ${lang === 'ru' ? w.titleRu : w.titleEn}`}
-                >
-                  <img className={styles.thumb} src={w.src} alt="" loading="lazy" decoding="async" />
-                  <div className={styles.meta}>
-                    <div className={styles.artist}>{w.artist}</div>
-                    <div className={styles.workTitle}>{lang === 'ru' ? w.titleRu : w.titleEn}</div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
+                <div className={styles.grid}>
+                  {group.works.map((w) => (
+                    <button
+                      key={w.id}
+                      type="button"
+                      className={styles.card}
+                      onClick={() => open(w.id)}
+                      aria-label={`${w.artist} — ${lang === 'ru' ? w.titleRu : w.titleEn}`}
+                    >
+                      <img className={styles.thumb} src={w.src} alt="" loading="lazy" decoding="async" />
+                      <div className={styles.meta}>
+                        <div className={styles.artist}>{w.artist}</div>
+                        <div className={styles.workTitle}>{lang === 'ru' ? w.titleRu : w.titleEn}</div>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
         </div>
       </div>
 
