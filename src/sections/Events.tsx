@@ -133,6 +133,32 @@ export function Events() {
 
   const closeDetails = () => setSelectedEvent(null);
 
+  useEffect(() => {
+    if (selectedEvent) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [selectedEvent]);
+
+  const [overlayHeight, setOverlayHeight] = useState<string>('100dvh');
+
+  useEffect(() => {
+    if (!selectedEvent) return;
+
+    const updateHeight = () => {
+      const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+      setOverlayHeight(`${targetHeight}px`);
+    };
+
+    updateHeight();
+    window.addEventListener('resize', updateHeight);
+    return () => window.removeEventListener('resize', updateHeight);
+  }, [selectedEvent]);
+
   return (
     <section id="events" ref={rootRef} className={styles.root} aria-label="Events">
       <div ref={pinRef} className={styles.pin}>
@@ -200,7 +226,11 @@ export function Events() {
 
       {/* Deep Dive Overlay */}
       {selectedEvent && (
-        <div className={styles.overlay} onClick={closeDetails}>
+        <div 
+          className={styles.overlay} 
+          onClick={closeDetails}
+          style={{ height: overlayHeight }}
+        >
           <div className={styles.detailsModal} onClick={(e) => e.stopPropagation()}>
             <button className={styles.closeBtn} onClick={closeDetails} aria-label="Close">×</button>
             <div className={styles.modalContent}>
