@@ -16,8 +16,12 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ViewMode>(() => {
     if (typeof window !== 'undefined') {
       // Prioritize URL hash for deep linking
-      if (window.location.hash === '#gallery' || window.location.hash === '#archive') {
+      const [anchor] = window.location.hash.split('?');
+      if (anchor === '#archive') {
         return 'gallery';
+      }
+      if (anchor === '#gallery' || anchor === '#immersive') {
+        return 'immersive';
       }
       // Fallback to localStorage
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -31,11 +35,12 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
       const hash = window.location.hash;
       const [anchor] = hash.split('?');
       
-      // Strict check: if anchor is exactly #gallery or #archive, it's a mode switch.
-      if ((anchor === '#gallery' || anchor === '#archive')) {
+      // Strict check: if anchor is exactly #archive, it's a mode switch.
+      // #gallery is used for the immersive view's anchor and should NOT trigger gallery/archive mode.
+      if (anchor === '#archive') {
         setModeState('gallery');
         localStorage.setItem(STORAGE_KEY, 'gallery');
-      } else if (anchor === '#immersive') {
+      } else if (anchor === '#immersive' || anchor === '#gallery') {
         setModeState('immersive');
         localStorage.setItem(STORAGE_KEY, 'immersive');
       }
