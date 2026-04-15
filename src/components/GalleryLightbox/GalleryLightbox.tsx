@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import type { GalleryWork } from '../../content/galleryManifest';
+import { teamMembers } from '../../content/teamData';
 import { useI18n } from '../../i18n/useI18n';
 import styles from './GalleryLightbox.module.css';
 
@@ -90,7 +91,11 @@ export function GalleryLightbox({
 
   if (!isOpen || !displayWork) return null;
 
-  const displayTitle = lang === 'ru' ? displayWork.titleRu : displayWork.titleEn;
+  const displayTitle = lang === 'ru' ? displayWork.titleRu : lang === 'es' ? displayWork.titleEs : displayWork.titleEn;
+  const member = teamMembers.find(m => m.name === displayWork.artist);
+  const displayArtist = lang === 'ru' ? member?.nameRu : lang === 'es' ? member?.nameEs : displayWork.artist;
+  
+  const displayMedium = lang === 'ru' ? displayWork.mediumRu : lang === 'es' ? displayWork.mediumEs : displayWork.mediumEn;
 
   return (
     <div className={styles.overlay} role="dialog" aria-modal="true" onMouseDown={onClose}>
@@ -105,17 +110,17 @@ export function GalleryLightbox({
               key={displayWork.id}
               className={styles.img} 
               src={displayWork.src} 
-              alt={`${displayWork.artist} — ${displayTitle}`} 
+              alt={`${displayArtist} — ${displayTitle}`} 
             />
           </div>
         </div>
 
         <div className={styles.info}>
-          <div className={styles.artist}>{displayWork.artist}</div>
+          <div className={styles.artist}>{displayArtist}</div>
           <div className={styles.title}>{displayTitle}</div>
           <div className={styles.details}>
             {displayWork.year && <span>{displayWork.year}</span>}
-            {displayWork.medium && <span>{displayWork.medium}</span>}
+            {displayMedium && <span>{displayMedium}</span>}
             {displayWork.size && <span>{displayWork.size}</span>}
           </div>
         </div>

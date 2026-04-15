@@ -225,7 +225,7 @@ export function Team() {
           {teamMembers.map((m) => (
             <div key={m.id} className={styles.card}>
               <div className={styles.textBack} aria-hidden="true">
-                {m.name.split(' ').map((word, i) => (
+                {(lang === 'ru' ? m.nameRu : lang === 'es' ? m.nameEs : m.name).split(' ').map((word, i) => (
                   <span key={i}>{word}<br /></span>
                 ))}
               </div>
@@ -234,17 +234,17 @@ export function Team() {
                 <img
                   className={styles.photo}
                   src={m.photoSrc}
-                  alt={m.name}
+                  alt={lang === 'ru' ? m.nameRu : lang === 'es' ? m.nameEs : m.name}
                   loading="lazy"
                 />
               </div>
 
               <div className={styles.textFront}>
                 <div className={styles.textContent}>
-                  <h3 className={styles.name}>{m.name}</h3>
+                  <h3 className={styles.name}>{lang === 'ru' ? m.nameRu : lang === 'es' ? m.nameEs : m.name}</h3>
                   <div className={styles.divider} />
                   <p className={styles.blurb}>
-                    {lang === 'ru' ? m.blurbRu : m.blurbEn}
+                    {lang === 'ru' ? m.blurbRu : lang === 'es' ? m.blurbEs : m.blurbEn}
                   </p>
                 </div>
               </div>

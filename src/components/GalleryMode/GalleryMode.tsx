@@ -59,25 +59,20 @@ export function GalleryMode() {
     { 
       id: 'works', 
       label: t.header.team,
-      children: artistEntries.map(([name]) => ({
-        id: `artist-${name.replace(/\s+/g, '-').toLowerCase()}`,
-        label: lang === 'ru' ? (
-          name === 'Andrey Vaganov' ? 'Андрей Ваганов' :
-          name === 'Evgeny Globenko' ? 'Евгений Глобенко' :
-          name === 'Petr Tsvetkov' ? 'Петр Цветков' :
-          name === 'Omar Godines' ? 'Омар Годинес' :
-          name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
-          name === 'Joslen Orsini' ? 'Йослен Орсини' :
-          name
-        ) : name // For 'en' and 'es' we use the Latin/International name
-      }))
+      children: artistEntries.map(([name]) => {
+        const member = teamMembers.find(m => m.name === name);
+        return {
+          id: `artist-${name.replace(/\s+/g, '-').toLowerCase()}`,
+          label: lang === 'ru' ? member?.nameRu : lang === 'es' ? member?.nameEs : name
+        };
+      })
     },
     { 
       id: 'events', 
       label: t.header.events,
       children: events.map(e => ({
         id: e.id,
-        label: lang === 'ru' ? e.titleRu : e.titleEn
+        label: lang === 'ru' ? e.titleRu : lang === 'es' ? e.titleEs : e.titleEn
       }))
     },
     { id: 'movie', label: t.header.movie },
@@ -112,26 +107,23 @@ export function GalleryMode() {
     'Other': { en: 'Other', ru: 'Прочее', es: 'Otro' }
   };
 
-  const getTranslatedMedium = (medium: string) => {
+  const getTranslatedMedium = (medium: string, work?: any) => {
+    if (work) {
+      if (lang === 'ru') return work.mediumRu || work.mediumEn || medium;
+      if (lang === 'es') return work.mediumEs || work.mediumEn || medium;
+      return work.mediumEn || medium;
+    }
     return mediumTranslations[medium]?.[lang] || medium;
   };
 
   // Get team member by name for bio and photo
   const getArtistData = (artistName: string) => {
     const member = teamMembers.find(m => m.name === artistName);
-    const translatedName = lang === 'ru' ? (
-      member?.name === 'Andrey Vaganov' ? 'Андрей Ваганов' :
-      member?.name === 'Evgeny Globenko' ? 'Евгений Глобенко' :
-      member?.name === 'Petr Tsvetkov' ? 'Петр Цветков' :
-      member?.name === 'Omar Godines' ? 'Омар Годинес' :
-      member?.name === 'Thomas Harutunyan' ? 'Томас Арутюнян' :
-      member?.name === 'Joslen Orsini' ? 'Йослен Орсини' :
-      member?.name
-    ) : member?.name;
+    const translatedName = lang === 'ru' ? member?.nameRu : lang === 'es' ? member?.nameEs : member?.name;
 
     return {
       name: translatedName || artistName,
-      bio: lang === 'ru' ? member?.blurbRu : member?.blurbEn,
+      bio: lang === 'ru' ? member?.blurbRu : lang === 'es' ? member?.blurbEs : member?.blurbEn,
       photo: member?.photoSrc,
     };
   };
@@ -433,12 +425,12 @@ export function GalleryMode() {
                         </div>
                         
                         <div className={styles.worksStack}>
-                          {works.map((work, idx) => (
+                          {works.map((work: any, idx) => (
                             <figure key={work.id} className={styles.workItem} style={{ zIndex: works.length - idx }}>
                               <div className={styles.workImageWrapper}>
                                 <img
                                   src={work.src}
-                                  alt={lang === 'ru' ? work.titleRu : work.titleEn}
+                                  alt={lang === 'ru' ? work.titleRu : lang === 'es' ? work.titleEs : work.titleEn}
                                   className={styles.workImage}
                                   loading="lazy"
                                   decoding="async"
@@ -447,9 +439,9 @@ export function GalleryMode() {
                               <figcaption className={styles.workCaption}>
                                 <div className={styles.captionHeader}>
                                   <div className={styles.captionTitleArea}>
-                                    <span className={styles.workMediumTag}>{getTranslatedMedium(work.medium || 'Other')}</span>
+                                    <span className={styles.workMediumTag}>{getTranslatedMedium(work.mediumEn || 'Other', work)}</span>
                                     <h4 className={styles.workTitle}>
-                                      {lang === 'ru' ? work.titleRu : work.titleEn}
+                                      {lang === 'ru' ? work.titleRu : lang === 'es' ? work.titleEs : work.titleEn}
                                     </h4>
                                   </div>
                                   <span className={styles.workIndex}>{(idx + 1).toString().padStart(2, '0')}</span>
@@ -480,19 +472,19 @@ export function GalleryMode() {
                 <div className={styles.eventInfo}>
                   <span className={styles.eventCategory}>{t.header.events}</span>
                   <h2 className={styles.eventTitle}>
-                    {lang === 'ru' ? event.titleRu : event.titleEn}
+                    {lang === 'ru' ? event.titleRu : lang === 'es' ? event.titleEs : event.titleEn}
                   </h2>
                   <div className={styles.eventMeta}>
-                    <span>{lang === 'ru' ? event.dateRu : event.dateEn}</span>
-                    <span>{lang === 'ru' ? event.locationRu : event.locationEn}</span>
+                    <span>{lang === 'ru' ? event.dateRu : lang === 'es' ? event.dateEs : event.dateEn}</span>
+                    <span>{lang === 'ru' ? event.locationRu : lang === 'es' ? event.locationEs : event.locationEn}</span>
                   </div>
                   <div className={styles.eventStory}>
-                    <p>{lang === 'ru' ? event.fullStoryRu : event.fullStoryEn}</p>
+                    <p>{lang === 'ru' ? event.fullStoryRu : lang === 'es' ? event.fullStoryEs : event.fullStoryEn}</p>
                   </div>
                   
                   {event.links && event.links.length > 0 && (
                     <div className={styles.linksSection}>
-                      <h4 className={styles.linksTitle}>{lang === 'ru' ? 'Источники' : 'Sources'}</h4>
+                      <h4 className={styles.linksTitle}>{lang === 'ru' ? 'Источники' : lang === 'es' ? 'Fuentes' : 'Sources'}</h4>
                       <nav className={styles.blueLinksList}>
                         {event.links.map((link, i) => (
                           <a 
@@ -502,7 +494,7 @@ export function GalleryMode() {
                             rel="noopener noreferrer" 
                             className={styles.blueLink}
                           >
-                            {lang === 'ru' ? link.titleRu : link.titleEn}
+                            {lang === 'ru' ? link.titleRu : lang === 'es' ? link.titleEs : link.titleEn}
                           </a>
                         ))}
                       </nav>

@@ -88,8 +88,8 @@ export function Gallery() {
     return artists.map(a => ({
       artist: a,
       works: galleryWorks.filter(w => w.artist === a).sort((w1, w2) => {
-        const t1 = lang === 'ru' ? w1.titleRu : w1.titleEn;
-        const t2 = lang === 'ru' ? w2.titleRu : w2.titleEn;
+        const t1 = lang === 'ru' ? w1.titleRu : lang === 'es' ? w1.titleEs : w1.titleEn;
+        const t2 = lang === 'ru' ? w2.titleRu : lang === 'es' ? w2.titleEs : w2.titleEn;
         return t1.localeCompare(t2);
       })
     }));
@@ -106,8 +106,8 @@ export function Gallery() {
     
     // Always sort by title
     arr.sort((a, b) => {
-      const titleA = lang === 'ru' ? a.titleRu : a.titleEn;
-      const titleB = lang === 'ru' ? b.titleRu : b.titleEn;
+      const titleA = lang === 'ru' ? a.titleRu : lang === 'es' ? a.titleEs : a.titleEn;
+      const titleB = lang === 'ru' ? b.titleRu : lang === 'es' ? b.titleEs : b.titleEn;
       return titleA.localeCompare(titleB);
     });
     return arr;
@@ -152,16 +152,20 @@ export function Gallery() {
               </button>
               
               <div className={styles.artistList}>
-                {artists.map((a) => (
-                  <button
-                    key={a}
-                    type="button"
-                    className={`${styles.tag} ${artist === a ? styles.tagActive : ''}`}
-                    onClick={(e) => handleArtistClick(a, e)}
-                  >
-                    {a}
-                  </button>
-                ))}
+                {artists.map((a) => {
+                  const member = teamMembers.find(m => m.name === a);
+                  const label = lang === 'ru' ? member?.nameRu : lang === 'es' ? member?.nameEs : a;
+                  return (
+                    <button
+                      key={a}
+                      type="button"
+                      className={`${styles.tag} ${artist === a ? styles.tagActive : ''}`}
+                      onClick={(e) => handleArtistClick(a, e)}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -177,10 +181,10 @@ export function Gallery() {
                   <div className={styles.artistHeader}>
                     {member && (
                       <div className={styles.artistAvatar}>
-                        <img src={member.photoSrc} alt={member.name} />
+                        <img src={member.photoSrc} alt={lang === 'ru' ? member.nameRu : lang === 'es' ? member.nameEs : member.name} />
                       </div>
                     )}
-                    <span className={styles.artistName}>{group.artist}</span>
+                    <span className={styles.artistName}>{lang === 'ru' ? member?.nameRu : lang === 'es' ? member?.nameEs : group.artist}</span>
                   </div>
                   <div className={styles.dividerLine} />
                 </div>
@@ -191,12 +195,12 @@ export function Gallery() {
                       type="button"
                       className={styles.card}
                       onClick={() => open(w.id)}
-                      aria-label={`${w.artist} — ${lang === 'ru' ? w.titleRu : w.titleEn}`}
+                      aria-label={`${lang === 'ru' ? member?.nameRu : lang === 'es' ? member?.nameEs : w.artist} — ${lang === 'ru' ? w.titleRu : lang === 'es' ? w.titleEs : w.titleEn}`}
                     >
                       <img className={styles.thumb} src={w.src} alt="" loading="lazy" decoding="async" />
                       <div className={styles.meta}>
-                        <div className={styles.artist}>{w.artist}</div>
-                        <div className={styles.workTitle}>{lang === 'ru' ? w.titleRu : w.titleEn}</div>
+                        <div className={styles.artist}>{lang === 'ru' ? member?.nameRu : lang === 'es' ? member?.nameEs : w.artist}</div>
+                        <div className={styles.workTitle}>{lang === 'ru' ? w.titleRu : lang === 'es' ? w.titleEs : w.titleEn}</div>
                       </div>
                     </button>
                   ))}

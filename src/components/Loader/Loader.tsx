@@ -30,6 +30,9 @@ export function Loader({ onLoaded }: { onLoaded: () => void }) {
   };
 
   useEffect(() => {
+    // Lock scroll while loading
+    document.body.style.overflow = 'hidden';
+    
     let loadedCount = 0;
     const totalCount = ASSETS_TO_LOAD.length;
 
@@ -61,10 +64,18 @@ export function Loader({ onLoaded }: { onLoaded: () => void }) {
         img.onerror = updateProgress;
       }
     });
+
+    return () => {
+      // Cleanup: ensure overflow is restored if component unmounts unexpectedly
+      document.body.style.overflow = '';
+    };
   }, []);
 
   useEffect(() => {
     if (isDone) {
+      // Restore scroll when loading is finished
+      document.body.style.overflow = '';
+      
       gsap.to(`.${styles.root}`, {
         opacity: 0,
         duration: 0.8,

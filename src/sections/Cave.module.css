@@ -242,7 +242,7 @@
 }
 
 .manifestoItem:nth-child(odd) .manifestoNumber {
-  left: -40px;
+  left: 20px;
 }
 
 .manifestoItem:nth-child(even) .manifestoNumber {

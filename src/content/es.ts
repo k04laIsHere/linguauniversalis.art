@@ -28,7 +28,7 @@ export const es: I18nDict = {
     ],
     flashlightTitle: 'Linterna',
     flashlightHint: 'Mueve el cursor para revelar la cueva.',
-    flashlightHint2: 'Desplázate hacia abajo: el viaje comienza.',
+    flashlightHint2: 'Desliza para comenzar',
     breachLabel: 'Entrar al\narchivo',
     breachDesc: 'Acceso directo a los resultados.\nVer el portafolio y eventos',
     artifacts: [
@@ -41,10 +41,10 @@ export const es: I18nDict = {
   ancient: { title: 'Marcas antiguas' },
   exitFlight: {
     title: 'Salida',
-    hint: 'Desplázate para pasar por la abertura.',
+    hint: 'Baja para pasar por la abertura.',
   },
   team: { title: 'Creadores', subtitle: 'Equipo del Proyecto', hint: 'Pasa el cursor para pausar y leer.', pause: 'Pausa' },
-  events: { title: 'Eventos', hint: 'Pasa el cursor para pausar. Desplázate para continuar.', pause: 'Pausa', explore: 'Explorar', scrollDiscover: 'Desplázate para descubrir' },
+  events: { title: 'Eventos', hint: 'Pasa el cursor para pausar. Desplázate para continuar.', pause: 'Pausa', explore: 'Explorar', scrollDiscover: 'Baja para descubrir' },
   gallery: {
     title: 'Galería de Obras',
     lede: 'Busca, filtra por artista y abre una obra. La URL se vuelve compartible para esa obra.',

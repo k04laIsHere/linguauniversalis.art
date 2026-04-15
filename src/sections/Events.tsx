@@ -196,20 +196,20 @@ export function Events() {
               <div className={styles.infoBox}>
                 <div className={styles.eventMeta}>
                   <span className={styles.metaItem}>
-                    {lang === 'ru' ? event.dateRu : event.dateEn}
+                    {lang === 'ru' ? event.dateRu : lang === 'es' ? event.dateEs : event.dateEn}
                   </span>
                   <span className={styles.metaDivider}>•</span>
                   <span className={styles.metaItem}>
-                    {lang === 'ru' ? event.locationRu : event.locationEn}
+                    {lang === 'ru' ? event.locationRu : lang === 'es' ? event.locationEs : event.locationEn}
                   </span>
                 </div>
                 
                 <h3 className={styles.eventTitle}>
-                  {lang === 'ru' ? event.titleRu : event.titleEn}
+                  {lang === 'ru' ? event.titleRu : lang === 'es' ? event.titleEs : event.titleEn}
                 </h3>
                 
                 <p className={styles.eventDesc}>
-                  {lang === 'ru' ? event.descRu : event.descEn}
+                  {lang === 'ru' ? event.descRu : lang === 'es' ? event.descEs : event.descEn}
                 </p>
                 
                 <button 
@@ -235,9 +235,9 @@ export function Events() {
             <button className={styles.closeBtn} onClick={closeDetails} aria-label="Close">×</button>
             <div className={styles.modalContent}>
               <div className={styles.modalHeader}>
-                <h2>{lang === 'ru' ? selectedEvent.titleRu : selectedEvent.titleEn}</h2>
+                <h2>{lang === 'ru' ? selectedEvent.titleRu : lang === 'es' ? selectedEvent.titleEs : selectedEvent.titleEn}</h2>
                 <p className={styles.modalMeta}>
-                  {lang === 'ru' ? selectedEvent.dateRu : selectedEvent.dateEn} | {lang === 'ru' ? selectedEvent.locationRu : selectedEvent.locationEn}
+                  {lang === 'ru' ? selectedEvent.dateRu : lang === 'es' ? selectedEvent.dateEs : selectedEvent.dateEn} | {lang === 'ru' ? selectedEvent.locationRu : lang === 'es' ? selectedEvent.locationEs : selectedEvent.locationEn}
                 </p>
               </div>
               <div className={styles.modalBody}>
@@ -247,11 +247,11 @@ export function Events() {
                   ))}
                 </div>
                 <div className={styles.modalText}>
-                  <p>{lang === 'ru' ? selectedEvent.fullStoryRu : selectedEvent.fullStoryEn}</p>
+                  <p>{lang === 'ru' ? selectedEvent.fullStoryRu : lang === 'es' ? selectedEvent.fullStoryEs : selectedEvent.fullStoryEn}</p>
                   
                   {selectedEvent.links && selectedEvent.links.length > 0 && (
                     <div className={styles.linksSection}>
-                      <h4 className={styles.linksTitle}>{lang === 'ru' ? 'Источники' : 'Sources'}</h4>
+                      <h4 className={styles.linksTitle}>{lang === 'ru' ? 'Источники' : lang === 'es' ? 'Fuentes' : 'Sources'}</h4>
                       <nav className={styles.blueLinksList}>
                         {selectedEvent.links.map((link, i) => (
                           <a 
@@ -261,7 +261,7 @@ export function Events() {
                             rel="noopener noreferrer" 
                             className={styles.blueLink}
                           >
-                            {lang === 'ru' ? link.titleRu : link.titleEn}
+                            {lang === 'ru' ? link.titleRu : lang === 'es' ? link.titleEs : link.titleEn}
                           </a>
                         ))}
                       </nav>
