@@ -98,6 +98,18 @@ export function Events() {
 
         // Horizontal Auto-Scroll logic (remains for all including first)
         if (images.length > 1 && carousel) {
+          const carouselEl = carousel as HTMLElement;
+          
+          tl.to(carouselEl, {
+            x: () => {
+              const totalWidth = carouselEl.scrollWidth;
+              const viewportWidth = (carouselEl.parentElement as HTMLElement).offsetWidth;
+              return -(totalWidth - viewportWidth);
+            },
+            duration: 1.8,
+            ease: 'none'
+          }, sectionStartTime);
+        }
 
         // Section Fade Out (except last)
         if (i < sections.length - 1) {
