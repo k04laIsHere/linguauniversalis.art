@@ -105,7 +105,7 @@ export function Cave() {
             ease: 'power2.out',
             scrollTrigger: {
               trigger: item,
-              start: 'top 95%',
+              start: 'top 105%',
               end: 'top 50%',
               scrub: 1,
             },
