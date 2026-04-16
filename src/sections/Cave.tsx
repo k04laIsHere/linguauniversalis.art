@@ -18,6 +18,9 @@ export function Cave() {
     let handleGlobalClick: () => void;
 
     const ctx = gsap.context(() => {
+      // Refresh ScrollTrigger to ensure correct positions
+      ScrollTrigger.refresh();
+
       // Toggle active state for cave background activation
       ScrollTrigger.create({
         trigger: root,
@@ -105,9 +108,10 @@ export function Cave() {
             ease: 'power2.out',
             scrollTrigger: {
               trigger: item,
-              start: 'top bottom', // Trigger when top of item hits bottom of screen
-              end: 'top 40%', // Fully visible by the time it reaches middle-ish
-              scrub: 1,
+              start: 'top 100%', // Bottom of viewport
+              end: 'top 30%', // Finish fade earlier to avoid being caught at top
+              scrub: 0.5, // Faster scrub for more responsive feedback
+              markers: false,
             },
           }
         );
