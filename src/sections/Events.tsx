@@ -65,48 +65,39 @@ export function Events() {
         
         const sectionStartTime = i * 2;
         
-        gsap.set(section, { autoAlpha: 0 });
-        gsap.set(infoBox, { autoAlpha: 0, y: 30 });
-        gsap.set(images, { x: 100, autoAlpha: 0 });
+        // If it's the first event, start visible and in position
+        if (i === 0) {
+          gsap.set(section, { autoAlpha: 1 });
+          gsap.set(infoBox, { autoAlpha: 1, y: 0 });
+          gsap.set(images, { x: 0, autoAlpha: 1 });
+        } else {
+          gsap.set(section, { autoAlpha: 0 });
+          gsap.set(infoBox, { autoAlpha: 0, y: 30 });
+          gsap.set(images, { x: 100, autoAlpha: 0 });
 
-        // Section Fade In
-        tl.to(section, { autoAlpha: 1, duration: 0.2 }, sectionStartTime);
+          // Section Fade In
+          tl.to(section, { autoAlpha: 1, duration: 0.2 }, sectionStartTime);
 
-        // Horizontal Carousel Reveal
-        tl.to(images, {
-          x: 0,
-          autoAlpha: 1,
-          stagger: 0.1,
-          duration: 0.8,
-          ease: 'power2.out'
-        }, sectionStartTime + 0.1);
+          // Horizontal Carousel Reveal
+          tl.to(images, {
+            x: 0,
+            autoAlpha: 1,
+            stagger: 0.1,
+            duration: 0.8,
+            ease: 'power2.out'
+          }, sectionStartTime + 0.1);
 
-        // Horizontal Auto-Scroll logic
-        if (images.length > 1 && carousel) {
-          const carouselEl = carousel as HTMLElement;
-          
-          // Force a small delay to ensure DOM dimensions are settled
-          tl.to(carouselEl, {
-            x: () => {
-              // totalWidth is the entire length of the internal flex track
-              const totalWidth = carouselEl.scrollWidth;
-              // viewportWidth is the visible 630px / 85vw container
-              const viewportWidth = (carouselEl.parentElement as HTMLElement).offsetWidth;
-              // We need to move exactly the hidden distance
-              return -(totalWidth - viewportWidth);
-            },
-            duration: 1.8,
-            ease: 'none'
-          }, sectionStartTime);
+          // Info box reveal
+          tl.to(infoBox, {
+            autoAlpha: 1,
+            y: 0,
+            duration: 0.6,
+            ease: 'power2.out'
+          }, sectionStartTime + 0.2);
         }
 
-        // Info box reveal
-        tl.to(infoBox, {
-          autoAlpha: 1,
-          y: 0,
-          duration: 0.6,
-          ease: 'power2.out'
-        }, sectionStartTime + 0.2);
+        // Horizontal Auto-Scroll logic (remains for all including first)
+        if (images.length > 1 && carousel) {
 
         // Section Fade Out (except last)
         if (i < sections.length - 1) {
