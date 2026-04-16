@@ -105,8 +105,8 @@ export function Cave() {
             ease: 'power2.out',
             scrollTrigger: {
               trigger: item,
-              start: 'top 105%',
-              end: 'top 50%',
+              start: 'top bottom', // Trigger when top of item hits bottom of screen
+              end: 'top 40%', // Fully visible by the time it reaches middle-ish
               scrub: 1,
             },
           }
