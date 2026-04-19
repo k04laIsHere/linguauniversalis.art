@@ -80,7 +80,7 @@ export function Cave() {
           ease: 'expo.out',
           scrollTrigger: {
             trigger: `.${styles.hero}`,
-            start: 'top 85%',
+            start: 'top 95%', // Started earlier (was 85%)
           },
         }
       );
@@ -89,7 +89,7 @@ export function Cave() {
       const manifestoItems = gsap.utils.toArray<HTMLElement>(`.${styles.manifestoItem}`);
       manifestoItems.forEach((item) => {
         // Main container fade and entry
-        const anim = gsap.fromTo(
+        gsap.fromTo(
           item,
           { 
             opacity: 0, 
@@ -103,55 +103,29 @@ export function Cave() {
             ease: 'none',
             scrollTrigger: {
               trigger: item,
-              start: 'top bottom',
-              end: 'top 30%',
+              start: 'top bottom+=10%', // Started earlier
+              end: 'top 40%',
               scrub: 0.5,
             },
           }
         );
 
-        // Click to fully reveal
-        item.addEventListener('click', () => {
-          if (anim.scrollTrigger) {
-            anim.scrollTrigger.kill();
-          }
-          // Smoothly animate from current state to full visibility
-          gsap.to(item, {
-            opacity: 1,
-            y: 0,
-            filter: 'blur(0px)',
-            duration: 0.8,
-            ease: 'power2.out',
-            overwrite: 'auto' // Prevents conflict with existing tweens
-          });
-        });
-
         // Individual text reveal
         const text = item.querySelector(`.${styles.manifestoText}`);
         if (text) {
-          const textAnim = gsap.fromTo(text,
+          gsap.fromTo(text,
             { x: item.classList.contains(styles.manifestoItemOdd) ? -20 : 20 },
             {
               x: 0,
               ease: 'none',
               scrollTrigger: {
                 trigger: item,
-                start: 'top bottom',
-                end: 'top 20%',
+                start: 'top bottom+=10%', // Started earlier
+                end: 'top 30%',
                 scrub: 0.5,
               }
             }
           );
-
-          item.addEventListener('click', () => {
-            if (textAnim.scrollTrigger) textAnim.scrollTrigger.kill();
-            gsap.to(text, { 
-              x: 0, 
-              duration: 0.8, 
-              ease: 'power2.out',
-              overwrite: 'auto' 
-            });
-          });
         }
 
         // Parallax for numbers
