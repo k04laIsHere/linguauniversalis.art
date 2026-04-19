@@ -22,7 +22,7 @@ type Options = {
 export function useViewportFlashlight(options: Options = {}) {
   const {
     radius = 520,
-    touchRadius = 760,
+    touchRadius = 380, // 50% smaller than previous ~760
     defaultPos = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.45 },
     varPrefix = '--lu_',
     target = window,

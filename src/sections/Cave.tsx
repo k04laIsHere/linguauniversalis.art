@@ -89,7 +89,7 @@ export function Cave() {
       const manifestoItems = gsap.utils.toArray<HTMLElement>(`.${styles.manifestoItem}`);
       manifestoItems.forEach((item) => {
         // Main container fade and entry
-        gsap.fromTo(
+        const anim = gsap.fromTo(
           item,
           { 
             opacity: 0, 
@@ -110,10 +110,24 @@ export function Cave() {
           }
         );
 
+        // Click to fully reveal
+        item.addEventListener('click', () => {
+          if (anim.scrollTrigger) {
+            anim.scrollTrigger.kill();
+          }
+          gsap.to(item, {
+            opacity: 1,
+            y: 0,
+            filter: 'blur(0px)',
+            duration: 0.8,
+            ease: 'power2.out'
+          });
+        });
+
         // Individual text reveal
         const text = item.querySelector(`.${styles.manifestoText}`);
         if (text) {
-          gsap.fromTo(text,
+          const textAnim = gsap.fromTo(text,
             { x: item.classList.contains(styles.manifestoItemOdd) ? -20 : 20 },
             {
               x: 0,
@@ -126,6 +140,11 @@ export function Cave() {
               }
             }
           );
+
+          item.addEventListener('click', () => {
+            if (textAnim.scrollTrigger) textAnim.scrollTrigger.kill();
+            gsap.to(text, { x: 0, duration: 0.8, ease: 'power2.out' });
+          });
         }
 
         // Parallax for numbers
