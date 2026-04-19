@@ -115,12 +115,14 @@ export function Cave() {
           if (anim.scrollTrigger) {
             anim.scrollTrigger.kill();
           }
+          // Smoothly animate from current state to full visibility
           gsap.to(item, {
             opacity: 1,
             y: 0,
             filter: 'blur(0px)',
             duration: 0.8,
-            ease: 'power2.out'
+            ease: 'power2.out',
+            overwrite: 'auto' // Prevents conflict with existing tweens
           });
         });
 
@@ -143,7 +145,12 @@ export function Cave() {
 
           item.addEventListener('click', () => {
             if (textAnim.scrollTrigger) textAnim.scrollTrigger.kill();
-            gsap.to(text, { x: 0, duration: 0.8, ease: 'power2.out' });
+            gsap.to(text, { 
+              x: 0, 
+              duration: 0.8, 
+              ease: 'power2.out',
+              overwrite: 'auto' 
+            });
           });
         }
 
