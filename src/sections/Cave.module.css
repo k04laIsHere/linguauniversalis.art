@@ -149,6 +149,8 @@
   gap: 0.2em;
   user-select: none;
   -webkit-user-select: none;
+  z-index: 60;
+  position: relative;
 }
 
 .titleWord {
@@ -268,6 +270,8 @@
   -webkit-user-select: none;
   -webkit-tap-highlight-color: transparent;
   will-change: transform;
+  z-index: 60;
+  position: relative;
 }
 
 .manifestoItem::after {
