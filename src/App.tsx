@@ -104,7 +104,7 @@ function AppContent() {
   useViewportFlashlight({
     enabled: !reduced && !isLoading,
     radius: 520,
-    touchRadius: 760,
+    touchRadius: 260,
     defaultPos: { x: window.innerWidth * 0.5, y: window.innerHeight * 0.45 },
   });
 
