@@ -40,7 +40,7 @@ export function Cave() {
         `.${styles.bgWrapper}`,
         { y: 0 },
         {
-          y: '20vh',
+          y: '10vh',
           ease: 'none',
           scrollTrigger: {
             trigger: root,
@@ -88,42 +88,62 @@ export function Cave() {
       // Manifesto Discovery Animation
       const manifestoItems = gsap.utils.toArray<HTMLElement>(`.${styles.manifestoItem}`);
       manifestoItems.forEach((item) => {
+        // Main container fade and entry
         gsap.fromTo(
           item,
           { 
             opacity: 0, 
-            y: 80,
-            scale: 0.98,
+            y: 50,
             filter: 'blur(10px)'
           },
           {
             opacity: 1,
             y: 0,
-            scale: 1,
             filter: 'blur(0px)',
-            duration: 1.5,
-            ease: 'power2.out',
-            scrollTrigger: {
-              trigger: item,
-              start: 'top bottom', // Trigger when top of item hits bottom of screen
-              end: 'top 40%', // Fully visible by the time it reaches middle-ish
-              scrub: 1,
-            },
-          }
-        );
-
-        const num = item.querySelector(`.${styles.manifestoNumber}`);
-        if (num) {
-          gsap.to(num, {
-            y: -80,
             ease: 'none',
             scrollTrigger: {
               trigger: item,
               start: 'top bottom',
-              end: 'bottom top',
-              scrub: true,
+              end: 'top 30%',
+              scrub: 0.5,
             },
-          });
+          }
+        );
+
+        // Individual text reveal
+        const text = item.querySelector(`.${styles.manifestoText}`);
+        if (text) {
+          gsap.fromTo(text,
+            { x: item.classList.contains(styles.manifestoItemOdd) ? -20 : 20 },
+            {
+              x: 0,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: item,
+                start: 'top bottom',
+                end: 'top 20%',
+                scrub: 0.5,
+              }
+            }
+          );
+        }
+
+        // Parallax for numbers
+        const num = item.querySelector(`.${styles.manifestoNumber}`);
+        if (num) {
+          gsap.fromTo(num, 
+            { y: 40 },
+            {
+              y: -100,
+              ease: 'none',
+              scrollTrigger: {
+                trigger: item,
+                start: 'top bottom',
+                end: 'bottom top',
+                scrub: true,
+              },
+            }
+          );
         }
       });
 
@@ -307,7 +327,7 @@ export function Cave() {
             {t.cave.manifesto.map((line, i) => (
               <div 
                 key={i} 
-                className={styles.manifestoItem}
+                className={`${styles.manifestoItem} ${i % 2 === 0 ? styles.manifestoItemOdd : styles.manifestoItemEven}`}
                 style={{ '--index': i } as React.CSSProperties}
               >
                 <span className={styles.manifestoNumber}>{i + 1}</span>
