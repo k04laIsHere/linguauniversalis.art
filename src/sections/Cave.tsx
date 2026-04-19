@@ -80,7 +80,7 @@ export function Cave() {
           ease: 'expo.out',
           scrollTrigger: {
             trigger: `.${styles.hero}`,
-            start: 'top 95%', // Started earlier (was 85%)
+            start: 'top bottom+=20%', // Trigger much earlier
           },
         }
       );
@@ -103,7 +103,7 @@ export function Cave() {
             ease: 'none',
             scrollTrigger: {
               trigger: item,
-              start: 'top bottom+=10%', // Started earlier
+              start: 'top bottom+=30%', // Trigger much earlier
               end: 'top 40%',
               scrub: 0.5,
             },
@@ -120,7 +120,7 @@ export function Cave() {
               ease: 'none',
               scrollTrigger: {
                 trigger: item,
-                start: 'top bottom+=10%', // Started earlier
+                start: 'top bottom+=30%', // Trigger much earlier
                 end: 'top 30%',
                 scrub: 0.5,
               }
