@@ -272,7 +272,6 @@ export function Cave() {
         <div className={styles.bg} aria-hidden="true" />
         <div className={styles.vignette} aria-hidden="true" />
       </div>
-      <div className={styles.shadowMask} aria-hidden="true" />
 
       <div className={styles.inner}>
         <div className={styles.introStack}>
@@ -385,6 +384,7 @@ export function Cave() {
           })}
         </div>
       </div>
+      <div className={styles.shadowMask} aria-hidden="true" />
     </section>
   );
 }
