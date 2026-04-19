@@ -42,8 +42,8 @@ export function useViewportFlashlight(options: Options = {}) {
     const root = document.documentElement;
     
     const tick = () => {
-      // Smooth lerp toward target
-      const lerp = 0.15; // Adjustment speed (0.1 - 0.2 is usually good)
+      // Smoother, heavier lerp toward target
+      const lerp = 0.06; // Reduced from 0.15 for heavier feel
       
       currentPosRef.current.x += (targetPosRef.current.x - currentPosRef.current.x) * lerp;
       currentPosRef.current.y += (targetPosRef.current.y - currentPosRef.current.y) * lerp;
