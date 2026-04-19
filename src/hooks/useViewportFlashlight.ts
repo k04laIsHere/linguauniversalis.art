@@ -53,12 +53,19 @@ export function useViewportFlashlight(options: Options = {}) {
     };
 
     const onMove = (e: PointerEvent) => {
+      // Ignore simulated pointermove on scroll for touch devices to prevent jumping
+      if (e.pointerType === 'touch' && e.buttons === 0) return;
+      
       const r = e.pointerType === 'touch' ? touchRadius : radius;
       posRef.current = { x: e.clientX, y: e.clientY, r };
     };
 
-    const onLeave = () => {
-      posRef.current = { x: defaultPos.x, y: defaultPos.y, r: radius };
+    const onScroll = () => {
+      // On scroll, keep the default center position for touch users
+      // to ensure the flashlight stays locked to the viewport center.
+      if (window.matchMedia('(pointer: coarse)').matches) {
+        posRef.current = { x: window.innerWidth * 0.5, y: window.innerHeight * 0.45, r: touchRadius };
+      }
     };
 
     onLeave();
@@ -69,6 +76,7 @@ export function useViewportFlashlight(options: Options = {}) {
     (t as any).addEventListener?.('pointerleave', onLeave, { passive: true });
     (t as any).addEventListener?.('pointercancel', onLeave, { passive: true });
     (t as any).addEventListener?.('blur', onLeave, { passive: true });
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
@@ -76,6 +84,7 @@ export function useViewportFlashlight(options: Options = {}) {
       (t as any).removeEventListener?.('pointerleave', onLeave);
       (t as any).removeEventListener?.('pointercancel', onLeave);
       (t as any).removeEventListener?.('blur', onLeave);
+      window.removeEventListener('scroll', onScroll);
     };
   }, [enabled, radius, touchRadius, target, varPrefix, defaultPos.x, defaultPos.y]);
 }
