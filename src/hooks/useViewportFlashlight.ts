@@ -17,7 +17,7 @@ type Options = {
 
 /**
  * Tracks pointer position in viewport coordinates and writes CSS vars in px.
- * Includes organic jitter/flicker for immersion.
+ * Includes organic jitter/flicker for immersion and smooth tracking.
  */
 export function useViewportFlashlight(options: Options = {}) {
   const {
@@ -29,7 +29,9 @@ export function useViewportFlashlight(options: Options = {}) {
     enabled = true,
   } = options;
 
-  const posRef = useRef({ x: defaultPos.x, y: defaultPos.y, r: radius });
+  // targetPos is where we want to be, currentPos is where we are (for smoothing)
+  const targetPosRef = useRef({ x: defaultPos.x, y: defaultPos.y, r: radius });
+  const currentPosRef = useRef({ x: defaultPos.x, y: defaultPos.y, r: radius });
   const rafRef = useRef<number | null>(null);
 
   useEffect(() => {
@@ -40,7 +42,15 @@ export function useViewportFlashlight(options: Options = {}) {
     const root = document.documentElement;
     
     const tick = () => {
-      const { x, y, r } = posRef.current;
+      // Smooth lerp toward target
+      const lerp = 0.15; // Adjustment speed (0.1 - 0.2 is usually good)
+      
+      currentPosRef.current.x += (targetPosRef.current.x - currentPosRef.current.x) * lerp;
+      currentPosRef.current.y += (targetPosRef.current.y - currentPosRef.current.y) * lerp;
+      currentPosRef.current.r += (targetPosRef.current.r - currentPosRef.current.r) * lerp;
+
+      const { x, y, r } = currentPosRef.current;
+      
       // Add subtle organic flicker
       const jitter = (Math.random() - 0.5) * 4;
       const flicker = 0.98 + Math.random() * 0.04;
@@ -54,14 +64,17 @@ export function useViewportFlashlight(options: Options = {}) {
 
     const onMove = (e: PointerEvent) => {
       const r = e.pointerType === 'touch' ? touchRadius : radius;
-      posRef.current = { x: e.clientX, y: e.clientY, r };
+      targetPosRef.current = { x: e.clientX, y: e.clientY, r };
     };
 
     const onLeave = () => {
-      posRef.current = { x: defaultPos.x, y: defaultPos.y, r: radius };
+      // No longer automatically snapping to center on mobile to prevent "jumps" 
+      // during scroll-induced leave events. Only reset if it's a mouse leaving.
+      if (!window.matchMedia('(pointer: coarse)').matches) {
+        targetPosRef.current = { x: defaultPos.x, y: defaultPos.y, r: radius };
+      }
     };
 
-    onLeave();
     rafRef.current = requestAnimationFrame(tick);
 
     // Attach listeners
