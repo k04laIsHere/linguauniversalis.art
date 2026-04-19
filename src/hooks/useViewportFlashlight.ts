@@ -46,7 +46,10 @@ export function useViewportFlashlight(options: Options = {}) {
       const lerp = 0.06; // Reduced from 0.15 for heavier feel
       
       currentPosRef.current.x += (targetPosRef.current.x - currentPosRef.current.x) * lerp;
-      currentPosRef.current.y += (targetPosRef.current.y - currentPosRef.current.y) * lerp;
+      
+      // Vertical position is locked to defaultPos.y (stays in same place vertically)
+      currentPosRef.current.y += (defaultPos.y - currentPosRef.current.y) * lerp;
+      
       currentPosRef.current.r += (targetPosRef.current.r - currentPosRef.current.r) * lerp;
 
       const { x, y, r } = currentPosRef.current;

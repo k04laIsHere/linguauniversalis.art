@@ -63,13 +63,6 @@
       rgba(0, 0, 0, 0.01) 20%,
       rgba(0, 0, 0, 0.4) 55%,
       black 92%
-    ),
-    radial-gradient(
-      ellipse clamp(350px, 35vw, 900px) clamp(200px, 20vw, 500px) at 50% var(--title-y, 50vh),
-      transparent 0%,
-      rgba(0, 0, 0, 0.1) 30%,
-      rgba(0, 0, 0, 0.6) 70%,
-      black 100%
     );
   mask-composite: intersect;
   -webkit-mask-image: 
@@ -79,13 +72,6 @@
       rgba(0, 0, 0, 0.01) 20%,
       rgba(0, 0, 0, 0.4) 55%,
       black 92%
-    ),
-    radial-gradient(
-      ellipse clamp(350px, 35vw, 900px) clamp(200px, 20vw, 500px) at 50% var(--title-y, 50vh),
-      transparent 0%,
-      rgba(0, 0, 0, 0.1) 30%,
-      rgba(0, 0, 0, 0.6) 70%,
-      black 100%
     );
   -webkit-mask-composite: source-in;
 }
@@ -444,12 +430,6 @@
         transparent 0%,
         rgba(0, 0, 0, 0.4) 55%,
         black 92%
-      ),
-      radial-gradient(
-        ellipse 50% 25% at 50% var(--title-y, 50vh),
-        transparent 0%,
-        rgba(0, 0, 0, 0.1) 30%,
-        black 100%
       );
     mask-composite: intersect;
     -webkit-mask-image: 
@@ -458,12 +438,6 @@
         transparent 0%,
         rgba(0, 0, 0, 0.4) 55%,
         black 92%
-      ),
-      radial-gradient(
-        ellipse 50% 25% at 50% var(--title-y, 50vh),
-        transparent 0%,
-        rgba(0, 0, 0, 0.1) 30%,
-        black 100%
       );
     -webkit-mask-composite: source-in;
   }
