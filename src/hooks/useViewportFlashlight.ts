@@ -46,10 +46,7 @@ export function useViewportFlashlight(options: Options = {}) {
       const lerp = 0.06; // Reduced from 0.15 for heavier feel
       
       currentPosRef.current.x += (targetPosRef.current.x - currentPosRef.current.x) * lerp;
-      
-      // Vertical position is locked to defaultPos.y (stays in same place vertically)
-      currentPosRef.current.y += (defaultPos.y - currentPosRef.current.y) * lerp;
-      
+      currentPosRef.current.y += (targetPosRef.current.y - currentPosRef.current.y) * lerp;
       currentPosRef.current.r += (targetPosRef.current.r - currentPosRef.current.r) * lerp;
 
       const { x, y, r } = currentPosRef.current;
@@ -67,6 +64,18 @@ export function useViewportFlashlight(options: Options = {}) {
 
     const onMove = (e: PointerEvent) => {
       const r = e.pointerType === 'touch' ? touchRadius : radius;
+      
+      // For touch, we only update target X. 
+      // This keeps the light following the finger horizontally during scrolls/glides,
+      // but keeps the target Y stable relative to the viewport.
+      const targetY = e.pointerType === 'touch' ? targetPosRef.current.y : e.clientY;
+      
+      targetPosRef.current = { x: e.clientX, y: targetY, r };
+    };
+
+    const onDown = (e: PointerEvent) => {
+      const r = e.pointerType === 'touch' ? touchRadius : radius;
+      // On a fresh tap/click, we update BOTH X and Y so it glides to the new location.
       targetPosRef.current = { x: e.clientX, y: e.clientY, r };
     };
 
@@ -82,7 +91,7 @@ export function useViewportFlashlight(options: Options = {}) {
 
     // Attach listeners
     (t as any).addEventListener?.('pointermove', onMove, { passive: true });
-    (t as any).addEventListener?.('pointerdown', onMove, { passive: true });
+    (t as any).addEventListener?.('pointerdown', onDown, { passive: true });
     (t as any).addEventListener?.('pointerleave', onLeave, { passive: true });
     (t as any).addEventListener?.('pointercancel', onLeave, { passive: true });
     (t as any).addEventListener?.('blur', onLeave, { passive: true });
