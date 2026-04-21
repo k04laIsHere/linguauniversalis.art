@@ -15,7 +15,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  z-index: 0;
+  z-index: 10;
   will-change: transform;
 }
 
@@ -53,7 +53,7 @@
   height: 120%;
   background: rgba(0, 0, 0, 0.98);
   pointer-events: none;
-  z-index: 50;
+  z-index: 20;
   opacity: 1;
   
   mask-image: 
@@ -100,7 +100,7 @@
   width: 100%;
   max-width: 1600px;
   margin: 0 auto;
-  z-index: 2;
+  z-index: 100;
 }
 
 .introStack {
