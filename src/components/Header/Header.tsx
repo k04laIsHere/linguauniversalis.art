@@ -75,7 +75,6 @@ export function Header() {
   const languages: { code: typeof lang; label: string }[] = [
     { code: 'ru', label: 'RU' },
     { code: 'en', label: 'EN' },
-    { code: 'es', label: 'ES' },
   ];
 
   return (
@@ -103,15 +102,15 @@ export function Header() {
         </nav>
 
         <div className={styles.desktopRight}>
-          {/* View as List Button - Hidden on mobile in immersive mode, shown on desktop */}
+          {/* Returning to Archive from Immersive mode */}
           {mode === 'immersive' && (
             <button
               type="button"
               className={`${styles.viewListBtn} ${styles.desktopOnly}`}
               onClick={toggleMode}
-              aria-label="View as list"
+              aria-label="View Archive"
             >
-              {t.header.viewAsList}
+              {t.header.backToArchive}
             </button>
           )}
 
@@ -198,7 +197,7 @@ export function Header() {
                 setIsOpen(false);
               }}
             >
-              {t.header.viewAsList}
+              {t.header.backToArchive}
             </button>
           )}
         </nav>

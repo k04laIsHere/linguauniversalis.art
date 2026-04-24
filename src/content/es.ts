@@ -14,6 +14,8 @@ export const es: I18nDict = {
     movie: 'Documental',
     brandHint: 'El Arte de la Creación',
     viewAsList: 'Entrar al archivo',
+    backToArchive: 'Volver al archivo',
+    journeyToWorld: 'El viaje al mundo de Lingua Universalis',
   },
   cave: {
     title: 'Lingua Universalis',
@@ -47,6 +49,8 @@ export const es: I18nDict = {
   events: { title: 'Eventos', hint: 'Pasa el cursor para pausar. Desplázate para continuar.', pause: 'Pausa', explore: 'Explorar', scrollDiscover: 'Baja para descubrir' },
   gallery: {
     title: 'Galería de Obras',
+    subtitle: 'ARCHIVO LINGUA UNIVERSALIS',
+    portalLabel: 'El viaje al mundo de Lingua Universalis',
     lede: 'Busca, filtra por artista y abre una obra. La URL se vuelve compartible para esa obra.',
     searchPlaceholder: 'Buscar por artista / título...',
     artistFilterAll: 'Todos los artistas',
@@ -72,5 +76,18 @@ export const es: I18nDict = {
     success: 'Señal transmitida. Conexión establecida.',
     error: 'Interferencia de frecuencia. Por favor, inténtalo de nuevo.',
     back: 'Volver',
+  },
+  declaration: {
+    title: 'DECLARACIÓN DEL PROYECTO',
+    projectTitle: '«LINGUA UNIVERSALIS. EL ARTE DE LA CREACIÓN»',
+    projectDescription: 'El proyecto "Lingua universalis. El Arte de la Creación" presenta obras de arte en diversos campos (pintura, escultura, arte digital) de artistas profesionales de Cuba, Venezuela, Armenia, España, así como de sus colegas rusos.',
+    goalTitle: 'El objetivo del proyecto:',
+    goalDescription: 'llamar la atención sobre el hecho de que el lenguaje del arte, siendo el más antiguo, universal y comprensible para cada persona en el planeta, se utiliza hoy en día, por regla general, para fines utilitarios: en el campo de la propaganda, el diseño, etc., para obtener beneficios comerciales, ignorando sus posibilidades inmensamente más amplias. Al poseer una capacidad universal para penetrar en las esferas espirituales, el arte debe convertirse plenamente en una herramienta para explorar al hombre, su relación con el Universo y, en última instancia, el encuentro con uno mismo. Hoy en día es una cuestión de supervivencia de la civilización humana.',
+    fragmentationTitle: 'Fragmentación y Tensión',
+    fragmentationDescription: 'El mundo moderno ha alcanzado el cenit de la fragmentación y la tensión. Al mismo tiempo, vemos una tendencia en varios países y pueblos hacia el acercamiento; sin embargo, el verdadero acercamiento de las diferentes culturas solo es posible sobre la base de un lenguaje común, que es el arte, así como la conciencia de un pasado común condicionado por un origen único del hombre. El arte, al mismo tiempo, debe ser puro, libre de la presión de las plataformas y estructuras comerciales que dictan su voluntad al artista. A este arte puro e independiente lo llamamos el Arte de la Creación.',
+    artistsTitle: 'Artistas',
+    artistsDescription: 'Joslen Orsini, Marichel Rodes, Peter Tsvetkov, Evgeny Globenko, Omar Godinez, Tomas Arutyunyan, Andrey Vaganov presentan sus obras llenas de búsquedas espirituales e interesantes soluciones para su encarnación plástica.',
+    visitDescription: 'Al visitar la exposición "Lingua universalis. El Arte de la Creación", el espectador se sorprenderá al descubrir cuán originales y, al mismo tiempo, cercanos en espíritu a los rusos son las obras de los maestros modernos cuya creatividad se originó a muchos miles de kilómetros de Moscú.',
+    messageDescription: 'Los participantes ven este proyecto como un mensaje a los jóvenes de todos los continentes, porque el mundo en el que vivirán depende de su elección.',
   },
 };

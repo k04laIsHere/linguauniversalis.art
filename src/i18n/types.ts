@@ -14,6 +14,8 @@ export type I18nDict = {
     movie: string;
     brandHint: string;
     viewAsList: string;
+    backToArchive: string;
+    journeyToWorld: string;
   };
   cave: {
     title: string;
@@ -52,6 +54,8 @@ export type I18nDict = {
   };
   gallery: {
     title: string;
+    subtitle: string;
+    portalLabel: string;
     lede: string;
     searchPlaceholder: string;
     artistFilterAll: string;
@@ -77,6 +81,19 @@ export type I18nDict = {
     success: string;
     error: string;
     back: string;
+  };
+  declaration: {
+    title: string;
+    projectTitle: string;
+    projectDescription: string;
+    goalTitle: string;
+    goalDescription: string;
+    fragmentationTitle: string;
+    fragmentationDescription: string;
+    artistsTitle: string;
+    artistsDescription: string;
+    visitDescription: string;
+    messageDescription: string;
   };
 };
 

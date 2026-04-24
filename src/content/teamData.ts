@@ -70,6 +70,16 @@ export const teamMembers: TeamMember[] = [
     blurbEn: 'Calligrapher and abstract artist exploring the themes of “Silence” and the “Holy Grail.”',
     blurbEs: 'Calígrafo y artista abstracto, investiga el «Silencio» y el «Santo Grial».',
   },
+  {
+    id: 'meritxell-rodes',
+    name: 'Meritxell Rodes',
+    nameRu: 'Меричель Родес',
+    nameEs: 'Meritxell Rodes',
+    photoSrc: '/assets/images/team/meritxell-rodes.jpg',
+    blurbRu: 'Представитель современного наивного искусства с «каталонским оттенком», певица и переводчик.',
+    blurbEn: 'Representative of modern naive art with a "Catalan touch," singer, and translator.',
+    blurbEs: 'Representante del arte naíf moderno con un "toque catalán", cantante y traductora.',
+  },
 ];
 
 

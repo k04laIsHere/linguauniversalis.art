@@ -25,9 +25,9 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
       }
       // Fallback to localStorage
       const saved = localStorage.getItem(STORAGE_KEY);
-      return (saved === 'gallery' || saved === 'immersive') ? saved : 'immersive';
+      return (saved === 'gallery' || saved === 'immersive') ? saved : 'gallery';
     }
-    return 'immersive';
+    return 'gallery';
   });
 
   useEffect(() => {

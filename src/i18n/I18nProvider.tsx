@@ -10,7 +10,6 @@ const STORAGE_KEY = 'lu_lang';
 function getInitialLang(): Lang {
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved === 'en') return 'en';
-  if (saved === 'es') return 'es';
   return 'ru';
 }
 

@@ -1,0 +1,31 @@
+{
+  "tasks": [
+    {
+      "id": "task-1",
+      "name": "Default Archive & Journey Portal",
+      "status": "verified",
+      "assignedTo": "agent:main:subagent:3b582257-1eb8-48e7-8d7f-0183e0d7d540",
+      "feedback": "1. Tracking (0.3em) is clunky on small buttons; preserve wide tracking for titles, but reduce for action labels. 2. Mobile sticky artist column needs better visual separation (shadow/border) and spacing. 3. Sidebar 'Journey' button is too heavy; make it secondary to the Archive nav.",
+      "lastUpdate": 1713916900
+    },
+    {
+      "id": "task-2",
+      "name": "Add Meritxell Rodes",
+      "status": "verified",
+      "assignedTo": "agent:main:subagent:b8bd61ba-0495-410c-bf5f-2dfeed4deb18",
+      "lastUpdate": 1713913200
+    },
+    {
+      "id": "task-3",
+      "name": "Project Declaration Modal",
+      "status": "verified",
+      "assignedTo": "agent:main:subagent:668f97b7-be0c-41c0-a7e0-9a1d532ad5b2",
+      "feedback": "1. Close button is above the header line; move it below or align it strictly with header baseline. 2. Implementation of scroll-lock is clunky; use a cleaner abstraction or ensure no layout shift on scrollbar removal. 3. Missing ES translation for the Declaration content.",
+      "lastUpdate": 1713917000
+    }
+  ],
+  "auditQueue": [],
+  "startTime": 1713902400,
+  "durationHours": 6,
+  "cycleCount": 1
+}

@@ -20,6 +20,23 @@ export function GalleryMode() {
   const [isMobile, setIsMobile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
+  const [isDeclarationOpen, setIsDeclarationOpen] = useState(false);
+
+  // Body scroll lock when modal is open
+  useEffect(() => {
+    if (isDeclarationOpen) {
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = `${scrollbarWidth}px`;
+    } else {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isDeclarationOpen]);
 
   // Detect mobile on mount and resize
   useEffect(() => {
@@ -30,13 +47,13 @@ export function GalleryMode() {
   }, []);
 
   const languages: { code: Lang; label: string }[] = [
-    { code: 'en', label: 'EN' },
     { code: 'ru', label: 'RU' },
-    { code: 'es', label: 'ES' },
+    { code: 'en', label: 'EN' },
   ];
 
   // Dynamically group works by artist based on the current galleryWorks order
   const artistEntries = useMemo(() => {
+    if (!galleryWorks) return [];
     const worksByArtist = galleryWorks.reduce((acc, work) => {
       if (!acc[work.artist]) {
         acc[work.artist] = {};
@@ -263,10 +280,18 @@ export function GalleryMode() {
 
           <button
             className={styles.sidebarImmersionBtn}
+            onClick={() => setIsDeclarationOpen(true)}
+            aria-label={t.declaration.title}
+          >
+            {t.declaration.title}
+          </button>
+
+          <button
+            className={styles.sidebarSecondaryBtn}
             onClick={toggleMode}
             aria-label="Enter immersive mode"
           >
-            {lang === 'ru' ? 'Иммерсия' : lang === 'es' ? 'Inmersión' : 'Immersion'}
+            {t.header.journeyToWorld}
           </button>
 
           <nav className={styles.sidebarNav}>
@@ -351,15 +376,26 @@ export function GalleryMode() {
         {/* Manifesto Section */}
         <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
           <div className={styles.manifestoContent}>
+            <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
+            <p className={styles.manifestoSubtitle}>{t.gallery.subtitle}</p>
+
             <button
-              className={styles.mainImmersionBtn}
+              className={styles.portalBtn}
               onClick={toggleMode}
               aria-label="Enter immersive mode"
             >
-              {lang === 'ru' ? 'Иммерсия' : lang === 'es' ? 'Inmersión' : 'Immersion'}
+              <span className={styles.portalLabel}>{t.gallery.portalLabel}</span>
+              <span className={styles.portalIcon}>✧</span>
             </button>
-            <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
-            <p className={styles.manifestoSubtitle}>{t.cave.subtitle}</p>
+
+            <button
+              className={styles.declarationBtn}
+              onClick={() => setIsDeclarationOpen(true)}
+              aria-label={t.declaration.title}
+            >
+              <span className={styles.btnIcon}>◈</span>
+              <span className={styles.btnText}>{t.declaration.title}</span>
+            </button>
 
             <div className={styles.manifestoText}>
               {t.cave.manifesto.map((line, i) => (
@@ -540,6 +576,37 @@ export function GalleryMode() {
           <Contact />
         </div>
       </main>
+
+      {/* Declaration Modal */}
+      {isDeclarationOpen && (
+        <div className={styles.modalOverlay} onClick={() => setIsDeclarationOpen(false)}>
+          <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
+            <header className={styles.modalHeader}>
+              <h2 className={styles.modalTitle}>
+                {t.declaration.title}
+              </h2>
+              <button 
+                className={styles.modalClose} 
+                onClick={() => setIsDeclarationOpen(false)}
+                aria-label="Close modal"
+              >
+                ✕
+              </button>
+            </header>
+            <div className={styles.modalBody}>
+              <div className={styles.declarationText}>
+                <h3>{t.declaration.projectTitle}</h3>
+                <p>{t.declaration.projectDescription}</p>
+                <p><strong>{t.declaration.goalTitle}</strong> {t.declaration.goalDescription}</p>
+                <p>{t.declaration.fragmentationDescription}</p>
+                <p>{t.declaration.artistsTitle}: {t.declaration.artistsDescription}</p>
+                <p>{t.declaration.visitDescription}</p>
+                <p>{t.declaration.messageDescription}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
