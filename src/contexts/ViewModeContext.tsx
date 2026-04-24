@@ -17,17 +17,19 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
     if (typeof window !== 'undefined') {
       // Prioritize URL hash for deep linking
       const [anchor] = window.location.hash.split('?');
+      if (anchor === '#immersive' || anchor === '#gallery') {
+        return 'immersive';
+      }
       if (anchor === '#archive') {
         return 'gallery';
       }
-      if (anchor === '#gallery' || anchor === '#immersive') {
-        return 'immersive';
-      }
-      // Fallback to localStorage
+      // Fallback to localStorage, default to gallery
       const saved = localStorage.getItem(STORAGE_KEY);
-      return (saved === 'gallery' || saved === 'immersive') ? saved : 'immersive';
+      if (saved === 'immersive') return 'immersive';
+      if (saved === 'gallery') return 'gallery';
+      return 'gallery';
     }
-    return 'immersive';
+    return 'gallery';
   });
 
   useEffect(() => {

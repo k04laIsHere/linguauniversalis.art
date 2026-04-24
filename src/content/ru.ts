@@ -50,7 +50,8 @@ export const ru: I18nDict = {
   gallery: {
     title: 'Галерея работ',
     subtitle: 'АРХИВ LINGUA UNIVERSALIS',
-    portalLabel: 'Путешествие в мир Lingua Universalis',
+    portalLabel: 'Начать путешествие',
+    intro: 'Мир Lingua Universalis — это пространство, где исчезают границы и время. Код нашего единства зашифрован в каждом образе.',
     lede: 'Поиск, фильтр по автору и быстрый просмотр. Ссылка на выбранную работу — в адресной строке.',
     searchPlaceholder: 'Поиск по автору / названию…',
     artistFilterAll: 'Все авторы',

@@ -3,10 +3,10 @@
     {
       "id": "task-1",
       "name": "Default Archive & Journey Portal",
-      "status": "verified",
+      "status": "auditing",
       "assignedTo": "agent:main:subagent:3b582257-1eb8-48e7-8d7f-0183e0d7d540",
       "feedback": "1. Tracking (0.3em) is clunky on small buttons; preserve wide tracking for titles, but reduce for action labels. 2. Mobile sticky artist column needs better visual separation (shadow/border) and spacing. 3. Sidebar 'Journey' button is too heavy; make it secondary to the Archive nav.",
-      "lastUpdate": 1713916900
+      "lastUpdate": 1777014782
     },
     {
       "id": "task-2",

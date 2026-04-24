@@ -50,7 +50,8 @@ export const en: I18nDict = {
   gallery: {
     title: 'Works Gallery',
     subtitle: 'LINGUA UNIVERSALIS ARCHIVE',
-    portalLabel: 'Journey to Lingua Universalis world',
+    portalLabel: 'Start the journey',
+    intro: 'The world of Lingua Universalis is a space where boundaries and time disappear. The code of our unity is encrypted in every image.',
     lede: 'Search, filter by artist, and open a work. The URL becomes shareable for that work.',
     searchPlaceholder: 'Search by artist / title…',
     artistFilterAll: 'All artists',

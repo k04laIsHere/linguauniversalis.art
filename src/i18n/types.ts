@@ -56,6 +56,7 @@ export type I18nDict = {
     title: string;
     subtitle: string;
     portalLabel: string;
+    intro: string;
     lede: string;
     searchPlaceholder: string;
     artistFilterAll: string;

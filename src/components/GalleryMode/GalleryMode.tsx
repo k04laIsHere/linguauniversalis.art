@@ -13,7 +13,7 @@ import styles from './GalleryMode.module.css';
 
 export function GalleryMode() {
   const { t, lang, setLang } = useI18n();
-  const { toggleMode } = useViewMode();
+  const { toggleMode, mode } = useViewMode();
   const collectionSectionRef = useRef<HTMLElement | null>(null);
   const eventsSectionRef = useRef<HTMLElement | null>(null);
   const manifestoSectionRef = useRef<HTMLElement | null>(null);
@@ -259,6 +259,59 @@ export function GalleryMode() {
     return () => ScrollTrigger.getAll().forEach(st => st.kill());
   }, [artistEntries.length, isMobile]);
 
+  const toggleModeWithTransition = () => {
+    // Add a black fade overlay before toggling
+    const overlay = document.createElement('div');
+    overlay.style.position = 'fixed';
+    overlay.style.inset = '0';
+    overlay.style.backgroundColor = 'black';
+    overlay.style.zIndex = '9999';
+    overlay.style.opacity = '0';
+    overlay.style.transition = 'opacity 0.6s ease';
+    overlay.style.pointerEvents = 'none';
+    document.body.appendChild(overlay);
+
+    requestAnimationFrame(() => {
+      overlay.style.opacity = '1';
+    });
+
+    setTimeout(() => {
+      toggleMode();
+      // The new mode will mount and we should fade out the overlay
+      setTimeout(() => {
+        overlay.style.opacity = '0';
+        setTimeout(() => {
+          document.body.removeChild(overlay);
+        }, 600);
+      }, 300);
+    }, 600);
+  };
+
+  const handleRipple = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const btn = e.currentTarget;
+    const rect = btn.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = e.clientX - rect.left - size / 2;
+    const y = e.clientY - rect.top - size / 2;
+
+    const ripple = document.createElement('span');
+    ripple.style.width = ripple.style.height = `${size}px`;
+    ripple.style.left = `${x}px`;
+    ripple.style.top = `${y}px`;
+    ripple.style.background = 'rgba(0, 0, 0, 0.4)'; // Changed to dark ripple
+    ripple.className = styles.ripple;
+
+    btn.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+  };
+
+  const handlePortalClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    handleRipple(e);
+    toggleModeWithTransition();
+  };
+
+  if (mode === 'immersive') return null;
+
   return (
     <div className={`${styles.root} ${isMenuOpen ? styles.menuOpen : ''}`}>
       <div className={styles.grain} />
@@ -287,14 +340,6 @@ export function GalleryMode() {
             {t.declaration.title}
           </button>
 
-          <button
-            className={styles.sidebarSecondaryBtn}
-            onClick={toggleMode}
-            aria-label="Enter immersive mode"
-          >
-            {t.header.journeyToWorld}
-          </button>
-
           <nav className={styles.sidebarNav}>
             {navItems.map((item, i) => (
               <div key={item.id} className={styles.navGroup}>
@@ -306,6 +351,14 @@ export function GalleryMode() {
                   <span className={styles.navNumber}>{(i + 1).toString().padStart(2, '0')}</span>
                   <span className={styles.navLabel}>{item.label}</span>
                 </button>
+                {item.id === 'manifesto' && (
+                  <button
+                    className={styles.sidebarDeclarationLink}
+                    onClick={() => setIsDeclarationOpen(true)}
+                  >
+                    {t.declaration.title}
+                  </button>
+                )}
                 {item.children && (
                   <div className={styles.navChildren}>
                     {item.children.map((child, j) => (
@@ -378,15 +431,19 @@ export function GalleryMode() {
         <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
           <div className={styles.manifestoContent}>
             <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
-            <p className={styles.manifestoSubtitle}>{t.gallery.subtitle}</p>
+            
+            <p className={styles.philosophicalIntro}>{t.gallery.intro}</p>
 
             <button
               className={styles.portalBtn}
-              onClick={toggleMode}
+              onClick={handlePortalClick}
               aria-label="Enter immersive mode"
             >
               <span className={styles.portalLabel}>{t.gallery.portalLabel}</span>
-              <span className={styles.portalIcon}>✧</span>
+              <svg className={styles.portalArrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+                <polyline points="12 5 19 12 12 19"></polyline>
+              </svg>
             </button>
 
             <div className={styles.manifestoText}>
@@ -406,7 +463,7 @@ export function GalleryMode() {
               className={styles.declarationBtn}
               onClick={() => setIsDeclarationOpen(true)}
               aria-label={t.declaration.title}
-              style={{ marginTop: '4rem', marginBottom: '2rem' }}
+              style={{ marginTop: '4rem', marginBottom: '4rem' }}
             >
               <span className={styles.btnIcon}>◈</span>
               <span className={styles.btnText}>{t.declaration.title}</span>
