@@ -73,12 +73,12 @@ export const teamMembers: TeamMember[] = [
   {
     id: 'meritxell-rodes',
     name: 'Meritxell Rodes',
-    nameRu: 'Меричель Родес',
+    nameRu: 'Маричель Родес',
     nameEs: 'Meritxell Rodes',
     photoSrc: '/assets/images/team/meritxell-rodes.jpg',
-    blurbRu: 'Представитель современного наивного искусства с «каталонским оттенком», певица и переводчик.',
-    blurbEn: 'Representative of modern naive art with a "Catalan touch," singer, and translator.',
-    blurbEs: 'Representante del arte naíf moderno con un "toque catalán", cantante y traductora.',
+    blurbRu: 'Представитель современного наивного искусства с «каталонским оттенком», певица и художник.',
+    blurbEn: 'Representative of modern naive art with a "Catalan touch," singer, and artist.',
+    blurbEs: 'Representante del arte naíf moderno con un "toque catalán", cantante y artista.',
   },
 ];
 

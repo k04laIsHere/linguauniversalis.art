@@ -535,15 +535,15 @@
 }
 
 .breachLabel {
-  font-size: clamp(14px, 2vw, 22px);
-  letter-spacing: 0.4em;
+  font-size: clamp(12px, 1.8vw, 20px);
+  letter-spacing: 0.3em;
   text-transform: uppercase;
   color: #000000;
   margin-bottom: 0.2em;
   display: block;
   font-weight: 400;
   line-height: 1.1;
-  padding-left: 0.4em;
+  padding-left: 0.3em;
 }
 
 .breachLine {

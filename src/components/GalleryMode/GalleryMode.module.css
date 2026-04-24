@@ -935,12 +935,12 @@
 .modalContent {
   background: #fcfcf9;
   width: 100%;
-  max-width: 900px;
+  max-width: 1200px;
   max-height: 90vh;
   position: relative;
   display: flex;
   flex-direction: column;
-  padding: 4rem;
+  padding: 5rem;
   cursor: default;
   border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: 0 40px 100px rgba(0, 0, 0, 0.08);

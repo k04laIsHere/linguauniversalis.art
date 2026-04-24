@@ -22,10 +22,24 @@
       "assignedTo": "agent:main:subagent:668f97b7-be0c-41c0-a7e0-9a1d532ad5b2",
       "feedback": "1. Close button is above the header line; move it below or align it strictly with header baseline. 2. Implementation of scroll-lock is clunky; use a cleaner abstraction or ensure no layout shift on scrollbar removal. 3. Missing ES translation for the Declaration content.",
       "lastUpdate": 1713917000
+    },
+    {
+      "id": "correction-cycle-v2",
+      "name": "Correction & Refinement Cycle (Urgent)",
+      "status": "verified",
+      "assignedTo": "agent:main:subagent:22a2f735-173a-4563-9107-dbd403e6303b",
+      "requirements": [
+        "Default View: JOURNEY (root domain)",
+        "Restore Spanish: Full RU/EN/ES support",
+        "Declaration Modal: Wider layout, relocated button (after manifesto)",
+        "Renaming: 'Back to Source' (EN/RU/ES), update labels in Cave.tsx & Header",
+        "Meritxell Rodes: 'Translator' -> 'Artist', Name: 'Маричель' (RU)"
+      ],
+      "lastUpdate": 1713945900
     }
   ],
   "auditQueue": [],
   "startTime": 1713902400,
   "durationHours": 6,
-  "cycleCount": 1
+  "cycleCount": 2
 }

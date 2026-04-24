@@ -49,6 +49,7 @@ export function GalleryMode() {
   const languages: { code: Lang; label: string }[] = [
     { code: 'ru', label: 'RU' },
     { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' },
   ];
 
   // Dynamically group works by artist based on the current galleryWorks order
@@ -388,15 +389,6 @@ export function GalleryMode() {
               <span className={styles.portalIcon}>✧</span>
             </button>
 
-            <button
-              className={styles.declarationBtn}
-              onClick={() => setIsDeclarationOpen(true)}
-              aria-label={t.declaration.title}
-            >
-              <span className={styles.btnIcon}>◈</span>
-              <span className={styles.btnText}>{t.declaration.title}</span>
-            </button>
-
             <div className={styles.manifestoText}>
               {t.cave.manifesto.map((line, i) => (
                 <p key={i} className={styles.manifestoLine}>
@@ -409,6 +401,16 @@ export function GalleryMode() {
                 </p>
               ))}
             </div>
+
+            <button
+              className={styles.declarationBtn}
+              onClick={() => setIsDeclarationOpen(true)}
+              aria-label={t.declaration.title}
+              style={{ marginTop: '4rem', marginBottom: '2rem' }}
+            >
+              <span className={styles.btnIcon}>◈</span>
+              <span className={styles.btnText}>{t.declaration.title}</span>
+            </button>
           </div>
         </section>
 

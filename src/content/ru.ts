@@ -13,8 +13,8 @@ export const ru: I18nDict = {
     contact: 'Связаться',
     movie: 'Фильм',
     brandHint: 'Искусство творения',
-    viewAsList: 'Вернуться в архив',
-    backToArchive: 'Назад в архив',
+    viewAsList: 'Назад к Истоку',
+    backToArchive: 'Назад к Истоку',
     journeyToWorld: 'Путешествие в мир Lingua Universalis',
   },
   cave: {
@@ -31,7 +31,7 @@ export const ru: I18nDict = {
     flashlightTitle: 'Фонарь',
     flashlightHint: 'Двигайтесь курсором, чтобы проявить пещеру.',
     flashlightHint2: 'Прокрутите вниз — путь начинается.',
-    breachLabel: 'Перейти\nв архив',
+    breachLabel: 'Назад\nк Истоку',
     breachDesc: 'Прямой доступ к результатам.\nПросмотр портфолио и событий',
     artifacts: [
       { title: 'Ущелье Карнарвон', location: 'Австралия' },

@@ -13,8 +13,8 @@ export const es: I18nDict = {
     contact: 'Contacto',
     movie: 'Documental',
     brandHint: 'El Arte de la Creación',
-    viewAsList: 'Entrar al archivo',
-    backToArchive: 'Volver al archivo',
+    viewAsList: 'Volver al Origen',
+    backToArchive: 'Volver al Origen',
     journeyToWorld: 'El viaje al mundo de Lingua Universalis',
   },
   cave: {
@@ -31,7 +31,7 @@ export const es: I18nDict = {
     flashlightTitle: 'Linterna',
     flashlightHint: 'Mueve el cursor para revelar la cueva.',
     flashlightHint2: 'Desliza para comenzar',
-    breachLabel: 'Entrar al\narchivo',
+    breachLabel: 'Volver\nal Origen',
     breachDesc: 'Acceso directo a los resultados.\nVer el portafolio y eventos',
     artifacts: [
       { title: 'Desfiladero de Carnarvon', location: 'Australia' },

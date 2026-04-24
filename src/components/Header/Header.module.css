@@ -182,15 +182,15 @@
   appearance: none;
   border: 1px solid rgba(255, 255, 255, 0.15);
   background: rgba(255, 255, 255, 0.05);
-  height: 44px;
-  padding: 0 16px;
-  border-radius: 22px;
+  height: 40px; /* Slightly shorter */
+  padding: 0 14px; /* Slightly tighter */
+  border-radius: 20px;
   display: flex;
   align-items: center;
   color: white;
   font-family: var(--font-title);
-  font-size: 12px;
-  letter-spacing: 0.08em;
+  font-size: 11px; /* Smaller */
+  letter-spacing: 0.05em; /* Reduced tracking */
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.3s ease;

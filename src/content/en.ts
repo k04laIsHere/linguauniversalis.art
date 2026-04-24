@@ -13,8 +13,8 @@ export const en: I18nDict = {
     contact: 'Contact',
     movie: 'Documentary',
     brandHint: 'Art of Creation',
-    viewAsList: 'Back to archive',
-    backToArchive: 'Back to archive',
+    viewAsList: 'Back to Source',
+    backToArchive: 'Back to Source',
     journeyToWorld: 'The journey to Lingua Universalis world',
   },
   cave: {
@@ -31,7 +31,7 @@ export const en: I18nDict = {
     flashlightTitle: 'Flashlight',
     flashlightHint: 'Move the cursor to reveal the cave.',
     flashlightHint2: 'Scroll down—the journey begins.',
-    breachLabel: 'Enter\nThe archive',
+    breachLabel: 'Back to\nSource',
     breachDesc: 'Direct access to the results.\nView the portfolio and events',
     artifacts: [
       { title: 'Carnarvon Gorge', location: 'Australia' },

@@ -75,6 +75,7 @@ export function Header() {
   const languages: { code: typeof lang; label: string }[] = [
     { code: 'ru', label: 'RU' },
     { code: 'en', label: 'EN' },
+    { code: 'es', label: 'ES' },
   ];
 
   return (
