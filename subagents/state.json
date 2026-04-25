@@ -36,6 +36,20 @@
         "Meritxell Rodes: 'Translator' -> 'Artist', Name: 'Маричель' (RU)"
       ],
       "lastUpdate": 1713945900
+    },
+    {
+      "id": "aesthetic-refinement-v3",
+      "name": "Aesthetic Refinement & Navigation Cleanup",
+      "status": "completed",
+      "assignedTo": "agent:main:subagent:1e502e23-82f4-4d20-95cc-6f5a60879bfe",
+      "requirements": [
+        "Default View: ARCHIVE (Gallery Mode) strictly forced on landing",
+        "Sidebar: Cleaned up buttons, added 'Start the Journey' secondary style",
+        "Journey Portal: New minimalist frame, lower verticality, gold subtitle",
+        "Mobile Fix: Z-index correction for Close button in Archive menu",
+        "Cleanup: Removed yellow from main buttons"
+      ],
+      "lastUpdate": 1777014782
     }
   ],
   "auditQueue": [],

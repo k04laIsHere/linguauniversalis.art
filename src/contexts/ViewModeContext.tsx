@@ -23,14 +23,20 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
       if (anchor === '#archive') {
         return 'gallery';
       }
-      // Fallback to localStorage, default to gallery
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved === 'immersive') return 'immersive';
-      if (saved === 'gallery') return 'gallery';
+      // Fallback to gallery
       return 'gallery';
     }
     return 'gallery';
   });
+
+  useEffect(() => {
+    // Force gallery mode on initial load if no specific hash is set
+    if (typeof window !== 'undefined' && !window.location.hash) {
+      setModeState('gallery');
+      localStorage.setItem(STORAGE_KEY, 'gallery');
+      window.history.replaceState(null, '', '#archive');
+    }
+  }, []);
 
   useEffect(() => {
     const handleHashChange = () => {

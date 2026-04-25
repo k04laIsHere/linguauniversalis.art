@@ -97,7 +97,7 @@
   color: #fcfcf9;
 }
 
-.sidebarImmersionBtn {
+.sidebarJourneyBtn {
   background: #fcfcf9;
   border: 1px solid #1a1a1a;
   padding: 0.8rem 1.2rem;
@@ -109,34 +109,36 @@
   transition: all 0.3s ease;
   width: 100%;
   text-transform: uppercase;
-  margin-bottom: 2rem;
+  margin-bottom: 0.5rem;
 }
 
-.sidebarImmersionBtn:hover {
+.sidebarJourneyBtn:hover {
   background: #1a1a1a;
   color: #fcfcf9;
   transform: translateY(-2px);
 }
 
 .sidebarDeclarationLink {
-  background: #1a1a1a;
-  border: none;
+  background: #fcfcf9;
+  border: 1px solid #1a1a1a;
   padding: 0.5rem 1rem;
   font-size: 0.7rem;
-  color: #fcfcf9;
-  text-align: left;
+  color: #1a1a1a;
+  text-align: center;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: var(--font-body);
+  font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  margin-top: 0.5rem;
-  margin-left: 2.2rem;
-  width: fit-content;
+  margin-top: 1rem;
+  margin-left: 0;
+  width: 100%;
 }
 
 .sidebarDeclarationLink:hover {
-  background: #000;
+  background: #1a1a1a;
+  color: #fcfcf9;
   transform: translateX(4px);
 }
 
@@ -358,128 +360,45 @@
 .burgerActive span::before { transform: rotate(45deg); top: 0; }
 .burgerActive span::after { transform: rotate(-45deg); top: 0; }
 
+.burgerActive {
+  z-index: 2200;
+}
+
 /* Manifesto Section */
 .manifestoSection {
   padding: 12rem 4rem 8rem;
-  min-height: 80vh;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
   align-items: flex-start;
 }
 
-.mainImmersionBtn {
-  background: #1a1a1a;
-  color: #fcfcf9;
-  border: none;
-  padding: 1rem 2.5rem;
-  font-size: 0.9rem;
+.titleGroup {
+  margin-bottom: 12rem;
+}
+
+.brandSubtitle {
+  font-family: var(--font-body);
   font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  cursor: pointer;
-  margin-bottom: 5.5rem;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-}
-
-.btnText {
-  position: relative;
-  z-index: 1;
-}
-
-.mainImmersionBtn::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 0;
-  height: 100%;
-  background: #d4af37;
-  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  z-index: 0;
-  border-radius: 4px;
-}
-
-.mainImmersionBtn:hover::before {
-  width: 100%;
-}
-
-.mainImmersionBtn:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 15px 30px rgba(212, 175, 55, 0.3);
-}
-
-.declarationBtn {
-  background: transparent;
-  color: #1a1a1a;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  padding: 1rem 2.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  cursor: pointer;
-  margin-bottom: 5.5rem;
-  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  display: flex;
-  align-items: center;
-  gap: 1.2rem;
-  border-radius: 4px;
-  position: relative;
-  overflow: hidden;
-  margin-left: 0;
-}
-
-.declarationBtn:hover {
-  background: rgba(0, 0, 0, 0.03);
-  border-color: #1a1a1a;
-  transform: translateY(-4px);
-}
-
-.btnIcon {
-  font-size: 1.1rem;
-  animation: pulseIcon 2s infinite ease-in-out;
-}
-
-@keyframes pulseIcon {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.9); }
-}
-
-.manifestoContent {
-  max-width: 1100px;
-  width: 100%;
-}
-
-.manifestoTitle {
-  font-family: var(--font-title);
-  font-size: clamp(3rem, 10vw, 6rem);
-  font-weight: 400;
-  margin: 0 0 2rem 0;
-  line-height: 0.9;
-  color: #1a1a1a;
-}
-
-.manifestoSubtitle {
-  font-size: 0.8rem;
-  font-weight: 600;
-  margin: 0 0 6rem 0;
+  font-size: 0.85rem;
   color: #d4af37;
-  letter-spacing: 0.15em;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
-  border-left: 3px solid #d4af37;
-  padding-left: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.portalFrame {
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  padding: 3rem;
+  margin-bottom: 6rem;
+  max-width: 700px;
+  width: 100%;
 }
 
 .philosophicalIntro {
   font-size: 1.1rem;
   line-height: 1.6;
-  margin: 0 0 2rem 0;
+  margin: 0 0 3rem 0;
   color: #666;
   max-width: 600px;
   opacity: 0.8;
@@ -491,12 +410,11 @@
   border: 1px solid #1a1a1a;
   padding: 1.5rem 2.5rem;
   width: 100%;
-  max-width: 600px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   cursor: pointer;
-  margin-bottom: 6rem;
+  margin-bottom: 0;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
   border-radius: 0;
   position: relative;
@@ -1084,7 +1002,8 @@
     height: 100vh;
     transform: translateX(-100%);
     background: #fcfcf9;
-    padding: 3rem 2rem 1.5rem;
+    padding: 6rem 2rem 1.5rem;
+    z-index: 2100;
   }
 
   .sidebarInner {

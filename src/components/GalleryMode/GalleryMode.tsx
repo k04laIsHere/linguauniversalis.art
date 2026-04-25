@@ -333,11 +333,11 @@ export function GalleryMode() {
           </div>
 
           <button
-            className={styles.sidebarImmersionBtn}
-            onClick={() => setIsDeclarationOpen(true)}
-            aria-label={t.declaration.title}
+            className={styles.sidebarJourneyBtn}
+            onClick={toggleModeWithTransition}
+            aria-label="Start the Journey"
           >
-            {t.declaration.title}
+            {lang === 'ru' ? 'Начать Путешествие' : lang === 'es' ? 'Comenzar el Viaje' : 'Start the Journey'}
           </button>
 
           <nav className={styles.sidebarNav}>
@@ -430,21 +430,28 @@ export function GalleryMode() {
         {/* Manifesto Section */}
         <section ref={manifestoSectionRef} id="manifesto" className={styles.manifestoSection}>
           <div className={styles.manifestoContent}>
-            <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
+            <div className={styles.titleGroup}>
+              <h1 className={styles.manifestoTitle}>{t.cave.title}</h1>
+              <div className={styles.brandSubtitle}>
+                {lang === 'ru' ? 'ИСКУССТВО ТВОРЕНИЯ' : lang === 'es' ? 'EL ARTE DE LA CREACIÓN' : 'THE ART OF CREATION'}
+              </div>
+            </div>
             
-            <p className={styles.philosophicalIntro}>{t.gallery.intro}</p>
+            <div className={styles.portalFrame}>
+              <p className={styles.philosophicalIntro}>{t.gallery.intro}</p>
 
-            <button
-              className={styles.portalBtn}
-              onClick={handlePortalClick}
-              aria-label="Enter immersive mode"
-            >
-              <span className={styles.portalLabel}>{t.gallery.portalLabel}</span>
-              <svg className={styles.portalArrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="5" y1="12" x2="19" y2="12"></line>
-                <polyline points="12 5 19 12 12 19"></polyline>
-              </svg>
-            </button>
+              <button
+                className={styles.portalBtn}
+                onClick={handlePortalClick}
+                aria-label="Enter immersive mode"
+              >
+                <span className={styles.portalLabel}>{t.gallery.portalLabel}</span>
+                <svg className={styles.portalArrow} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="5" y1="12" x2="19" y2="12"></line>
+                  <polyline points="12 5 19 12 12 19"></polyline>
+                </svg>
+              </button>
+            </div>
 
             <div className={styles.manifestoText}>
               {t.cave.manifesto.map((line, i) => (
@@ -458,16 +465,6 @@ export function GalleryMode() {
                 </p>
               ))}
             </div>
-
-            <button
-              className={styles.declarationBtn}
-              onClick={() => setIsDeclarationOpen(true)}
-              aria-label={t.declaration.title}
-              style={{ marginTop: '4rem', marginBottom: '4rem' }}
-            >
-              <span className={styles.btnIcon}>◈</span>
-              <span className={styles.btnText}>{t.declaration.title}</span>
-            </button>
           </div>
         </section>
 
