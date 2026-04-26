@@ -23,18 +23,18 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
       if (anchor === '#archive') {
         return 'gallery';
       }
-      // Fallback to gallery
-      return 'gallery';
     }
     return 'gallery';
   });
 
   useEffect(() => {
-    // Force gallery mode on initial load if no specific hash is set
-    if (typeof window !== 'undefined' && !window.location.hash) {
-      setModeState('gallery');
-      localStorage.setItem(STORAGE_KEY, 'gallery');
-      window.history.replaceState(null, '', '#archive');
+    // Force archive hash on initial load if no specific hash is set
+    if (typeof window !== 'undefined') {
+      const [anchor] = window.location.hash.split('?');
+      if (!anchor) {
+        setModeState('gallery');
+        window.history.replaceState(null, '', '#archive');
+      }
     }
   }, []);
 

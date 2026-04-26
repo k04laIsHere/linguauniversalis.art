@@ -43,14 +43,14 @@ export function Loader({ onLoaded }: { onLoaded: () => void }) {
 
       if (loadedCount === totalCount) {
         setTimeout(() => {
-          handleSelectMode('immersive');
+          handleSelectMode('gallery');
         }, 500);
       }
     };
 
     if (totalCount === 0) {
       setProgress(100);
-      handleSelectMode('immersive');
+      handleSelectMode('gallery');
       return;
     }
 

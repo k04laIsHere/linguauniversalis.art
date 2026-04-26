@@ -3,7 +3,7 @@
     {
       "id": "task-1",
       "name": "Default Archive & Journey Portal",
-      "status": "auditing",
+      "status": "verified",
       "assignedTo": "agent:main:subagent:3b582257-1eb8-48e7-8d7f-0183e0d7d540",
       "feedback": "1. Tracking (0.3em) is clunky on small buttons; preserve wide tracking for titles, but reduce for action labels. 2. Mobile sticky artist column needs better visual separation (shadow/border) and spacing. 3. Sidebar 'Journey' button is too heavy; make it secondary to the Archive nav.",
       "lastUpdate": 1777014782
@@ -40,7 +40,7 @@
     {
       "id": "aesthetic-refinement-v3",
       "name": "Aesthetic Refinement & Navigation Cleanup",
-      "status": "completed",
+      "status": "verified",
       "assignedTo": "agent:main:subagent:1e502e23-82f4-4d20-95cc-6f5a60879bfe",
       "requirements": [
         "Default View: ARCHIVE (Gallery Mode) strictly forced on landing",
@@ -48,6 +48,21 @@
         "Journey Portal: New minimalist frame, lower verticality, gold subtitle",
         "Mobile Fix: Z-index correction for Close button in Archive menu",
         "Cleanup: Removed yellow from main buttons"
+      ],
+      "lastUpdate": 1777014782
+    },
+    {
+      "id": "phase-4-stabilization",
+      "name": "Phase 4 Stabilization & Mobile Menu UX",
+      "status": "verified",
+      "assignedTo": "agent:main:subagent:cc9c612a-f2c1-4afc-b9fe-28747e30e8f9",
+      "requirements": [
+        "Default View: ARCHIVE (White mode) strictly forced on landing",
+        "Branding: Monochrome black titles/subtitles (no gold)",
+        "Layout: Moved portal frame higher up for better focus",
+        "Navigation: Restored Project Declaration button in Sidebar (mobile/desktop)",
+        "Mobile Fix: Z-index and visibility fix for Close button (occlusion root cause fixed)",
+        "Mobile UX: Improved spacing in mobile navigation"
       ],
       "lastUpdate": 1777014782
     }

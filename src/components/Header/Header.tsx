@@ -16,6 +16,8 @@ export function Header() {
   const [isLangOpen, setIsLangOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
 
+  if (mode === 'gallery') return null;
+
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 50);

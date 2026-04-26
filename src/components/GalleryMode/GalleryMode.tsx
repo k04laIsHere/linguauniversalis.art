@@ -352,12 +352,23 @@ export function GalleryMode() {
                   <span className={styles.navLabel}>{item.label}</span>
                 </button>
                 {item.id === 'manifesto' && (
-                  <button
-                    className={styles.sidebarDeclarationLink}
-                    onClick={() => setIsDeclarationOpen(true)}
-                  >
-                    {t.declaration.title}
-                  </button>
+                  <>
+                    <button
+                      className={styles.sidebarDeclarationLink}
+                      onClick={() => setIsDeclarationOpen(true)}
+                    >
+                      {t.declaration.title}
+                    </button>
+                    <button
+                      className={styles.sidebarDeclarationLinkMobile}
+                      onClick={() => {
+                        setIsDeclarationOpen(true);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      {t.declaration.title}
+                    </button>
+                  </>
                 )}
                 {item.children && (
                   <div className={styles.navChildren}>

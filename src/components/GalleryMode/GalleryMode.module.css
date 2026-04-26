@@ -234,6 +234,10 @@
   font-weight: 600;
 }
 
+.sidebarDeclarationLinkMobile {
+  display: none;
+}
+
 /* Main Content Area */
 .mainContent {
   flex: 1;
@@ -333,7 +337,7 @@
   border: none;
   cursor: pointer;
   position: relative;
-  z-index: 1200;
+  z-index: 2200;
 }
 
 .burger span, 
@@ -342,9 +346,10 @@
   content: '';
   position: absolute;
   width: 24px;
-  height: 1px;
+  height: 1.5px;
   background: #1a1a1a;
   transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
 }
 
 .burger span {
@@ -356,17 +361,18 @@
 .burger span::before { top: -8px; left: 0; }
 .burger span::after { top: 8px; left: 0; }
 
-.burgerActive span { background: transparent; }
-.burgerActive span::before { transform: rotate(45deg); top: 0; }
-.burgerActive span::after { transform: rotate(-45deg); top: 0; }
-
 .burgerActive {
   z-index: 2200;
+  background: transparent;
 }
+
+.burgerActive span { background: transparent !important; }
+.burgerActive span::before { transform: rotate(45deg); top: 0; background: #000000 !important; }
+.burgerActive span::after { transform: rotate(-45deg); top: 0; background: #000000 !important; }
 
 /* Manifesto Section */
 .manifestoSection {
-  padding: 12rem 4rem 8rem;
+  padding: 8rem 4rem 8rem;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -374,14 +380,22 @@
 }
 
 .titleGroup {
-  margin-bottom: 12rem;
+  margin-bottom: 4rem;
+}
+
+.manifestoTitle {
+  font-family: var(--font-title);
+  font-size: clamp(2rem, 5vw, 4rem);
+  color: #000000;
+  margin: 0;
+  text-transform: uppercase;
 }
 
 .brandSubtitle {
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.85rem;
-  color: #d4af37;
+  color: #000000;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   margin-top: 1.5rem;
@@ -920,7 +934,7 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
   display: flex;
   justify-content: space-between;
-  align-items: baseline;
+  align-items: center;
 }
 
 .modalTitle {
@@ -936,10 +950,12 @@
   border: none;
   font-size: 1.2rem;
   cursor: pointer;
-  color: #1a1a1a;
-  opacity: 0.4;
+  color: #000000;
+  opacity: 0.8;
   transition: opacity 0.3s ease;
-  padding: 0.5rem;
+  padding: 1.5rem;
+  position: relative;
+  z-index: 3100;
 }
 
 .modalClose:hover {
@@ -986,8 +1002,33 @@
 
 /* Mobile Overrides */
 @media (max-width: 1024px) {
-  .portalBtn {
-    animation: breathing 3.5s infinite ease-in-out;
+  .sidebarDeclarationLink {
+    display: none;
+  }
+
+  .sidebarDeclarationLinkMobile {
+    display: block;
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 0.8rem;
+    color: #888;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: var(--font-body);
+    letter-spacing: 0.02em;
+    margin-top: 0.45rem;
+    padding-left: 2.2rem;
+  }
+
+  .sidebarDeclarationLinkMobile:hover {
+    color: #1a1a1a;
+    transform: translateX(4px);
+  }
+
+  .sidebarJourneyBtn {
+    margin-bottom: 3rem;
   }
 
   .portalArrow {
@@ -1003,7 +1044,7 @@
     transform: translateX(-100%);
     background: #fcfcf9;
     padding: 6rem 2rem 1.5rem;
-    z-index: 2100;
+    z-index: 1500;
   }
 
   .sidebarInner {
