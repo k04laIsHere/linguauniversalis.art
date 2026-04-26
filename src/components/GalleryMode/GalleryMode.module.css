@@ -202,6 +202,11 @@
   opacity: 1;
 }
 
+.sidebarNavChildActive {
+  color: #1a1a1a !important;
+  font-weight: 600;
+}
+
 .navChildren {
   display: flex;
   flex-direction: column;
@@ -222,6 +227,7 @@
   transition: all 0.3s ease;
   font-family: var(--font-body);
   letter-spacing: 0.02em;
+  text-transform: none;
 }
 
 .sidebarNavChild:hover {
@@ -230,7 +236,7 @@
 }
 
 .sidebarNavChildActive {
-  color: #1a1a1a;
+  color: #1a1a1a !important;
   font-weight: 600;
 }
 
@@ -337,7 +343,7 @@
   border: none;
   cursor: pointer;
   position: relative;
-  z-index: 2200;
+  z-index: 9999;
 }
 
 .burger span, 
@@ -362,7 +368,7 @@
 .burger span::after { top: 8px; left: 0; }
 
 .burgerActive {
-  z-index: 2200;
+  z-index: 9999;
   background: transparent;
 }
 
@@ -386,7 +392,7 @@
 .manifestoTitle {
   font-family: var(--font-title);
   font-size: clamp(2rem, 5vw, 4rem);
-  color: #000000;
+  color: #000000 !important; /* Force pure black */
   margin: 0;
   text-transform: uppercase;
 }
@@ -395,7 +401,7 @@
   font-family: var(--font-body);
   font-weight: 600;
   font-size: 0.85rem;
-  color: #000000;
+  color: #d4af37;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   margin-top: 1.5rem;
@@ -493,6 +499,43 @@
   display: flex;
   flex-direction: column;
   gap: 2rem;
+  margin-bottom: 4rem;
+}
+
+.declarationBtn {
+  background: none;
+  border: none;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 0;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: fit-content;
+}
+
+.declarationBtnLine {
+  width: 40px;
+  height: 1px;
+  background: #d4af37;
+  transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.declarationBtnText {
+  font-family: var(--font-title);
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #1a1a1a;
+  transition: color 0.3s ease;
+}
+
+.declarationBtn:hover .declarationBtnLine {
+  width: 60px;
+}
+
+.declarationBtn:hover .declarationBtnText {
+  color: #d4af37;
 }
 
 .manifestoLine {
@@ -1044,7 +1087,7 @@
     transform: translateX(-100%);
     background: #fcfcf9;
     padding: 6rem 2rem 1.5rem;
-    z-index: 1500;
+    z-index: 8000;
   }
 
   .sidebarInner {

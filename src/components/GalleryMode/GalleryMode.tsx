@@ -352,23 +352,18 @@ export function GalleryMode() {
                   <span className={styles.navLabel}>{item.label}</span>
                 </button>
                 {item.id === 'manifesto' && (
-                  <>
+                  <div className={styles.navChildren} style={{ marginBottom: '0.5rem' }}>
                     <button
-                      className={styles.sidebarDeclarationLink}
-                      onClick={() => setIsDeclarationOpen(true)}
-                    >
-                      {t.declaration.title}
-                    </button>
-                    <button
-                      className={styles.sidebarDeclarationLinkMobile}
+                      className={`${styles.sidebarNavChild} ${isDeclarationOpen ? styles.sidebarNavChildActive : ''}`}
                       onClick={() => {
                         setIsDeclarationOpen(true);
                         setIsMenuOpen(false);
                       }}
+                      style={{ '--index': i + 0.1 } as any}
                     >
                       {t.declaration.title}
                     </button>
-                  </>
+                  </div>
                 )}
                 {item.children && (
                   <div className={styles.navChildren}>
@@ -476,6 +471,14 @@ export function GalleryMode() {
                 </p>
               ))}
             </div>
+
+            <button 
+              className={styles.declarationBtn}
+              onClick={() => setIsDeclarationOpen(true)}
+            >
+              <span className={styles.declarationBtnLine}></span>
+              <span className={styles.declarationBtnText}>{t.declaration.title}</span>
+            </button>
           </div>
         </section>
 
