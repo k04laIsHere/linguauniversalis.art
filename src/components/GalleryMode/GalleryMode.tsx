@@ -22,7 +22,6 @@ export function GalleryMode() {
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isDeclarationOpen, setIsDeclarationOpen] = useState(false);
 
-  // Body scroll lock when modal is open
   useEffect(() => {
     if (isDeclarationOpen) {
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
@@ -32,11 +31,15 @@ export function GalleryMode() {
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
     }
-    return () => {
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
-    };
   }, [isDeclarationOpen]);
+
+  useEffect(() => {
+    if (isMenuOpen && isMobile) {
+      document.body.style.overflow = 'hidden';
+    } else if (!isDeclarationOpen) {
+      document.body.style.overflow = '';
+    }
+  }, [isMenuOpen, isMobile, isDeclarationOpen]);
 
   // Detect mobile on mount and resize
   useEffect(() => {
@@ -113,6 +116,7 @@ export function GalleryMode() {
   const handleNavClick = (id: string) => {
     scrollToId(id);
     setIsMenuOpen(false);
+    setIsDeclarationOpen(false);
   };
 
   // Translation map for mediums
@@ -318,7 +322,21 @@ export function GalleryMode() {
       {/* Sidebar Navigation */}
       <aside className={styles.sidebar}>
         <div className={styles.sidebarInner}>
-          <div className={styles.sidebarLogo} onClick={() => handleNavClick('manifesto')}>Lingua Universalis</div>
+          <div className={styles.sidebarTopMobile}>
+            <div className={styles.sidebarLogo} onClick={() => handleNavClick('manifesto')}>Lingua Universalis</div>
+            {isMobile && (
+              <button 
+                className={styles.sidebarClose} 
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsMenuOpen(false);
+                }}
+                aria-label="Close menu"
+              >
+                ✕
+              </button>
+            )}
+          </div>
           
           <div className={styles.sidebarLangRow}>
             {languages.map((l) => (

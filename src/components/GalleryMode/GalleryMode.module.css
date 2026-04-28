@@ -36,7 +36,7 @@
   padding: 3rem 2.5rem;
   display: flex;
   flex-direction: column;
-  z-index: 1100;
+  z-index: 10000; /* Increased to be above everything else in mobile */
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
@@ -47,10 +47,31 @@
   flex-direction: column;
   overflow-y: auto;
   scrollbar-width: none;
+  width: 100%; /* Added width for mobile */
 }
 
 .sidebarInner::-webkit-scrollbar {
   display: none;
+}
+
+.sidebarTopMobile {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.sidebarClose {
+  display: none;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #1a1a1a;
+  cursor: pointer;
+  padding: 0.5rem;
+  margin-right: -0.5rem;
+  transition: opacity 0.3s ease;
 }
 
 .sidebarLogo {
@@ -58,7 +79,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 2rem;
+  margin-bottom: 0; /* Changed from 2rem to 0 because of sidebarTopMobile */
   color: #1a1a1a;
   opacity: 0.4;
   cursor: pointer;
@@ -73,6 +94,7 @@
   display: flex;
   gap: 0.5rem;
   margin-bottom: 1.5rem;
+  flex-shrink: 0;
 }
 
 .sidebarLangBtnSmall {
@@ -110,6 +132,7 @@
   width: 100%;
   text-transform: uppercase;
   margin-bottom: 0.5rem;
+  flex-shrink: 0;
 }
 
 .sidebarJourneyBtn:hover {
@@ -218,26 +241,32 @@
 
 .sidebarNavChild {
   background: none;
-  border: none;
-  padding: 0;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  padding: 0.5rem 1rem;
+  margin-top: 0.75rem;
   font-size: 0.8rem;
-  color: #888;
+  color: #555;
   text-align: left;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: var(--font-body);
   letter-spacing: 0.02em;
   text-transform: none;
+  width: fit-content;
+  border-radius: 2px;
 }
 
 .sidebarNavChild:hover {
   color: #1a1a1a;
+  border-color: #1a1a1a;
+  background: rgba(0, 0, 0, 0.02);
   transform: translateX(4px);
 }
 
 .sidebarNavChildActive {
   color: #1a1a1a !important;
   font-weight: 600;
+  border-color: #d4af37;
 }
 
 .sidebarDeclarationLinkMobile {
@@ -373,8 +402,8 @@
 }
 
 .burgerActive span { background: transparent !important; }
-.burgerActive span::before { transform: rotate(45deg); top: 0; background: #000000 !important; }
-.burgerActive span::after { transform: rotate(-45deg); top: 0; background: #000000 !important; }
+.burgerActive span::before { transform: rotate(45deg); top: 50%; left: 10px; background: #000000 !important; width: 24px; height: 2px; position: absolute; }
+.burgerActive span::after { transform: rotate(-45deg); top: 50%; left: 10px; background: #000000 !important; width: 24px; height: 2px; position: absolute; }
 
 /* Manifesto Section */
 .manifestoSection {
@@ -504,18 +533,18 @@
 
 .declarationBtn {
   background: none;
-  border: none;
+  border: 1px solid rgba(0, 0, 0, 0.15);
   display: flex;
   align-items: center;
   gap: 1.5rem;
-  padding: 0;
+  padding: 1.2rem 2rem;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   width: fit-content;
 }
 
 .declarationBtnLine {
-  width: 40px;
+  width: 30px;
   height: 1px;
   background: #d4af37;
   transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -523,19 +552,20 @@
 
 .declarationBtnText {
   font-family: var(--font-title);
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #1a1a1a;
   transition: color 0.3s ease;
 }
 
-.declarationBtn:hover .declarationBtnLine {
-  width: 60px;
+.declarationBtn:hover {
+  border-color: #1a1a1a;
+  background: rgba(0, 0, 0, 0.02);
 }
 
-.declarationBtn:hover .declarationBtnText {
-  color: #d4af37;
+.declarationBtn:hover .declarationBtnLine {
+  width: 45px;
 }
 
 .manifestoLine {
@@ -1063,6 +1093,7 @@
     letter-spacing: 0.02em;
     margin-top: 0.45rem;
     padding-left: 2.2rem;
+    text-transform: none; /* Sentence case */
   }
 
   .sidebarDeclarationLinkMobile:hover {
@@ -1086,16 +1117,23 @@
     height: 100vh;
     transform: translateX(-100%);
     background: #fcfcf9;
-    padding: 6rem 2rem 1.5rem;
-    z-index: 8000;
+    padding: 2rem 2rem 1.5rem;
+    z-index: 10000;
+    visibility: hidden;
+    pointer-events: none;
+    display: flex; /* Ensure it stays a flex container in mobile */
   }
 
   .sidebarInner {
     padding-bottom: 1rem;
   }
 
+  .sidebarClose {
+    display: block;
+  }
+
   .sidebarLogo {
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
     font-size: 0.75rem;
   }
 
@@ -1130,10 +1168,14 @@
 
   .sidebarNavChild {
     font-size: 0.75rem;
+    padding: 0.4rem 0.8rem;
+    margin-top: 0.5rem;
   }
 
   .menuOpen .sidebar {
     transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
   }
 
   .mainContent {
@@ -1145,6 +1187,7 @@
     padding: 1rem 1.5rem;
     width: 100%;
     left: 0;
+    z-index: 5000;
   }
 
   .headerActions {
@@ -1161,6 +1204,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    z-index: 5001;
   }
 
   .manifestoSection {

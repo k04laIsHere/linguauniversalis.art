@@ -79,7 +79,7 @@ export const es: I18nDict = {
     back: 'Volver',
   },
   declaration: {
-    title: 'DECLARACIÓN DEL PROYECTO',
+    title: 'Declaración del proyecto',
     projectTitle: '«LINGUA UNIVERSALIS. EL ARTE DE LA CREACIÓN»',
     projectDescription: 'El proyecto "Lingua universalis. El Arte de la Creación" presenta obras de arte en diversos campos (pintura, escultura, arte digital) de artistas profesionales de Cuba, Venezuela, Armenia, España, así como de sus colegas rusos.',
     goalTitle: 'El objetivo del proyecto:',
