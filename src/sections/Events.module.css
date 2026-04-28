@@ -81,6 +81,7 @@
   opacity: 0;
   pointer-events: none;
   padding-top: 15vh;
+  z-index: 10; /* Ensure content is above background text but below header */
 }
 
 .eventSection.active {
@@ -402,27 +403,31 @@
   }
 
   .sectionHeader {
-    top: 6vh;
+    top: 5vh;
     left: 50%;
     transform: translateX(-50%);
     width: 94%;
+    z-index: 200; /* Higher than everything else in section */
   }
   .sectionLabel {
-    font-size: clamp(1rem, 5vw, 1.8rem);
-    letter-spacing: 4px;
+    font-size: clamp(0.9rem, 4.5vw, 1.4rem);
+    letter-spacing: 3px;
     line-height: 1.2;
-    background: none; /* Clean on mobile */
+    background: rgba(5, 7, 10, 0.4);
+    backdrop-filter: blur(4px);
+    padding: 4px 12px;
+    border-radius: 2px;
   }
   .content {
-    padding-top: 25vh;
+    padding-top: 20vh;
   }
   .eventSection {
-    padding-top: 18vh;
-    justify-content: flex-start; /* Prevent images from floating up into title */
+    padding-top: 12vh;
+    justify-content: flex-start;
   }
   .carouselContainer {
-    margin-bottom: 1.5rem;
-    margin-top: 2rem;
+    margin-bottom: 1rem;
+    margin-top: 1rem;
   }
   .infoBox {
     padding: 1.5rem;
