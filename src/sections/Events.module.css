@@ -403,31 +403,32 @@
   }
 
   .sectionHeader {
-    top: 5vh;
+    top: 10vh;
     left: 50%;
     transform: translateX(-50%);
     width: 94%;
     z-index: 200; /* Higher than everything else in section */
   }
   .sectionLabel {
-    font-size: clamp(0.9rem, 4.5vw, 1.4rem);
-    letter-spacing: 3px;
+    font-size: clamp(0.75rem, 3.5vw, 1.1rem);
+    letter-spacing: 2px;
     line-height: 1.2;
-    background: rgba(5, 7, 10, 0.4);
-    backdrop-filter: blur(4px);
-    padding: 4px 12px;
-    border-radius: 2px;
+    background: rgba(5, 7, 10, 0.6);
+    backdrop-filter: blur(8px);
+    padding: 6px 14px;
+    border-radius: 1px;
+    border: 1px solid rgba(217, 192, 141, 0.2);
   }
   .content {
-    padding-top: 20vh;
+    padding-top: 18vh;
   }
   .eventSection {
-    padding-top: 12vh;
+    padding-top: 22vh;
     justify-content: flex-start;
   }
   .carouselContainer {
-    margin-bottom: 1rem;
-    margin-top: 1rem;
+    margin-bottom: 0.8rem;
+    margin-top: 0;
   }
   .infoBox {
     padding: 1.5rem;
