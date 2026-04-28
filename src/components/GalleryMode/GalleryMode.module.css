@@ -1132,8 +1132,6 @@
     background: #fcfcf9;
     padding: 2rem 2rem 1.5rem;
     z-index: 10000;
-    visibility: hidden;
-    pointer-events: none;
     display: flex; /* Ensure it stays a flex container in mobile */
   }
 
@@ -1187,8 +1185,6 @@
 
   .menuOpen .sidebar {
     transform: translateX(0);
-    visibility: visible;
-    pointer-events: auto;
   }
 
   .mainContent {
