@@ -372,7 +372,7 @@ export function GalleryMode() {
                 {item.id === 'manifesto' && (
                   <div className={styles.navChildren} style={{ marginBottom: '0.5rem' }}>
                     <button
-                      className={`${styles.sidebarNavChild} ${isDeclarationOpen ? styles.sidebarNavChildActive : ''}`}
+                      className={`${styles.sidebarNavChild} ${styles.declarationLink} ${isDeclarationOpen ? styles.sidebarNavChildActive : ''}`}
                       onClick={() => {
                         setIsDeclarationOpen(true);
                         setIsMenuOpen(false);
