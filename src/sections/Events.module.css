@@ -403,27 +403,28 @@
   }
 
   .sectionHeader {
-    top: 10vh;
+    top: 15vh; /* Push further down to clear the header area */
     left: 50%;
     transform: translateX(-50%);
     width: 94%;
-    z-index: 200; /* Higher than everything else in section */
+    z-index: 200;
   }
   .sectionLabel {
-    font-size: clamp(0.75rem, 3.5vw, 1.1rem);
+    font-size: clamp(0.7rem, 3vw, 1rem);
     letter-spacing: 2px;
     line-height: 1.2;
-    background: rgba(5, 7, 10, 0.6);
+    background: rgba(5, 7, 10, 0.7);
     backdrop-filter: blur(8px);
     padding: 6px 14px;
     border-radius: 1px;
-    border: 1px solid rgba(217, 192, 141, 0.2);
+    border: 1px solid rgba(217, 192, 141, 0.3);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
   }
   .content {
-    padding-top: 18vh;
+    padding-top: 15vh;
   }
   .eventSection {
-    padding-top: 22vh;
+    padding-top: 28vh; /* Significant gap from header and title */
     justify-content: flex-start;
   }
   .carouselContainer {
@@ -431,15 +432,16 @@
     margin-top: 0;
   }
   .infoBox {
-    padding: 1.5rem;
-    margin-bottom: 2vh;
+    padding: 1.2rem; /* Compact for small height devices */
+    margin-bottom: 1vh;
   }
   .eventTitle {
-    font-size: 1.6rem;
+    font-size: 1.4rem;
+    margin-bottom: 0.8rem;
   }
   .eventDesc {
-    font-size: 0.9rem;
-    margin-bottom: 2rem;
+    font-size: 0.85rem;
+    margin-bottom: 1.2rem;
   }
   .closeBtn {
     top: 2rem;
