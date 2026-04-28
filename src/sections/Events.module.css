@@ -37,7 +37,7 @@
   top: 15vh;
   left: 50%;
   transform: translateX(-50%);
-  z-index: 50;
+  z-index: 100; /* Increased to stay above content */
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,6 +55,7 @@
   color: rgb(5, 7, 10);
   text-shadow: 0px 1px 1px rgba(255, 255, 255, 0.4);
   text-align: center;
+  background: linear-gradient(to bottom, rgba(5, 7, 10, 0) 0%, rgba(5, 7, 10, 0.8) 50%, rgba(5, 7, 10, 0) 100%); /* Slight backdrop for clarity on overlap */
 }
 
 .sectionLine {
@@ -401,7 +402,7 @@
   }
 
   .sectionHeader {
-    top: 8vh;
+    top: 6vh;
     left: 50%;
     transform: translateX(-50%);
     width: 94%;
@@ -410,12 +411,18 @@
     font-size: clamp(1rem, 5vw, 1.8rem);
     letter-spacing: 4px;
     line-height: 1.2;
+    background: none; /* Clean on mobile */
   }
   .content {
-    padding-top: 35vh;
+    padding-top: 25vh;
   }
   .eventSection {
-    padding-top: 10vh;
+    padding-top: 18vh;
+    justify-content: flex-start; /* Prevent images from floating up into title */
+  }
+  .carouselContainer {
+    margin-bottom: 1.5rem;
+    margin-top: 2rem;
   }
   .infoBox {
     padding: 1.5rem;
