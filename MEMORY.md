@@ -19,3 +19,4 @@ Transitioned the website from an immersive-first experience to an archive-first 
 - **Branding:** Title is Black (#000000), Subtitle is Gold (#d4af37).
 - **Mobile UX:** Burger-to-X transition fixed via z-index priority (9999).
 - **Declaration:** On-page button integrated after Manifesto; Sidebar link harmonized with artist links.
+- 2026-06-24: Removed 'Inner Language I' artwork by Joslen Orsini from the gallery manifest as requested, updating both archive and immersion modes.

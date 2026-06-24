@@ -62,7 +62,7 @@ export function GalleryMode() {
       if (!acc[work.artist]) {
         acc[work.artist] = {};
       }
-      const medium = work.medium || 'Other';
+      const medium = work.mediumEn || 'Other';
       if (!acc[work.artist][medium]) {
         acc[work.artist][medium] = [];
       }
