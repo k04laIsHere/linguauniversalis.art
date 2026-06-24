@@ -234,7 +234,7 @@ export function GalleryMode() {
                   const currentStr = (i + 1).toString().padStart(2, '0');
                   const totalStr = groupWorksCount.toString().padStart(2, '0');
                   tl.add(() => {
-                    progressLabel.innerHTML = `${currentStr}&nbsp;/&nbsp;${totalStr}`;
+                    progressLabel.textContent = `${currentStr}\u00A0/\u00A0${totalStr}`;
                   }, pos + 0.5);
                 }
               });
