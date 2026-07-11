@@ -72,12 +72,12 @@ export function ExitFlight() {
           drawHeight = canvas.height;
           drawWidth = canvas.height * imgAspect;
           offsetX = (canvas.width - drawWidth) / 2;
-          offsetY = -(drawHeight * 0.03); // Nudge higher by 3%
+          offsetY = 0;
         } else {
           drawWidth = canvas.width;
           drawHeight = canvas.width / imgAspect;
           offsetX = 0;
-          offsetY = (canvas.height - drawHeight) / 2 - (drawHeight * 0.03); // Nudge higher by 3%
+          offsetY = (canvas.height - drawHeight) / 2;
         }
 
         // We use Math.floor to prevent sub-pixel rounding differences 
