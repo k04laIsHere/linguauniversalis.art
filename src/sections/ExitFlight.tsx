@@ -68,16 +68,19 @@ export function ExitFlight() {
         
         let drawWidth, drawHeight, offsetX, offsetY;
 
+        // Match browser's background-size: cover + background-position: center 15% math perfectly
+        const verticalAlignPercent = 0.15; // Position 15% from the top (keeps top of the cave visible)
+
         if (imgAspect > canvasAspect) {
           drawHeight = canvas.height;
           drawWidth = canvas.height * imgAspect;
-          offsetX = (canvas.width - drawWidth) / 2;
-          offsetY = -(drawHeight * 0.03); // Nudge higher by 3%
+          offsetX = (canvas.width - drawWidth) * 0.5;
+          offsetY = (canvas.height - drawHeight) * verticalAlignPercent;
         } else {
           drawWidth = canvas.width;
           drawHeight = canvas.width / imgAspect;
-          offsetX = 0;
-          offsetY = (canvas.height - drawHeight) / 2 - (drawHeight * 0.03); // Nudge higher by 3%
+          offsetX = (canvas.width - drawWidth) * 0.5;
+          offsetY = (canvas.height - drawHeight) * verticalAlignPercent;
         }
 
         // We use Math.floor to prevent sub-pixel rounding differences 
