@@ -74,13 +74,13 @@ export function ExitFlight() {
         if (imgAspect > canvasAspect) {
           drawHeight = canvas.height;
           drawWidth = canvas.height * imgAspect;
-          offsetX = (canvas.width - drawWidth) * 0.5;
-          offsetY = (canvas.height - drawHeight) * verticalAlignPercent;
+          offsetX = (canvas.width - drawWidth) / 2;
+          offsetY = 0;
         } else {
           drawWidth = canvas.width;
           drawHeight = canvas.width / imgAspect;
-          offsetX = (canvas.width - drawWidth) * 0.5;
-          offsetY = (canvas.height - drawHeight) * verticalAlignPercent;
+          offsetX = 0;
+          offsetY = (canvas.height - drawHeight) / 2;
         }
 
         // We use Math.floor to prevent sub-pixel rounding differences 
