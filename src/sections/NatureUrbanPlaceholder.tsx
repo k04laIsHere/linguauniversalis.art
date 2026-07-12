@@ -29,8 +29,7 @@ export function NatureUrbanPlaceholder() {
     let lastWidth = window.innerWidth;
     const lockHeight = () => {
       if (window.innerWidth !== lastWidth || !root.style.height) {
-        // Use the larger dimension to ensure the pinned area covers the screen expansion
-        const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+        const targetHeight = window.innerHeight;
         root.style.height = `${targetHeight}px`;
         lastWidth = window.innerWidth;
         if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
@@ -87,7 +86,7 @@ export function NatureUrbanPlaceholder() {
       // THE FIX: Use the exact height lock logic from the container to determine
       // the canvas height. This ensures the 100% canvas height matches the
       // physical height expected by the browser's cover math.
-      const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+      const targetHeight = window.innerHeight;
       const targetWidth = window.innerWidth;
       const dpr = window.devicePixelRatio || 1;
       

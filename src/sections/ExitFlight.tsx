@@ -29,7 +29,7 @@ export function ExitFlight() {
     let lastWidth = window.innerWidth;
     const lockHeight = () => {
       if (window.innerWidth !== lastWidth || !root.style.height) {
-        const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+        const targetHeight = window.innerHeight;
         root.style.height = `${targetHeight}px`;
         lastWidth = window.innerWidth;
         if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
@@ -74,13 +74,13 @@ export function ExitFlight() {
         if (imgAspect > canvasAspect) {
           drawHeight = canvas.height;
           drawWidth = canvas.height * imgAspect;
-          offsetX = (canvas.width - drawWidth) / 2;
-          offsetY = 0;
+          offsetX = (canvas.width - drawWidth) * 0.5;
+          offsetY = (canvas.height - drawHeight) * verticalAlignPercent;
         } else {
           drawWidth = canvas.width;
           drawHeight = canvas.width / imgAspect;
-          offsetX = 0;
-          offsetY = (canvas.height - drawHeight) / 2;
+          offsetX = (canvas.width - drawWidth) * 0.5;
+          offsetY = (canvas.height - drawHeight) * verticalAlignPercent;
         }
 
         // We use Math.floor to prevent sub-pixel rounding differences 
@@ -91,7 +91,7 @@ export function ExitFlight() {
 
     const updateCanvasSize = () => {
       // THE FIX: Use the exact height lock logic from the container
-      const targetHeight = Math.max(window.innerHeight, window.screen.height || 0);
+      const targetHeight = window.innerHeight;
       const targetWidth = window.innerWidth;
       
       // Force integer pixel values for the backing store to prevent scaling blur/offset
