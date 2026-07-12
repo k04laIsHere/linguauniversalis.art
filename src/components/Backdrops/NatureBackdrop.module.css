@@ -13,7 +13,7 @@
   will-change: opacity;
   background-image: url('/assets/images/backgrounds/nature.webp');
   background-size: cover;
-  background-position: center;
+  background-position: center 15%;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
