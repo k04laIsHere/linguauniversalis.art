@@ -472,3 +472,46 @@
 }
 
 
+
+
+@media (min-width: 1024px) {
+  .pin {
+    flex-direction: row;
+    justify-content: flex-start;
+  }
+
+  .sectionHeader {
+    position: relative;
+    top: auto;
+    left: auto;
+    transform: none;
+    width: 35%;
+    margin-top: 0;
+    padding-left: 4rem;
+    align-items: flex-start;
+  }
+
+  .sectionLabel {
+    text-align: left;
+  }
+
+  .content {
+    width: 65%;
+    padding-top: 0;
+    display: flex;
+    align-items: center;
+  }
+
+  .eventSection {
+    padding-top: 0;
+    align-items: flex-start;
+  }
+
+  .carouselContainer {
+    width: 100%;
+  }
+
+  .carouselItem {
+    width: min(700px, 45vw);
+  }
+}
