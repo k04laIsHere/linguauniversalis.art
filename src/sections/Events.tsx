@@ -16,6 +16,17 @@ export function Events() {
     [],
   );
 
+
+  const allImages = useMemo(() => {
+    return events.flatMap((event, eventIdx) =>
+      event.images.map(img => ({
+        src: img,
+        eventIdx,
+        event
+      }))
+    );
+  }, []);
+
   useEffect(() => {
     if (reduced) return;
     const root = rootRef.current;
@@ -38,8 +49,10 @@ export function Events() {
     lockHeight();
     window.addEventListener('resize', lockHeight);
 
-    const sections = Array.from(pin.querySelectorAll<HTMLElement>('[data-event-section]'));
-    if (sections.length === 0) return;
+
+    const carousel = pin.querySelector(`.${styles.imageCarousel}`);
+    const infoBox = pin.querySelector(`.${styles.infoBox}`);
+    if (!carousel || !infoBox) return;
 
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({
@@ -47,81 +60,37 @@ export function Events() {
         scrollTrigger: {
           trigger: root,
           start: 'top top',
-          end: `+=${sections.length * 150}%`, 
+          end: `+=${allImages.length * 50}%`, // Dynamic scroll length based on total images
           scrub: 1,
           pin: pin, anticipatePin: 1,
           pinSpacing: true,
           onUpdate: (self) => {
-            const idx = Math.min(sections.length - 1, Math.max(0, Math.floor(self.progress * sections.length * 0.99)));
-            setActiveIndex(idx);
+             // Calculate which image is currently centered based on scroll progress
+             const idx = Math.min(allImages.length - 1, Math.max(0, Math.floor(self.progress * allImages.length * 0.99)));
+             // Update the active event index based on the currently visible image
+             if (allImages[idx]) {
+               setActiveIndex(allImages[idx].eventIdx);
+             }
           },
         },
       });
 
-      sections.forEach((section, i) => {
-        const infoBox = section.querySelector(`.${styles.infoBox}`);
-        const carousel = section.querySelector(`.${styles.imageCarousel}`);
-        const images = Array.from(section.querySelectorAll<HTMLElement>(`.${styles.carouselItem}`));
-        
-        const sectionStartTime = i * 2;
-        
-        // If it's the first event, start visible and in position
-        if (i === 0) {
-          gsap.set(section, { autoAlpha: 1 });
-          gsap.set(infoBox, { autoAlpha: 1, y: 0 });
-          gsap.set(images, { x: 0, autoAlpha: 1 });
-        } else {
-          gsap.set(section, { autoAlpha: 0 });
-          gsap.set(infoBox, { autoAlpha: 0, y: 30 });
-          gsap.set(images, { x: 100, autoAlpha: 0 });
+      gsap.set(infoBox, { autoAlpha: 1, y: 0 });
 
-          // Section Fade In
-          tl.to(section, { autoAlpha: 1, duration: 0.2 }, sectionStartTime);
-
-          // Horizontal Carousel Reveal
-          tl.to(images, {
-            x: 0,
-            autoAlpha: 1,
-            stagger: 0.1,
-            duration: 0.8,
-            ease: 'power2.out'
-          }, sectionStartTime + 0.1);
-
-          // Info box reveal
-          tl.to(infoBox, {
-            autoAlpha: 1,
-            y: 0,
-            duration: 0.6,
-            ease: 'power2.out'
-          }, sectionStartTime + 0.2);
-        }
-
-        // Horizontal Auto-Scroll logic (remains for all including first)
-        if (images.length > 1 && carousel) {
-          const carouselEl = carousel as HTMLElement;
-          
-          tl.to(carouselEl, {
-            x: () => {
-              const totalWidth = carouselEl.scrollWidth;
-              const viewportWidth = (carouselEl.parentElement as HTMLElement).offsetWidth;
-              return -(totalWidth - viewportWidth);
-            },
-            duration: 1.8,
-            ease: 'none'
-          }, sectionStartTime);
-        }
-
-        // Section Fade Out (except last)
-        if (i < sections.length - 1) {
-          tl.to(section, {
-            autoAlpha: 0,
-            scale: 0.95,
-            duration: 0.6,
-            ease: 'power2.inOut'
-          }, sectionStartTime + 1.4);
-        }
+      // Horizontal Carousel scroll
+      const carouselEl = carousel as HTMLElement;
+      tl.to(carouselEl, {
+        x: () => {
+          const totalWidth = carouselEl.scrollWidth;
+          const viewportWidth = (carouselEl.parentElement as HTMLElement).offsetWidth;
+          // Only scroll if content is wider than viewport
+          if (totalWidth <= viewportWidth) return 0;
+          return -(totalWidth - viewportWidth);
+        },
+        ease: 'none'
       });
     }, root);
+
 
     return () => {
       ctx.revert();
@@ -177,53 +146,50 @@ export function Events() {
         </div>
 
         <div className={styles.content}>
-          {events.map((event, idx) => (
-            <div 
-              key={event.id} 
-              className={`${styles.eventSection} ${activeIndex === idx ? styles.active : ''}`}
-              data-event-section
-            >
-              <div className={styles.carouselContainer}>
-                <div className={styles.imageCarousel}>
-                  {event.images.map((img, imgIdx) => (
-                    <div 
-                      key={`${event.id}-img-${imgIdx}`} 
-                      className={styles.carouselItem}
-                    >
-                      <img src={img} alt="" className={styles.eventImage} loading="lazy" />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className={styles.infoBox}>
-                <div className={styles.eventMeta}>
-                  <span className={styles.metaItem}>
-                    {lang === 'ru' ? event.dateRu : lang === 'es' ? event.dateEs : event.dateEn}
-                  </span>
-                  <span className={styles.metaDivider}>•</span>
-                  <span className={styles.metaItem}>
-                    {lang === 'ru' ? event.locationRu : lang === 'es' ? event.locationEs : event.locationEn}
-                  </span>
-                </div>
-                
-                <h3 className={styles.eventTitle}>
-                  {lang === 'ru' ? event.titleRu : lang === 'es' ? event.titleEs : event.titleEn}
-                </h3>
-                
-                <p className={styles.eventDesc}>
-                  {lang === 'ru' ? event.descRu : lang === 'es' ? event.descEs : event.descEn}
-                </p>
-                
-                <button 
-                  className={styles.exploreBtn}
-                  onClick={(e) => handleExplore(e, event)}
-                >
-                  {t.events.explore}
-                </button>
+          <div
+            className={`${styles.eventSection} ${styles.active}`}
+            data-event-section
+          >
+            <div className={styles.carouselContainer}>
+              <div className={styles.imageCarousel}>
+                {allImages.map((item, i) => (
+                  <div
+                    key={`${item.event.id}-img-${i}`}
+                    className={styles.carouselItem}
+                  >
+                    <img src={item.src} alt="" className={styles.eventImage} loading="lazy" />
+                  </div>
+                ))}
               </div>
             </div>
-          ))}
+
+            <div className={styles.infoBox}>
+              <div className={styles.eventMeta}>
+                <span className={styles.metaItem}>
+                  {lang === 'ru' ? events[activeIndex].dateRu : lang === 'es' ? events[activeIndex].dateEs : events[activeIndex].dateEn}
+                </span>
+                <span className={styles.metaDivider}>•</span>
+                <span className={styles.metaItem}>
+                  {lang === 'ru' ? events[activeIndex].locationRu : lang === 'es' ? events[activeIndex].locationEs : events[activeIndex].locationEn}
+                </span>
+              </div>
+
+              <h3 className={styles.eventTitle}>
+                {lang === 'ru' ? events[activeIndex].titleRu : lang === 'es' ? events[activeIndex].titleEs : events[activeIndex].titleEn}
+              </h3>
+
+              <p className={styles.eventDesc}>
+                {lang === 'ru' ? events[activeIndex].descRu : lang === 'es' ? events[activeIndex].descEs : events[activeIndex].descEn}
+              </p>
+
+              <button
+                className={styles.exploreBtn}
+                onClick={(e) => handleExplore(e, events[activeIndex])}
+              >
+                {t.events.explore}
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
