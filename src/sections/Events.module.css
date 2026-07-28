@@ -515,3 +515,24 @@
     width: min(700px, 45vw);
   }
 }
+
+
+@media (max-width: 768px) {
+  .eventDesc {
+    display: none;
+  }
+
+  .carouselItem {
+    width: min(450px, 75vw); /* Shrink footprint on mobile so it's not cut off */
+  }
+
+  .infoBox {
+    padding: 1rem; /* Smaller padding on mobile */
+    margin-bottom: 1vh;
+  }
+
+  .eventTitle {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+}
