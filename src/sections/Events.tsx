@@ -49,7 +49,7 @@ export function Events() {
           start: 'top top',
           end: `+=${sections.length * 150}%`, 
           scrub: 1,
-          pin: root,
+          pin: pin, anticipatePin: 1,
           pinSpacing: true,
           onUpdate: (self) => {
             const idx = Math.min(sections.length - 1, Math.max(0, Math.floor(self.progress * sections.length * 0.99)));
