@@ -1,6 +1,6 @@
 .header {
   position: fixed;
-  top: 0; /* Align to the very top */
+  top: 24px; /* Align to the very top */
   left: 0;
   right: 0;
   z-index: 1000;
@@ -82,7 +82,7 @@
   transition: opacity 0.3s ease, visibility 0.3s ease;
   z-index: 100;
   flex-shrink: 0;
-  margin-right: 20px;
+  margin-right: 60px;
 }
 
 .headerOpen .brand {
@@ -379,7 +379,7 @@
   .header {
     padding: 0; 
     height: 100px;
-    top: 0;
+    top: 24px;
   }
   .headerInner {
     padding: 0 20px;
