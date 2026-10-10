@@ -16,6 +16,7 @@ import { Team } from './sections/Team';
 import { Events } from './sections/Events';
 import { Gallery } from './sections/Gallery';
 import { Contact } from './sections/Contact';
+import { Movie } from './sections/Movie';
 import { NatureUrbanPlaceholder } from './sections/NatureUrbanPlaceholder';
 import { scrollToId } from './utils/scroll';
 import { initGsap, ScrollTrigger } from './animation/gsap';
@@ -143,6 +144,7 @@ function AppContent() {
               <Events />
               <NatureUrbanPlaceholder />
               <Gallery />
+              <Movie />
               <Contact />
             </main>
             {!isLoading && <BackdropController />}
