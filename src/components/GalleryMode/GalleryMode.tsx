@@ -6,6 +6,7 @@ import { teamMembers } from '../../content/teamData';
 import { galleryWorks } from '../../content/galleryManifest';
 import { events } from '../../content/eventsData';
 import { Contact } from '../../sections/Contact';
+import { Movie } from '../../sections/Movie';
 import { scrollToId } from '../../utils/scroll';
 import { useActiveSection } from '../Header/useActiveSection';
 import { gsap, ScrollTrigger } from '../../animation/gsap';
@@ -645,19 +646,7 @@ export function GalleryMode() {
         </section>
 
         {/* Movie Section */}
-        <section id="movie" className={styles.movieSection}>
-          <span className={styles.movieLabel}>{t.header.movie}</span>
-          <h2 className={styles.movieTitle}>Lingua Universalis</h2>
-          <div className={styles.videoWrapper}>
-            <iframe 
-              src="https://rutube.ru/play/embed/250e0fe59efd7f8bc6026577e8331b58/" 
-              className={styles.videoFrame}
-              allow="clipboard-write; autoplay" 
-              allowFullScreen
-              title="Lingua Universalis Movie"
-            />
-          </div>
-        </section>
+        <Movie />
 
         {/* Contact */}
         <div className={styles.contactWrapper} id="contact">

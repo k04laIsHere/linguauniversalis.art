@@ -54,6 +54,7 @@ export function Header() {
       { id: 'team', label: t.header.team },
       { id: 'events', label: t.header.events },
       { id: 'gallery', label: t.header.gallery },
+      { id: 'movie', label: t.header.movie },
       { id: 'contact', label: t.header.contact },
     ],
     [t],
