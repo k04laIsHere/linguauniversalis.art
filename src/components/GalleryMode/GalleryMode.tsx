@@ -649,7 +649,7 @@ export function GalleryMode() {
         <Movie />
 
         {/* Contact */}
-        <div className={styles.contactWrapper} id="contact">
+        <div className={styles.contactWrapper}>
           <Contact />
         </div>
       </main>
