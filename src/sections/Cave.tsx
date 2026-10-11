@@ -51,15 +51,6 @@ export function Cave() {
         }
       );
 
-      // Transition Section: Place nature image at the bottom of the cave
-      // Remove previous JS-injected div if it exists to avoid duplicates on fast reload
-      const existing = root.querySelector(`.${styles.natureBottom}`);
-      if (existing) existing.remove();
-
-      const naturePlaceholder = document.createElement('div');
-      naturePlaceholder.className = styles.natureBottom;
-      root.appendChild(naturePlaceholder);
-
       // Hero Title Animation: Individual characters
       const titleChars = gsap.utils.toArray<HTMLElement>(`.${styles.titleChar}`);
       gsap.fromTo(
@@ -383,6 +374,8 @@ export function Cave() {
             );
           })}
         </div>
+
+        <div className={styles.exitPortalSpacer} aria-hidden="true" />
       </div>
       <div className={styles.shadowMask} aria-hidden="true" />
     </section>

@@ -1,8 +1,8 @@
 .root {
   position: relative;
   min-height: 500vh;
-  padding: 120px 0 100px;
-  background: #020305;
+  padding: 120px 0 0;
+  background: transparent;
   transition: visibility 0.3s;
 }
 
@@ -13,7 +13,7 @@
 
 .bgWrapper {
   position: absolute;
-  inset: 0;
+  inset: 0 0 100dvh 0;
   pointer-events: none;
   z-index: 10;
   will-change: transform;
@@ -22,6 +22,7 @@
 .bg {
   position: absolute;
   inset: 0;
+  background-color: #020305;
   background-image: url('/assets/images/backgrounds/cave-wall-texture.jpg');
   background-size: 2000px auto;
   background-repeat: repeat;
@@ -31,6 +32,7 @@
   z-index: 0;
   will-change: opacity;
 }
+
 
 .vignette {
   position: absolute;
@@ -592,3 +594,11 @@
     max-width: 95%;
   }
 }
+
+.exitPortalSpacer {
+  position: relative;
+  height: 100vh;
+  height: 100dvh;
+  pointer-events: none;
+}
+

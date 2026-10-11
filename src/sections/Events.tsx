@@ -37,8 +37,7 @@ export function Events() {
 
     let lastWidth = window.innerWidth;
     const lockHeight = () => {
-      if (window.innerWidth !== lastWidth || !root.style.height) {
-        root.style.height = `${window.innerHeight}px`;
+      if (window.innerWidth !== lastWidth || !pin.style.height) {
         pin.style.height = `${window.innerHeight}px`;
         lastWidth = window.innerWidth;
         if (typeof ScrollTrigger !== 'undefined' && ScrollTrigger.refresh) {
