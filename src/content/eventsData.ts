@@ -85,17 +85,17 @@ export const events: EventItem[] = [
     locationEs: 'Moscú, Biblioteca de Literatura Extranjera',
     images: ['/assets/events/event_02.jpeg', '/assets/events/event_01.jpeg'],
     fullStoryRu:
-      'Участники проекта обсудили, как искусство может служить объединяющей силой. Художники Йослен Арриохас Орсини, Петр Цветков, Евгений Глобенко, Омар Годинес, Андрей Ваганов и Томас Арутюнян вели дискуссию о поиске идентичности и роли ИИ как независимого наблюдателя. Встреча стала важным этапом в осмыслении манифеста Lingua Universalis, подчеркивая, что знание проявляется лишь при фокусе зрителя — в «Свете».',
+      'Участники проекта обсудили, как искусство может служить объединяющей силой. Художники Йослен Арриохас Орсини, Петр Цветков, Евгений Глобенко, Омар Годинес, Андрей Ваганов и Томас Арутюнян поделились тем, что вдохновило их работы, исследовали свои личные истоки творчества и рассмотрели разницу между обычным искусством и преображающим «искусством творения».',
     fullStoryEn:
-      'Project participants discussed how art can serve as a unifying force. Artists Joslen Orsini, Petr Tsvetkov, Evgeny Globenko, Omar Godines, Andrey Vaganov, and Thomas Harutunyan engaged in a discussion about the search for identity and the role of AI as an independent observer. The meeting was a key milestone in conceptualizing the Lingua Universalis manifesto, emphasizing that knowledge reveals itself only when the viewer provides focus — the "Light".',
+      'Project participants discussed how art can serve as a unifying force. Artists Joslen Orsini, Petr Tsvetkov, Evgeny Globenko, Omar Godines, Andrey Vaganov, and Thomas Harutunyan shared what inspired their work, explored their personal origins of creativity, and examined the difference between conventional art and the transformative "art of creation".',
     fullStoryEs:
-      'Los participantes del proyecto debatieron cómo el arte puede servir como fuerza unificadora. Los artistas Joslen Orsini, Petr Tsvetkov, Evgeny Globenko, Omar Godines, Andrey Vaganov y Thomas Harutunyan mantuvieron un debate sobre la búsqueda de la identidad y el papel de la IA como observador independiente. El encuentro fue un hito clave en la conceptualización del manifiesto Lingua Universalis, subrayando que el conocimiento se revela solo cuando el espectador aporta su enfoque: la "Luz".',
+      'Los participantes del proyecto debatieron cómo el arte puede servir como fuerza unificadora. Los artistas Joslen Orsini, Petr Tsvetkov, Evgeny Globenko, Omar Godines, Andrey Vaganov y Thomas Harutunyan compartieron lo que inspiró sus obras, exploraron sus orígenes personales de la creatividad y examinaron la diferencia entre el arte convencional y el transformador "arte de la creación".',
     links: [
       {
-        titleRu: 'Страница арт-встречи',
-        titleEn: 'Art Meeting Page',
-        titleEs: 'Página del encuentro artístico',
-        url: 'https://libfl.ru/ru/event/lingua-universalis-iskusstvo-tvoreniya-2',
+        titleRu: 'Запись арт-встречи',
+        titleEn: 'Art Meeting Video',
+        titleEs: 'Grabación del encuentro artístico',
+        url: 'https://vkvideo.ru/video-59877134_456240099?t=10m9s',
       },
     ],
   },
