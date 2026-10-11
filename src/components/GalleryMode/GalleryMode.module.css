@@ -36,7 +36,7 @@
   padding: 3rem 2.5rem;
   display: flex;
   flex-direction: column;
-  z-index: 10000; /* Increased to be above everything else in mobile */
+  z-index: 10000;
   transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   flex-shrink: 0;
 }
@@ -47,7 +47,7 @@
   flex-direction: column;
   overflow-y: auto;
   scrollbar-width: none;
-  width: 100%; /* Added width for mobile */
+  width: 100%;
 }
 
 .sidebarInner::-webkit-scrollbar {
@@ -79,7 +79,7 @@
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  margin-bottom: 0; /* Changed from 2rem to 0 because of sidebarTopMobile */
+  margin-bottom: 0;
   color: #1a1a1a;
   opacity: 0.4;
   cursor: pointer;
@@ -100,7 +100,14 @@
 .sidebarLangBtnSmall {
   background: #f0f0f0;
   border: 1px solid #e0e0e0;
-  padding: 0.5rem 0.8rem;
+  padding: 0.5rem 0.85rem;
+  min-width: 42px;
+  min-height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
   font-size: 0.75rem;
   font-weight: 600;
   color: #666;
@@ -123,6 +130,12 @@
   background: #fcfcf9;
   border: 1px solid #1a1a1a;
   padding: 0.8rem 1.2rem;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1.25;
   font-size: 0.8rem;
   font-weight: 600;
   letter-spacing: 0.05em;
@@ -131,7 +144,7 @@
   transition: all 0.3s ease;
   width: 100%;
   text-transform: uppercase;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.25rem;
   flex-shrink: 0;
 }
 
@@ -147,7 +160,11 @@
   padding: 0.5rem 1rem;
   font-size: 0.7rem;
   color: #1a1a1a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
+  line-height: 1.25;
   cursor: pointer;
   transition: all 0.3s ease;
   font-family: var(--font-body);
@@ -262,11 +279,6 @@
   transform: translateX(4px);
 }
 
-.sidebarNavChildActive {
-  color: #1a1a1a !important;
-  font-weight: 600;
-}
-
 .declarationLink {
   border: 1px solid rgba(0, 0, 0, 0.15) !important;
   padding: 0.5rem 1rem !important;
@@ -274,6 +286,11 @@
   width: fit-content !important;
   border-radius: 2px !important;
   color: #555 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  line-height: 1.25 !important;
 }
 
 .declarationLink:hover {
@@ -362,6 +379,9 @@
   font-weight: 600;
   color: #666;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   transition: all 0.2s ease;
 }
@@ -433,7 +453,7 @@
 .manifestoTitle {
   font-family: var(--font-title);
   font-size: clamp(2rem, 5vw, 4rem);
-  color: #000000 !important; /* Force pure black */
+  color: #000000 !important;
   margin: 0;
   text-transform: uppercase;
 }
@@ -474,6 +494,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
   cursor: pointer;
   margin-bottom: 0;
   transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
@@ -493,6 +514,8 @@
   font-weight: 600;
   letter-spacing: 0.1em;
   text-transform: uppercase;
+  text-align: left;
+  line-height: 1.3;
   position: relative;
   z-index: 2;
 }
@@ -500,6 +523,7 @@
 .portalArrow {
   width: 20px;
   height: 20px;
+  flex-shrink: 0;
   transition: transform 0.4s ease-in-out;
   position: relative;
   z-index: 2;
@@ -546,8 +570,9 @@
 .declarationBtn {
   background: none;
   border: 1px solid rgba(0, 0, 0, 0.15);
-  display: flex;
+  display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 1.5rem;
   padding: 1.2rem 2rem;
   cursor: pointer;
@@ -559,6 +584,7 @@
   width: 30px;
   height: 1px;
   background: #d4af37;
+  flex-shrink: 0;
   transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -569,6 +595,8 @@
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #1a1a1a;
+  line-height: 1.25;
+  text-align: center;
   transition: color 0.3s ease;
 }
 
@@ -593,7 +621,9 @@
   margin-bottom: 2rem;
 }
 
-/* Collection Section */
+/* =====================================================
+   COLLECTION SECTION (Option 1: Split-Stage + Drawer)
+   ===================================================== */
 .collectionInner {
   display: flex;
   flex-direction: column;
@@ -601,14 +631,14 @@
 
 .artistBlock {
   display: grid;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: clamp(300px, 28vw, 400px) minmax(0, 1fr);
   min-height: 100vh;
   position: relative;
 }
 
 /* Artist Column (Left) */
 .artistCol {
-  padding: 4rem;
+  padding: clamp(2rem, 3.5vw, 3.75rem);
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -617,12 +647,21 @@
   will-change: transform;
 }
 
+.artistInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+}
+
 .artistPhotoWrapper {
-  width: 160px;
-  height: 160px;
-  margin-bottom: 2rem;
+  width: clamp(96px, 14vh, 144px);
+  height: clamp(96px, 14vh, 144px);
+  margin-bottom: clamp(1rem, 2.2vh, 1.75rem);
   border-radius: 50%;
   overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
 }
 
 .artistPhoto {
@@ -632,23 +671,93 @@
   filter: grayscale(1);
 }
 
+.artistText {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  min-width: 0;
+}
+
+.artistCountryTag {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #c59b27;
+  margin-bottom: 0.4rem;
+  line-height: 1.3;
+}
+
 .artistName {
   font-family: var(--font-title);
-  font-size: 2.5rem;
-  margin: 0 0 1rem 0;
+  font-size: clamp(1.65rem, 2.3vw, 2.35rem);
+  line-height: 1.12;
+  margin: 0 0 0.65rem 0;
   color: #1a1a1a;
+  word-break: break-word;
 }
 
 .artistBio {
   font-size: 0.9rem;
-  line-height: 1.6;
-  color: #666666;
-  max-width: 280px;
+  line-height: 1.55;
+  color: #4a4a46;
+  margin: 0 0 0.75rem 0;
+  max-width: 310px;
+}
+
+.artistBioPreview {
+  font-size: 0.82rem;
+  line-height: 1.58;
+  color: #787872;
+  margin: 0 0 1.25rem 0;
+  max-width: 310px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.artistBioBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  color: #1a1a1a;
+  font-family: var(--font-body);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.25;
+  min-height: 40px;
+  padding: 0.55rem 1.05rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  width: fit-content;
+  max-width: 100%;
+}
+
+.artistBioBtn:hover {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fcfcf9;
+}
+
+.artistBioBtnDesktopText {
+  display: inline;
+}
+
+.artistBioBtnMobileText {
+  display: none;
 }
 
 /* Works Column (Right) */
 .worksCol {
   position: relative;
+  min-width: 0;
 }
 
 .mediumGroup {
@@ -660,9 +769,9 @@
 
 .mediumHeader {
   position: absolute;
-  top: 5rem;
-  left: 4rem;
-  right: 4rem;
+  top: clamp(2rem, 5vh, 4.5rem);
+  left: clamp(2rem, 4vw, 4rem);
+  right: clamp(2rem, 4vw, 4rem);
   z-index: 50;
   display: flex;
   justify-content: space-between;
@@ -674,9 +783,11 @@
   font-family: var(--font-title);
   font-size: 0.75rem;
   color: #d4af37;
-  letter-spacing: 0.5em;
+  letter-spacing: 0.4em;
   text-transform: uppercase;
   white-space: normal;
+  line-height: 1.35;
+  margin: 0;
   flex: 1;
 }
 
@@ -708,7 +819,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 8rem 4rem 4rem;
+  padding: clamp(5rem, 10vh, 7.5rem) clamp(2rem, 4vw, 4rem) clamp(1.75rem, 4vh, 3.25rem);
   background: transparent;
   will-change: transform, opacity;
 }
@@ -716,7 +827,7 @@
 .workImageWrapper {
   width: 100%;
   max-width: 80vh;
-  height: 60vh;
+  height: clamp(220px, 53vh, 550px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -732,7 +843,7 @@
 }
 
 .workCaption {
-  margin-top: 1rem;
+  margin-top: clamp(0.75rem, 1.5vh, 1.15rem);
   width: 100%;
   max-width: 80vh;
   text-align: left;
@@ -742,7 +853,8 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  margin-bottom: 0.75rem;
+  gap: 1rem;
+  margin-bottom: 0.65rem;
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   padding-bottom: 0.5rem;
 }
@@ -750,7 +862,8 @@
 .captionTitleArea {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
+  min-width: 0;
 }
 
 .workMediumTag {
@@ -759,27 +872,38 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   font-weight: 600;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .workTitle {
   font-family: var(--font-title);
-  font-size: 1.75rem;
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
   margin: 0;
   color: #1a1a1a;
-  line-height: 1.1;
+  line-height: 1.15;
 }
 
 .workIndex {
   font-family: var(--font-title);
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   color: #1a1a1a;
-  opacity: 0.2;
+  opacity: 0.22;
+  flex-shrink: 0;
 }
 
 .workMeta {
   display: flex;
-  gap: 2rem;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.workMetaDetails {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex-wrap: wrap;
 }
 
 .workMetaItem {
@@ -787,6 +911,382 @@
   color: #888888;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+}
+
+.workStoryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.45rem;
+  background: rgba(212, 175, 55, 0.13);
+  border: 1px solid rgba(212, 175, 55, 0.48);
+  color: #785a08;
+  font-family: var(--font-body);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  min-height: 34px;
+  padding: 0.42rem 0.9rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  pointer-events: auto;
+}
+
+.workStoryBtn:hover {
+  background: #d4af37;
+  border-color: #d4af37;
+  color: #141413;
+  transform: translateY(-1px);
+}
+
+/* =====================================================
+   SLIDE-OVER CURATORIAL DRAWER (Option 1)
+   ===================================================== */
+.drawerOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 15, 14, 0.62);
+  backdrop-filter: blur(6px);
+  z-index: 11000;
+  display: flex;
+  justify-content: flex-end;
+  cursor: pointer;
+  animation: overlayFadeIn 0.25s ease;
+}
+
+@keyframes overlayFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.drawerPanel {
+  width: min(640px, 94vw);
+  height: 100vh;
+  max-height: 100dvh;
+  background: #fcfcf9;
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  box-shadow: -20px 0 70px rgba(0, 0, 0, 0.18);
+  display: flex;
+  flex-direction: column;
+  cursor: default;
+  animation: drawerSlideIn 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes drawerSlideIn {
+  from {
+    opacity: 0.5;
+    transform: translateX(40px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.drawerHeader {
+  padding: clamp(1.5rem, 3.5vw, 2.5rem) clamp(1.5rem, 4vw, 3rem) 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.drawerHeaderTitles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.drawerEyebrow {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #c59b27;
+  line-height: 1.3;
+}
+
+.drawerTitle {
+  font-family: var(--font-title);
+  font-size: clamp(1.35rem, 2.4vw, 1.95rem);
+  line-height: 1.15;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.drawerWorkSubMeta {
+  font-size: 0.76rem;
+  color: #787872;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.drawerCloseBtn {
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.16);
+  color: #1a1a1a;
+  font-size: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  line-height: 1;
+  flex-shrink: 0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.drawerCloseBtn:hover {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fcfcf9;
+}
+
+.drawerBody {
+  padding: clamp(1.5rem, 3.5vw, 2.25rem) clamp(1.5rem, 4vw, 3rem) 3rem;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+  flex: 1;
+  scrollbar-width: thin;
+  scrollbar-color: #d4af37 transparent;
+}
+
+.drawerBody::-webkit-scrollbar {
+  width: 4px;
+}
+
+.drawerBody::-webkit-scrollbar-thumb {
+  background: #d4af37;
+}
+
+.drawerArtistLead {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.drawerArtistAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: grayscale(1);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
+}
+
+.drawerArtistBlurb {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #4a4a46;
+  margin: 0;
+}
+
+.drawerSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.drawerSectionHeading {
+  font-family: var(--font-title);
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #c59b27;
+  margin: 0;
+}
+
+.drawerParagraph {
+  font-size: 0.95rem;
+  line-height: 1.75;
+  color: #2c2c2a;
+  margin: 0;
+}
+
+.drawerExhibitionsList {
+  margin: 0;
+  padding-left: 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.drawerExhibitionItem {
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: #3a3a37;
+}
+
+.drawerVisionBox {
+  border-left: 2px solid #d4af37;
+  background: linear-gradient(90deg, rgba(212, 175, 55, 0.08), transparent);
+  padding: 1.15rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.drawerVisionText {
+  font-size: 0.94rem;
+  line-height: 1.72;
+  color: #2c2c2a;
+  font-style: italic;
+  margin: 0;
+}
+
+.drawerWorksGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+  gap: 0.75rem;
+}
+
+.drawerWorkMiniCard {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem;
+  background: #f6f5f0;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  transition: all 0.2s ease;
+}
+
+.drawerWorkMiniCardInteractive {
+  cursor: pointer;
+}
+
+.drawerWorkMiniCardInteractive:hover {
+  border-color: #d4af37;
+  background: #faf7ec;
+}
+
+.drawerWorkMiniThumb {
+  width: 52px;
+  height: 52px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #eae8e1;
+}
+
+.drawerWorkMiniInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.drawerWorkMiniTitle {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.drawerWorkMiniMeta {
+  font-size: 0.68rem;
+  color: #787872;
+}
+
+.drawerWorkMiniBadge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9e7810;
+}
+
+.drawerArtworkPreview {
+  width: 100%;
+  background: #f5f4ef;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawerArtworkImg {
+  max-width: 100%;
+  max-height: 300px;
+  object-fit: contain;
+  display: block;
+}
+
+.drawerFooter {
+  margin-top: auto;
+  padding-top: 1.25rem;
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.drawerFooterArtist {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.drawerFooterAvatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  object-fit: cover;
+  filter: grayscale(1);
+}
+
+.drawerFooterArtistName {
+  font-family: var(--font-title);
+  font-size: 0.88rem;
+  color: #1a1a1a;
+}
+
+.drawerFooterArtistCountry {
+  font-size: 0.68rem;
+  color: #787872;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.drawerSwitchBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.22);
+  color: #1a1a1a;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  line-height: 1.25;
+  min-height: 38px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.drawerSwitchBtn:hover {
+  background: #1a1a1a;
+  border-color: #1a1a1a;
+  color: #fcfcf9;
 }
 
 /* Events Section */
@@ -797,14 +1297,14 @@
 
 .eventBlock {
   display: grid;
-  grid-template-columns: 450px 1fr;
+  grid-template-columns: clamp(320px, 30vw, 450px) minmax(0, 1fr);
   min-height: 100vh;
   position: relative;
   border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 
 .eventCol {
-  padding: 4rem;
+  padding: clamp(2rem, 3.5vw, 4rem);
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -824,7 +1324,7 @@
 
 .eventTitle {
   font-family: var(--font-title);
-  font-size: 2.2rem;
+  font-size: clamp(1.65rem, 2.2vw, 2.2rem);
   margin: 0 0 1.5rem 0;
   line-height: 1.1;
   color: #1a1a1a;
@@ -972,21 +1472,6 @@
   }
 }
 
-@media (max-width: 1024px) {
-  .modalContent {
-    padding: 3rem;
-    max-width: 85vw;
-  }
-}
-
-@media (max-width: 768px) {
-  .modalContent {
-    padding: 2.5rem 1.5rem;
-    max-height: 90vh;
-    max-width: 95vw;
-  }
-}
-
 .modalHeader {
   margin-bottom: 2.5rem;
   padding-bottom: 1.5rem;
@@ -1066,8 +1551,59 @@
   color: #1a1a1a;
 }
 
-/* Mobile Overrides */
-@media (max-width: 1024px) {
+/* =====================================================
+   4:3 DESKTOP & COMPACT LAPTOP SCALING (961px - 1366px)
+   ===================================================== */
+@media (min-width: 961px) and (max-width: 1366px) {
+  .sidebar {
+    width: 250px;
+    padding: 2rem 1.5rem;
+  }
+
+  .mainContent {
+    margin-left: 250px;
+  }
+
+  .artistBlock {
+    grid-template-columns: clamp(240px, 24vw, 320px) minmax(0, 1fr);
+  }
+
+  .artistCol {
+    padding: 2rem 1.5rem;
+  }
+
+  .mediumHeader {
+    left: 2rem;
+    right: 2rem;
+  }
+
+  .workItem {
+    padding: 5.5rem 2rem 2rem;
+  }
+}
+
+/* Short viewport heights on desktop (e.g., 1366x768, 1280x720, 1024x768) */
+@media (min-width: 961px) and (max-height: 760px) {
+  .artistPhotoWrapper {
+    width: 88px;
+    height: 88px;
+    margin-bottom: 0.85rem;
+  }
+
+  .artistBioPreview {
+    -webkit-line-clamp: 2;
+    margin-bottom: 0.85rem;
+  }
+
+  .workImageWrapper {
+    height: 46vh;
+  }
+}
+
+/* =====================================================
+   TABLET PORTRAIT & MOBILE OVERRIDES (<= 960px)
+   ===================================================== */
+@media (max-width: 960px) {
   .sidebarDeclarationLink {
     display: none;
   }
@@ -1086,7 +1622,7 @@
     letter-spacing: 0.02em;
     margin-top: 0.45rem;
     padding-left: 2.2rem;
-    text-transform: none; /* Sentence case */
+    text-transform: none;
   }
 
   .sidebarDeclarationLinkMobile:hover {
@@ -1095,7 +1631,7 @@
   }
 
   .sidebarJourneyBtn {
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
   }
 
   .portalArrow {
@@ -1112,7 +1648,7 @@
     background: #fcfcf9;
     padding: 2rem 2rem 1.5rem;
     z-index: 10000;
-    display: flex; /* Ensure it stays a flex container in mobile */
+    display: flex;
   }
 
   .sidebarInner {
@@ -1130,16 +1666,6 @@
 
   .sidebarLangRow {
     margin-bottom: 1rem;
-  }
-
-  .sidebarSecondaryBtn {
-    margin-bottom: 2rem;
-  }
-
-  .sidebarImmersionBtn {
-    margin-bottom: 1rem;
-    padding: 0.6rem 1rem;
-    font-size: 0.7rem;
   }
 
   .sidebarNav {
@@ -1173,14 +1699,15 @@
 
   .header {
     display: flex;
-    padding: 1rem 1.5rem;
+    padding: 0.65rem 1.5rem;
+    height: 64px;
     width: 100%;
     left: 0;
     z-index: 5000;
   }
 
   .headerActions {
-    gap: 1.2rem;
+    gap: 1rem;
   }
 
   .logo {
@@ -1197,13 +1724,16 @@
   }
 
   .manifestoSection {
-    padding: 8rem 1.5rem 6rem;
+    padding: 7rem 1.5rem 5rem;
   }
 
-  .mainImmersionBtn {
-    width: 100%;
-    padding: 1rem;
-    font-size: 0.7rem;
+  .portalFrame {
+    padding: 1.75rem;
+    margin-bottom: 3.5rem;
+  }
+
+  .portalBtn {
+    padding: 1.15rem 1.5rem;
   }
 
   .artistBlock, .eventBlock {
@@ -1212,21 +1742,95 @@
   
   .artistCol {
     height: auto;
-    padding: 1.5rem; 
+    padding: 0.7rem 1.25rem;
     border-right: none;
     border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
     align-items: center;
     text-align: left;
-    position: sticky;
-    top: 64px;
     z-index: 500;
     background: rgba(252, 252, 249, 0.98);
     backdrop-filter: blur(10px);
-    flex-direction: column;
-    justify-content: flex-start;
-    gap: 0.5rem;
+    flex-direction: row;
+    justify-content: space-between;
     width: 100%;
+  }
+
+  .artistInfo {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.9rem;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .artistPhotoWrapper {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 0;
+    flex-shrink: 0;
+  }
+
+  .artistText {
+    flex: 1;
+    min-width: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.1rem 0.75rem;
+  }
+
+  .artistCountryTag {
+    grid-column: 1 / 2;
+    font-size: 0.56rem;
+    margin-bottom: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .artistName {
+    grid-column: 1 / 2;
+    font-size: clamp(1rem, 3vw, 1.25rem);
+    margin-bottom: 0.05rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .artistBio {
+    grid-column: 1 / 2;
+    font-size: 0.74rem;
+    line-height: 1.3;
+    margin: 0;
+    max-width: 100%;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .artistBioPreview {
+    display: none;
+  }
+
+  .artistBioBtn {
+    grid-column: 2 / 3;
+    grid-row: 1 / 4;
+    padding: 0.45rem 0.75rem;
+    min-height: 34px;
+    font-size: 0.65rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .artistBioBtnDesktopText {
+    display: none;
+  }
+
+  .artistBioBtnMobileText {
+    display: inline;
   }
 
   .eventCol {
@@ -1237,43 +1841,39 @@
     position: relative;
     justify-content: flex-start;
   }
-  
-  .artistInfo {
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    justify-content: flex-start;
-    width: 100%;
-  }
 
-  .artistPhotoWrapper {
-    width: 70px; 
-    height: 70px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-
-  .artistName {
-    font-size: 1.5rem; 
-  }
-
-  .artistBio, .eventStory {
-    font-size: 0.8rem; 
+  .eventStory {
+    font-size: 0.85rem;
     max-width: 100%;
   }
 
   .mediumHeader {
-    left: 1.5rem;
-    right: 1.5rem;
-    top: 7rem; 
+    left: 1.25rem;
+    right: 1.25rem;
+    top: 10.25rem;
+  }
+
+  .mediumTitle {
+    font-size: 0.68rem;
+    letter-spacing: 0.22em;
   }
 
   .workItem {
-    padding: 10rem 1.5rem 2.5rem; 
+    padding: 12rem 1.25rem 1.5rem;
   }
 
   .workImageWrapper {
-    height: 40vh;
+    height: clamp(175px, 37vh, 360px);
+  }
+
+  .workTitle {
+    font-size: 1.2rem;
+  }
+
+  .workStoryBtn {
+    font-size: 0.65rem;
+    padding: 0.38rem 0.75rem;
+    min-height: 32px;
   }
 
   .eventImagesCol {
@@ -1283,6 +1883,7 @@
 
   .modalContent {
     padding: 2.5rem 1.5rem;
+    max-width: 92vw;
   }
 
   .modalHeader {
@@ -1298,3 +1899,30 @@
     line-height: 1.6;
   }
 }
+
+@media (max-width: 640px) {
+  .declarationBtn {
+    width: 100%;
+    padding: 1rem 1.25rem;
+    justify-content: center;
+  }
+
+  .declarationBtnLine {
+    display: none;
+  }
+
+  .artistPhotoWrapper {
+    width: 46px;
+    height: 46px;
+  }
+
+  .artistInfo {
+    gap: 0.75rem;
+  }
+
+  .drawerArtistLead {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+

@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { useI18n } from '../../i18n/useI18n';
 import { useViewMode } from '../../contexts/ViewModeContext';
 import { teamMembers } from '../../content/teamData';
-import { galleryWorks } from '../../content/galleryManifest';
+import { galleryWorks, GalleryWork } from '../../content/galleryManifest';
 import { events } from '../../content/eventsData';
 import { Contact } from '../../sections/Contact';
 import { Movie } from '../../sections/Movie';
@@ -11,6 +11,11 @@ import { scrollToId } from '../../utils/scroll';
 import { useActiveSection } from '../Header/useActiveSection';
 import { gsap, ScrollTrigger } from '../../animation/gsap';
 import styles from './GalleryMode.module.css';
+
+type DrawerState =
+  | { type: 'closed' }
+  | { type: 'bio'; artistName: string }
+  | { type: 'story'; artistName: string; workId: string };
 
 export function GalleryMode() {
   const { t, lang, setLang } = useI18n();
@@ -22,29 +27,51 @@ export function GalleryMode() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isLangDropdownOpen, setIsLangDropdownOpen] = useState(false);
   const [isDeclarationOpen, setIsDeclarationOpen] = useState(false);
+  const [drawerState, setDrawerState] = useState<DrawerState>({ type: 'closed' });
+
+  const isOverlayOpen = isDeclarationOpen || drawerState.type !== 'closed';
 
   useEffect(() => {
-    if (isDeclarationOpen) {
+    if (isOverlayOpen) {
       const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
       document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    } else {
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+    } else if (!isMenuOpen || !isMobile) {
       document.body.style.overflow = '';
       document.body.style.paddingRight = '';
     }
-  }, [isDeclarationOpen]);
+  }, [isOverlayOpen, isMenuOpen, isMobile]);
 
   useEffect(() => {
     if (isMenuOpen && isMobile) {
       document.body.style.overflow = 'hidden';
-    } else if (!isDeclarationOpen) {
+    } else if (!isOverlayOpen) {
       document.body.style.overflow = '';
     }
-  }, [isMenuOpen, isMobile, isDeclarationOpen]);
+  }, [isMenuOpen, isMobile, isOverlayOpen]);
 
-  // Detect mobile on mount and resize
+  // Close drawer or modal on Escape key
   useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth <= 1024);
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (drawerState.type !== 'closed') {
+          setDrawerState({ type: 'closed' });
+        } else if (isDeclarationOpen) {
+          setIsDeclarationOpen(false);
+        } else if (isMenuOpen) {
+          setIsMenuOpen(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [drawerState.type, isDeclarationOpen, isMenuOpen]);
+
+  // Detect mobile/tablet portrait on mount and resize (<= 960px so 1024x768 4:3 uses desktop split-stage)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth <= 960);
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
@@ -74,7 +101,7 @@ export function GalleryMode() {
     // Keep the order from galleryWorks (first appearance defines order)
     const uniqueArtists = Array.from(new Set(galleryWorks.map(w => w.artist)));
     return uniqueArtists.map(name => [name, worksByArtist[name]] as [string, Record<string, typeof galleryWorks>]);
-  }, [galleryWorks]);
+  }, []);
 
   const navItems = useMemo(() => [
     { id: 'manifesto', label: t.header.manifesto },
@@ -118,6 +145,7 @@ export function GalleryMode() {
     scrollToId(id);
     setIsMenuOpen(false);
     setIsDeclarationOpen(false);
+    setDrawerState({ type: 'closed' });
   };
 
   // Translation map for mediums
@@ -127,10 +155,15 @@ export function GalleryMode() {
     'Sculpture': { en: 'Sculpture', ru: 'Скульптура', es: 'Escultura' },
     'Acrylic': { en: 'Acrylic', ru: 'Акрил', es: 'Acrílico' },
     'Mixed Media': { en: 'Mixed Media', ru: 'Смешанная техника', es: 'Técnica Mixta' },
+    'Oil and soft pastel on paper': {
+      en: 'Oil and soft pastel on paper',
+      ru: 'Масляная и сухая пастель на бумаге',
+      es: 'Pastel al óleo y seco sobre papel',
+    },
     'Other': { en: 'Other', ru: 'Прочее', es: 'Otro' }
   };
 
-  const getTranslatedMedium = (medium: string, work?: any) => {
+  const getTranslatedMedium = (medium: string, work?: GalleryWork) => {
     if (work) {
       if (lang === 'ru') return work.mediumRu || work.mediumEn || medium;
       if (lang === 'es') return work.mediumEs || work.mediumEn || medium;
@@ -139,14 +172,83 @@ export function GalleryMode() {
     return mediumTranslations[medium]?.[lang] || medium;
   };
 
-  // Get team member by name for bio and photo
+  const getWorkTitle = (work: GalleryWork) =>
+    lang === 'ru' ? work.titleRu : lang === 'es' ? work.titleEs : work.titleEn;
+
+  const getWorkStory = (work: GalleryWork) =>
+    lang === 'ru' ? work.storyRu : lang === 'es' ? work.storyEs : work.storyEn;
+
+  // Curatorial UI labels in all 3 languages
+  const curatorialLabels = useMemo(() => ({
+    readBioFull:
+      lang === 'ru'
+        ? '+ Биография и кредо'
+        : lang === 'es'
+        ? '+ Biografía y visión'
+        : '+ Read Biography & Vision',
+    readBioCompact:
+      lang === 'ru'
+        ? '+ О художнике'
+        : lang === 'es'
+        ? '+ Biografía'
+        : '+ Bio & Vision',
+    readStory:
+      lang === 'ru'
+        ? '✦ История создания'
+        : lang === 'es'
+        ? '✦ Historia de la obra'
+        : '✦ Story Behind the Work',
+    bioHeading:
+      lang === 'ru' ? 'Биография' : lang === 'es' ? 'Biografía' : 'Biography',
+    visionHeading:
+      lang === 'ru'
+        ? 'Творческое кредо и взгляд на проект'
+        : lang === 'es'
+        ? 'Visión artística y declaración sobre el proyecto'
+        : 'Artistic Vision & Project Statement',
+    exhibitionsHeading:
+      lang === 'ru'
+        ? 'Значимые выставки и участие'
+        : lang === 'es'
+        ? 'Exposiciones destacadas y participación'
+        : 'Notable Exhibitions & Participation',
+    worksInCollectionHeading:
+      lang === 'ru'
+        ? 'Работы в экспозиции'
+        : lang === 'es'
+        ? 'Obras en la exposición'
+        : 'Exhibited Works',
+    storyHeading:
+      lang === 'ru'
+        ? 'История создания работы'
+        : lang === 'es'
+        ? 'Historia detrás de la obra'
+        : 'Story Behind the Work',
+    hasStoryTag:
+      lang === 'ru' ? '✦ История' : lang === 'es' ? '✦ Historia' : '✦ Story',
+  }), [lang]);
+
+  // Get team member by name for bio, vision, country, and photo
   const getArtistData = (artistName: string) => {
     const member = teamMembers.find(m => m.name === artistName);
     const translatedName = lang === 'ru' ? member?.nameRu : lang === 'es' ? member?.nameEs : member?.name;
+    const fullName = lang === 'ru' ? member?.fullNameRu : lang === 'es' ? member?.fullNameEs : member?.fullNameEn;
+    const country = lang === 'ru' ? member?.countryRu : lang === 'es' ? member?.countryEs : member?.countryEn;
+    const blurb = lang === 'ru' ? member?.blurbRu : lang === 'es' ? member?.blurbEs : member?.blurbEn;
+    const bio = lang === 'ru' ? member?.bioRu : lang === 'es' ? member?.bioEs : member?.bioEn;
+    const vision = lang === 'ru' ? member?.visionRu : lang === 'es' ? member?.visionEs : member?.visionEn;
+    const exhibitions = lang === 'ru' ? member?.exhibitionsRu : lang === 'es' ? member?.exhibitionsEs : member?.exhibitionsEn;
 
     return {
+      id: member?.id || artistName,
+      rawName: artistName,
       name: translatedName || artistName,
-      bio: lang === 'ru' ? member?.blurbRu : lang === 'es' ? member?.blurbEs : member?.blurbEn,
+      fullName: fullName || translatedName || artistName,
+      country: country || '',
+      bio: blurb || '',
+      fullBio: bio || '',
+      vision: vision || '',
+      exhibitions: exhibitions || [],
       photo: member?.photoSrc,
     };
   };
@@ -162,16 +264,18 @@ export function GalleryMode() {
           const artistCol = block.querySelector(`.${styles.artistCol}`) as HTMLElement;
           const mediumGroups = gsap.utils.toArray<HTMLElement>(block.querySelectorAll(`.${styles.mediumGroup}`));
           
-          // Pin the Artist Info Column
-          ScrollTrigger.create({
-            trigger: block,
-            start: 'top top',
-            end: 'bottom bottom',
-            pin: artistCol,
-            pinSpacing: false,
-            invalidateOnRefresh: true,
-            refreshPriority: -1,
-          });
+          // Pin the Artist Info Column (at top: 0 on desktop, and at top: 64px below header on mobile/tablet)
+          if (artistCol) {
+            ScrollTrigger.create({
+              trigger: block,
+              start: isMobile ? 'top 64px' : 'top top',
+              end: 'bottom bottom',
+              pin: artistCol,
+              pinSpacing: false,
+              invalidateOnRefresh: true,
+              refreshPriority: -1,
+            });
+          }
 
           // Handle Medium Groups and their Flipping Works
           mediumGroups.forEach((group) => {
@@ -179,6 +283,20 @@ export function GalleryMode() {
             const progressLabel = group.querySelector(`.${styles.progressLabel}`) as HTMLElement;
             const groupWorksCount = works.length;
             const groupDistance = (groupWorksCount - 1) * window.innerHeight;
+
+            // Ensure only the active work intercepts clicks in stacked works
+            const syncActiveWorkInteractivity = (activeIndex: number) => {
+              works.forEach((w, idx) => {
+                w.style.pointerEvents = idx === activeIndex ? 'auto' : 'none';
+              });
+              if (progressLabel) {
+                const currentStr = (activeIndex + 1).toString().padStart(2, '0');
+                const totalStr = groupWorksCount.toString().padStart(2, '0');
+                progressLabel.textContent = `${currentStr}\u00A0/\u00A0${totalStr}`;
+              }
+            };
+
+            syncActiveWorkInteractivity(0);
 
             if (groupWorksCount > 1) {
               const tl = gsap.timeline({
@@ -197,6 +315,13 @@ export function GalleryMode() {
                   },
                   invalidateOnRefresh: true,
                   refreshPriority: 1,
+                  onUpdate: (self) => {
+                    const activeIdx = Math.min(
+                      groupWorksCount - 1,
+                      Math.max(0, Math.round(self.progress * (groupWorksCount - 1)))
+                    );
+                    syncActiveWorkInteractivity(activeIdx);
+                  },
                 }
               });
 
@@ -230,14 +355,6 @@ export function GalleryMode() {
                   }, 
                   pos
                 );
-
-                if (progressLabel) {
-                  const currentStr = (i + 1).toString().padStart(2, '0');
-                  const totalStr = groupWorksCount.toString().padStart(2, '0');
-                  tl.add(() => {
-                    progressLabel.textContent = `${currentStr}\u00A0/\u00A0${totalStr}`;
-                  }, pos + 0.5);
-                }
               });
             }
           });
@@ -265,7 +382,6 @@ export function GalleryMode() {
   }, [artistEntries.length, isMobile]);
 
   const toggleModeWithTransition = () => {
-    // Add a black fade overlay before toggling
     const overlay = document.createElement('div');
     overlay.style.position = 'fixed';
     overlay.style.inset = '0';
@@ -282,7 +398,6 @@ export function GalleryMode() {
 
     setTimeout(() => {
       toggleMode();
-      // The new mode will mount and we should fade out the overlay
       setTimeout(() => {
         overlay.style.opacity = '0';
         setTimeout(() => {
@@ -303,7 +418,7 @@ export function GalleryMode() {
     ripple.style.width = ripple.style.height = `${size}px`;
     ripple.style.left = `${x}px`;
     ripple.style.top = `${y}px`;
-    ripple.style.background = 'rgba(0, 0, 0, 0.4)'; // Changed to dark ripple
+    ripple.style.background = 'rgba(0, 0, 0, 0.4)';
     ripple.className = styles.ripple;
 
     btn.appendChild(ripple);
@@ -316,6 +431,18 @@ export function GalleryMode() {
   };
 
   if (mode === 'immersive') return null;
+
+  // Resolve active drawer content
+  const activeDrawerArtist =
+    drawerState.type !== 'closed' ? getArtistData(drawerState.artistName) : null;
+  const activeDrawerArtistWorks =
+    drawerState.type !== 'closed'
+      ? galleryWorks.filter(w => w.artist === drawerState.artistName)
+      : [];
+  const activeDrawerWork =
+    drawerState.type === 'story'
+      ? galleryWorks.find(w => w.id === drawerState.workId) || null
+      : null;
 
   return (
     <div className={`${styles.root} ${isMenuOpen ? styles.menuOpen : ''}`}>
@@ -501,7 +628,7 @@ export function GalleryMode() {
           </div>
         </section>
 
-        {/* Collection - The Stationary Flip Architecture */}
+        {/* Collection - The Stationary Flip Architecture + Option 1 Curatorial Drawer */}
         <section ref={collectionSectionRef} className={styles.collectionSection} id="works">
           <div className={styles.collectionInner}>
             {artistEntries.map(([artistName, mediums]) => {
@@ -515,14 +642,14 @@ export function GalleryMode() {
                   data-artist={artistName}
                   id={`artist-${artistName.replace(/\s+/g, '-').toLowerCase()}`}
                 >
-                  {/* Artist Info - Pinned on Left (Desktop) / Top (Mobile) */}
+                  {/* Artist Info - Pinned on Left (Desktop) / Sticky Top Bar (Mobile) */}
                   <div className={styles.artistCol}>
                     <div className={styles.artistInfo}>
                       {artistData.photo && (
                         <div className={styles.artistPhotoWrapper}>
                           <img
                             src={artistData.photo}
-                            alt={artistName}
+                            alt={artistData.name}
                             className={styles.artistPhoto}
                             loading="lazy"
                             decoding="async"
@@ -530,8 +657,26 @@ export function GalleryMode() {
                         </div>
                       )}
                       <div className={styles.artistText}>
+                        {artistData.country && (
+                          <span className={styles.artistCountryTag}>{artistData.country}</span>
+                        )}
                         <h2 className={styles.artistName}>{artistData.name}</h2>
                         <p className={styles.artistBio}>{artistData.bio}</p>
+                        {artistData.fullBio && (
+                          <p className={styles.artistBioPreview}>{artistData.fullBio}</p>
+                        )}
+                        <button
+                          type="button"
+                          className={styles.artistBioBtn}
+                          onClick={() => setDrawerState({ type: 'bio', artistName })}
+                        >
+                          <span className={styles.artistBioBtnDesktopText}>
+                            {curatorialLabels.readBioFull}
+                          </span>
+                          <span className={styles.artistBioBtnMobileText}>
+                            {curatorialLabels.readBioCompact}
+                          </span>
+                        </button>
                       </div>
                     </div>
                   </div>
@@ -550,34 +695,60 @@ export function GalleryMode() {
                         </div>
                         
                         <div className={styles.worksStack}>
-                          {works.map((work: any, idx) => (
-                            <figure key={work.id} className={styles.workItem} style={{ zIndex: works.length - idx }}>
-                              <div className={styles.workImageWrapper}>
-                                <img
-                                  src={work.src}
-                                  alt={lang === 'ru' ? work.titleRu : lang === 'es' ? work.titleEs : work.titleEn}
-                                  className={styles.workImage}
-                                  loading="lazy"
-                                  decoding="async"
-                                />
-                              </div>
-                              <figcaption className={styles.workCaption}>
-                                <div className={styles.captionHeader}>
-                                  <div className={styles.captionTitleArea}>
-                                    <span className={styles.workMediumTag}>{getTranslatedMedium(work.mediumEn || 'Other', work)}</span>
-                                    <h4 className={styles.workTitle}>
-                                      {lang === 'ru' ? work.titleRu : lang === 'es' ? work.titleEs : work.titleEn}
-                                    </h4>
+                          {works.map((work: GalleryWork, idx) => {
+                            const storyText = getWorkStory(work);
+                            return (
+                              <figure
+                                key={work.id}
+                                className={styles.workItem}
+                                style={{ zIndex: works.length - idx }}
+                              >
+                                <div className={styles.workImageWrapper}>
+                                  <img
+                                    src={work.src}
+                                    alt={getWorkTitle(work)}
+                                    className={styles.workImage}
+                                    loading="lazy"
+                                    decoding="async"
+                                  />
+                                </div>
+                                <figcaption className={styles.workCaption}>
+                                  <div className={styles.captionHeader}>
+                                    <div className={styles.captionTitleArea}>
+                                      <span className={styles.workMediumTag}>
+                                        {getTranslatedMedium(work.mediumEn || 'Other', work)}
+                                      </span>
+                                      <h4 className={styles.workTitle}>{getWorkTitle(work)}</h4>
+                                    </div>
+                                    <span className={styles.workIndex}>
+                                      {(idx + 1).toString().padStart(2, '0')}
+                                    </span>
                                   </div>
-                                  <span className={styles.workIndex}>{(idx + 1).toString().padStart(2, '0')}</span>
-                                </div>
-                                <div className={styles.workMeta}>
-                                  {work.year && <span className={styles.workMetaItem}>{work.year}</span>}
-                                  {work.size && <span className={styles.workMetaItem}>{work.size}</span>}
-                                </div>
-                              </figcaption>
-                            </figure>
-                          ))}
+                                  <div className={styles.workMeta}>
+                                    <div className={styles.workMetaDetails}>
+                                      {work.year && <span className={styles.workMetaItem}>{work.year}</span>}
+                                      {work.size && <span className={styles.workMetaItem}>{work.size}</span>}
+                                    </div>
+                                    {storyText && (
+                                      <button
+                                        type="button"
+                                        className={styles.workStoryBtn}
+                                        onClick={() =>
+                                          setDrawerState({
+                                            type: 'story',
+                                            artistName,
+                                            workId: work.id,
+                                          })
+                                        }
+                                      >
+                                        {curatorialLabels.readStory}
+                                      </button>
+                                    )}
+                                  </div>
+                                </figcaption>
+                              </figure>
+                            );
+                          })}
                         </div>
                       </div>
                     ))}
@@ -653,6 +824,225 @@ export function GalleryMode() {
           <Contact />
         </div>
       </main>
+
+      {/* Slide-Over Curatorial Drawer (Creator Biography/Vision & Artwork Story) */}
+      {drawerState.type !== 'closed' && activeDrawerArtist && (
+        <div
+          className={styles.drawerOverlay}
+          onClick={() => setDrawerState({ type: 'closed' })}
+          role="dialog"
+          aria-modal="true"
+        >
+          <aside
+            className={styles.drawerPanel}
+            onClick={(e) => e.stopPropagation()}
+          >
+            {drawerState.type === 'bio' ? (
+              <>
+                <header className={styles.drawerHeader}>
+                  <div className={styles.drawerHeaderTitles}>
+                    {activeDrawerArtist.country && (
+                      <span className={styles.drawerEyebrow}>
+                        {activeDrawerArtist.country}
+                      </span>
+                    )}
+                    <h2 className={styles.drawerTitle}>{activeDrawerArtist.fullName}</h2>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.drawerCloseBtn}
+                    onClick={() => setDrawerState({ type: 'closed' })}
+                    aria-label="Close panel"
+                  >
+                    ✕
+                  </button>
+                </header>
+
+                <div className={styles.drawerBody}>
+                  <div className={styles.drawerArtistLead}>
+                    {activeDrawerArtist.photo && (
+                      <img
+                        src={activeDrawerArtist.photo}
+                        alt={activeDrawerArtist.name}
+                        className={styles.drawerArtistAvatar}
+                      />
+                    )}
+                    <p className={styles.drawerArtistBlurb}>{activeDrawerArtist.bio}</p>
+                  </div>
+
+                  {activeDrawerArtist.fullBio && (
+                    <section className={styles.drawerSection}>
+                      <h3 className={styles.drawerSectionHeading}>
+                        {curatorialLabels.bioHeading}
+                      </h3>
+                      {activeDrawerArtist.fullBio.split('\n\n').map((para, idx) => (
+                        <p key={idx} className={styles.drawerParagraph}>
+                          {para}
+                        </p>
+                      ))}
+                    </section>
+                  )}
+
+                  {activeDrawerArtist.exhibitions && activeDrawerArtist.exhibitions.length > 0 && (
+                    <section className={styles.drawerSection}>
+                      <h3 className={styles.drawerSectionHeading}>
+                        {curatorialLabels.exhibitionsHeading}
+                      </h3>
+                      <ul className={styles.drawerExhibitionsList}>
+                        {activeDrawerArtist.exhibitions.map((item, idx) => (
+                          <li key={idx} className={styles.drawerExhibitionItem}>
+                            {item}
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  )}
+
+                  {activeDrawerArtist.vision && (
+                    <section className={styles.drawerVisionBox}>
+                      <h3 className={styles.drawerSectionHeading}>
+                        {curatorialLabels.visionHeading}
+                      </h3>
+                      {activeDrawerArtist.vision.split('\n\n').map((para, idx) => (
+                        <p key={idx} className={styles.drawerVisionText}>
+                          {para}
+                        </p>
+                      ))}
+                    </section>
+                  )}
+
+                  {activeDrawerArtistWorks.length > 0 && (
+                    <section className={styles.drawerSection}>
+                      <h3 className={styles.drawerSectionHeading}>
+                        {curatorialLabels.worksInCollectionHeading}
+                      </h3>
+                      <div className={styles.drawerWorksGrid}>
+                        {activeDrawerArtistWorks.map((w) => {
+                          const hasStory = Boolean(getWorkStory(w));
+                          return (
+                            <div
+                              key={w.id}
+                              className={`${styles.drawerWorkMiniCard} ${hasStory ? styles.drawerWorkMiniCardInteractive : ''}`}
+                              onClick={() => {
+                                if (hasStory) {
+                                  setDrawerState({
+                                    type: 'story',
+                                    artistName: activeDrawerArtist.rawName,
+                                    workId: w.id,
+                                  });
+                                }
+                              }}
+                            >
+                              <img
+                                src={w.src}
+                                alt={getWorkTitle(w)}
+                                className={styles.drawerWorkMiniThumb}
+                                loading="lazy"
+                              />
+                              <div className={styles.drawerWorkMiniInfo}>
+                                <span className={styles.drawerWorkMiniTitle}>
+                                  {getWorkTitle(w)}
+                                </span>
+                                <span className={styles.drawerWorkMiniMeta}>
+                                  {w.year} · {w.size}
+                                </span>
+                                {hasStory && (
+                                  <span className={styles.drawerWorkMiniBadge}>
+                                    {curatorialLabels.hasStoryTag}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </section>
+                  )}
+                </div>
+              </>
+            ) : activeDrawerWork ? (
+              <>
+                <header className={styles.drawerHeader}>
+                  <div className={styles.drawerHeaderTitles}>
+                    <span className={styles.drawerEyebrow}>
+                      {activeDrawerArtist.name} &nbsp;·&nbsp;{' '}
+                      {getTranslatedMedium(activeDrawerWork.mediumEn || 'Other', activeDrawerWork)}
+                    </span>
+                    <h2 className={styles.drawerTitle}>{getWorkTitle(activeDrawerWork)}</h2>
+                    <div className={styles.drawerWorkSubMeta}>
+                      {activeDrawerWork.year}
+                      {activeDrawerWork.size ? ` · ${activeDrawerWork.size}` : ''}
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    className={styles.drawerCloseBtn}
+                    onClick={() => setDrawerState({ type: 'closed' })}
+                    aria-label="Close panel"
+                  >
+                    ✕
+                  </button>
+                </header>
+
+                <div className={styles.drawerBody}>
+                  <div className={styles.drawerArtworkPreview}>
+                    <img
+                      src={activeDrawerWork.src}
+                      alt={getWorkTitle(activeDrawerWork)}
+                      className={styles.drawerArtworkImg}
+                    />
+                  </div>
+
+                  <section className={styles.drawerSection}>
+                    <h3 className={styles.drawerSectionHeading}>
+                      ✦ {curatorialLabels.storyHeading}
+                    </h3>
+                    {getWorkStory(activeDrawerWork)
+                      ?.split('\n\n')
+                      .map((para, idx) => (
+                        <p key={idx} className={styles.drawerParagraph}>
+                          {para}
+                        </p>
+                      ))}
+                  </section>
+
+                  <footer className={styles.drawerFooter}>
+                    <div className={styles.drawerFooterArtist}>
+                      {activeDrawerArtist.photo && (
+                        <img
+                          src={activeDrawerArtist.photo}
+                          alt={activeDrawerArtist.name}
+                          className={styles.drawerFooterAvatar}
+                        />
+                      )}
+                      <div>
+                        <div className={styles.drawerFooterArtistName}>
+                          {activeDrawerArtist.fullName}
+                        </div>
+                        <div className={styles.drawerFooterArtistCountry}>
+                          {activeDrawerArtist.country}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className={styles.drawerSwitchBtn}
+                      onClick={() =>
+                        setDrawerState({
+                          type: 'bio',
+                          artistName: activeDrawerArtist.rawName,
+                        })
+                      }
+                    >
+                      {curatorialLabels.readBioFull}
+                    </button>
+                  </footer>
+                </div>
+              </>
+            ) : null}
+          </aside>
+        </div>
+      )}
 
       {/* Declaration Modal */}
       {isDeclarationOpen && (

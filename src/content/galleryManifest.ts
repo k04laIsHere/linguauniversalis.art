@@ -11,6 +11,15 @@ export type GalleryWork = {
   mediumEn?: string;
   mediumRu?: string;
   mediumEs?: string;
+  /**
+   * Optional curatorial / artist story behind the work.
+   * Add `storyRu`, `storyEn`, and `storyEs` to any work below to automatically
+   * enable the "✦ Story Behind the Work" button and slide-over story drawer.
+   * Separate paragraphs with `\n\n`.
+   */
+  storyRu?: string;
+  storyEn?: string;
+  storyEs?: string;
 };
 
 const enc = (path: string) => encodeURI(path);
@@ -71,6 +80,12 @@ export const galleryWorks: GalleryWork[] = [
     mediumEn: 'Digital Art',
     mediumRu: 'Цифровое искусство',
     mediumEs: 'Arte digital',
+    storyRu:
+      'Я сделал эту работу для проекта Lingua Universalis. Мне хотелось поразмышлять о том, что объединяет людей, несмотря на все наши различия. Мы говорим на разных языках, принадлежим к разным культурам, по-разному смотрим на мир, но при этом у нас остаётся много общего.\n\nРабота сделана в технике цифрового коллажа с использованием генеративных нейросетей. Мне было интересно собрать множество текстур, шрифтов и изображений в одну композицию, в которой отдельные детали постепенно складываются в общую картину.\n\nДве стороны работы отличаются цветом: одна более тёплая, другая холодная. Между ними — два человеческих профиля. Головы заполнены текстом на разных языках. Здесь мне было важно не столько содержание надписей, сколько сам образ: множество разных слов, которые сосуществуют в одном пространстве. Сегодня слова чаще разделяют нас, чем связывают.\n\nВ центре находится рука, внутри которой можно разглядеть маленькие фигуры людей и сцены из жизни. Она напоминает мне древний символ, но при этом состоит из множества вполне земных, человеческих историй. Над ней расположен круг с лицами и орнаментами, который объединяет композицию и притягивает взгляд.\n\nДля меня эта работа — о том, как из множества отдельных историй складывается нечто общее. Мне интересно, что увидит в ней другой человек и какие смыслы найдёт для себя.',
+    storyEn:
+      'I created this work for the Lingua Universalis project. I wanted to reflect on what unites people despite all our differences. We speak different languages, belong to different cultures, and see the world in different ways, yet we still share so much in common.\n\nThe piece was created using digital collage techniques combined with generative neural networks. I was interested in bringing together a multitude of textures, typefaces, and images into a single composition where individual details gradually come together to form a unified whole.\n\nThe two sides of the work contrast in color: one is warmer, the other cooler. Between them are two human profiles. Their heads are filled with text in different languages. What mattered to me here was not so much the literal meaning of the inscriptions as the image itself: a multitude of different words coexisting within a single space. Today, words divide us more often than they connect us.\n\nAt the center is a hand, inside which one can make out small human figures and scenes from everyday life. It reminds me of an ancient symbol, yet it is composed of many grounded, human stories. Above it sits a circle with faces and ornaments that unifies the composition and draws the eye.\n\nFor me, this work is about how something shared emerges out of many separate stories. I am curious to see what another person will discover in it and what meanings they will find for themselves.',
+    storyEs:
+      'Hice esta obra para el proyecto Lingua Universalis. Quería reflexionar sobre lo que une a las personas a pesar de todas nuestras diferencias. Hablamos distintos idiomas, pertenecemos a diferentes culturas y miramos el mundo de maneras diversas, pero aun así conservamos mucho en común.\n\nLa obra está realizada con la técnica de collage digital utilizando redes neuronales generativas. Me interesaba reunir múltiples texturas, tipografías e imágenes en una sola composición, en la que los detalles individuales van conformando gradualmente una imagen común.\n\nLos dos lados de la obra se diferencian por el color: uno es más cálido y el otro más frío. Entre ellos hay dos perfiles humanos. Las cabezas están llenas de textos en distintos idiomas. Aquí me importaba no tanto el contenido literal de las inscripciones como la imagen misma: una multitud de palabras diferentes que coexisten en un mismo espacio. Hoy en día, las palabras suelen separarnos más de lo que nos unen.\n\nEn el centro se encuentra una mano, dentro de la cual se pueden distinguir pequeñas figuras humanas y escenas de la vida cotidiana. Me recuerda a un símbolo antiguo, pero al mismo tiempo está formada por muchas historias profundamente terrenales y humanas. Sobre ella se sitúa un círculo con rostros y ornamentos que unifica la composición y atrae la mirada.\n\nPara mí, esta obra trata de cómo a partir de muchas historias individuales surge algo compartido. Me interesa saber qué verá en ella otra persona y qué significados encontrará para sí misma.',
   },
   {
     id: 'evgenyglobenko-1',
