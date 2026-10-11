@@ -14,7 +14,7 @@ export function Movie() {
 
   const isRu = lang === 'ru';
   const ccLang = isRu ? 'ru' : 'en';
-  const videoSrc = `https://www.youtube.com/embed/bugdiiVDZCc?si=aSMKeukfUgDUx4B_&cc_load_policy=1&cc_lang_pref=${ccLang}&hl=${ccLang}`;
+  const videoSrc = `https://www.youtube-nocookie.com/embed/bugdiiVDZCc?cc_load_policy=1&cc_lang_pref=${ccLang}&hl=${ccLang}`;
 
   return (
     <section
@@ -26,6 +26,7 @@ export function Movie() {
         <iframe
           src={videoSrc}
           className={styles.videoFrame}
+          loading="lazy"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
           referrerPolicy="strict-origin-when-cross-origin"
           allowFullScreen

@@ -99,7 +99,7 @@ export function useViewportFlashlight(options: Options = {}) {
     return () => {
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       (t as any).removeEventListener?.('pointermove', onMove);
-      (t as any).removeEventListener?.('pointerdown', onMove);
+      (t as any).removeEventListener?.('pointerdown', onDown);
       (t as any).removeEventListener?.('pointerleave', onLeave);
       (t as any).removeEventListener?.('pointercancel', onLeave);
       (t as any).removeEventListener?.('blur', onLeave);

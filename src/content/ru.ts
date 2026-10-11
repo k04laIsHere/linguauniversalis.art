@@ -68,15 +68,6 @@ export const ru: I18nDict = {
   contact: {
     title: 'Сигнал',
     subtitle: 'Установите связь через универсальную частоту.',
-    coreHint: 'Нажмите на Ядро, чтобы открыть передатчик',
-    formName: 'Ваше имя',
-    formEmail: 'Ваш Email',
-    formMessage: 'Ваше сообщение',
-    formSubmit: 'Отправить сигнал',
-    sending: 'Передача...',
-    success: 'Сигнал передан. Связь установлена.',
-    error: 'Помехи в эфире. Попробуйте еще раз.',
-    back: 'Назад',
   },
   declaration: {
     title: 'Декларация проекта',

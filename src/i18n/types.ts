@@ -73,15 +73,6 @@ export type I18nDict = {
   contact: {
     title: string;
     subtitle: string;
-    coreHint: string;
-    formName: string;
-    formEmail: string;
-    formMessage: string;
-    formSubmit: string;
-    sending: string;
-    success: string;
-    error: string;
-    back: string;
   };
   declaration: {
     title: string;

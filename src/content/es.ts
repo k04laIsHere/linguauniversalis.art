@@ -68,15 +68,6 @@ export const es: I18nDict = {
   contact: {
     title: 'Señal',
     subtitle: 'Establece conexión a través de la frecuencia universal.',
-    coreHint: 'Haz clic en el Núcleo para abrir el transmisor',
-    formName: 'Tu nombre',
-    formEmail: 'Tu correo electrónico',
-    formMessage: 'Tu mensaje',
-    formSubmit: 'Enviar señal',
-    sending: 'Transmitiendo...',
-    success: 'Señal transmitida. Conexión establecida.',
-    error: 'Interferencia de frecuencia. Por favor, inténtalo de nuevo.',
-    back: 'Volver',
   },
   declaration: {
     title: 'Declaración del proyecto',

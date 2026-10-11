@@ -160,18 +160,10 @@ test.describe('Lingua Universalis UI/UX Verification', () => {
     await expect(lightbox).toBeVisible();
   });
 
-  test('Contact: Signal interaction', async ({ page }) => {
+  test('Contact: Direct email link', async ({ page }) => {
     await page.locator('#contact').scrollIntoViewIfNeeded();
-    const signalBtn = page.locator('button:has-text("Сигнал"), button:has-text("Signal")').first();
-    
-    // Simulate long press
-    await signalBtn.hover();
-    await page.mouse.down();
-    await page.waitForTimeout(2500); // Wait for progress > 1
-    await page.mouse.up();
-    
-    // Check if contact channels are revealed
-    await expect(page.locator('text=linguauniversalis.project@gmail.com')).toBeVisible();
+    const emailLink = page.locator('#contact a[href="mailto:linguauniversalis.art@gmail.com"]');
+    await expect(emailLink).toBeVisible();
   });
 
 });

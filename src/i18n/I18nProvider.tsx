@@ -5,30 +5,10 @@ import { en } from '../content/en';
 import { es } from '../content/es';
 import { I18nContext } from './I18nContext';
 
-const STORAGE_KEY = 'lu_lang';
-
-function getInitialLang(): Lang {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved === 'en') return 'en';
-  if (saved === 'es') return 'es';
-  return 'ru';
-}
-
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLang] = useState<Lang>(() => {
-    try {
-      return getInitialLang();
-    } catch {
-      return 'ru';
-    }
-  });
+  const [lang, setLang] = useState<Lang>('ru');
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, lang);
-    } catch {
-      // ignore
-    }
     document.documentElement.lang = lang;
   }, [lang]);
 

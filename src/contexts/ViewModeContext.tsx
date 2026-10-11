@@ -10,8 +10,6 @@ interface ViewModeContextValue {
 
 const ViewModeContext = createContext<ViewModeContextValue | undefined>(undefined);
 
-const STORAGE_KEY = 'lingua-view-mode';
-
 export function ViewModeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ViewMode>(() => {
     if (typeof window !== 'undefined') {
@@ -47,10 +45,8 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
       // #gallery is used for the immersive view's anchor and should NOT trigger gallery/archive mode.
       if (anchor === '#archive') {
         setModeState('gallery');
-        localStorage.setItem(STORAGE_KEY, 'gallery');
       } else if (anchor === '#immersive' || anchor === '#gallery') {
         setModeState('immersive');
-        localStorage.setItem(STORAGE_KEY, 'immersive');
       }
     };
 
@@ -60,7 +56,6 @@ export function ViewModeProvider({ children }: { children: ReactNode }) {
 
   const setMode = (newMode: ViewMode) => {
     setModeState(newMode);
-    localStorage.setItem(STORAGE_KEY, newMode);
     
     // Update URL without hash scrolling if possible, or just pushState
     if (newMode === 'gallery') {

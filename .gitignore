@@ -9,17 +9,21 @@
 # production
 /dist
 
-# misc
+# misc & env
 .DS_Store
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+.env
+.env.*
+!.env.example
 
-# logs
+# build cache & logs
+.vite/
+*.tsbuildinfo
+*.log
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+test-results/
+playwright-report/
 
 # IDEs
 .vscode/
@@ -29,6 +33,40 @@ yarn-error.log*
 *.njsproj
 *.sln
 *.sw?
+*.code-workspace
 .cursor/
 .playwright-mcp/
+
+# AI agent workspace, memory, and local debug artifacts
+.openclaw/
+home/
+memory/
+subagents/
+scripts/watchdog.mjs
+backups/
+AGENTS.md
+SOUL.md
+USER.md
+IDENTITY.md
+HEARTBEAT.md
+TOOLS.md
+MEMORY.md
+AGENT_INSPECTION_PROMPT.md
+ORCHESTRATION_PLAN.md
+REFINEMENT_PLAN_*.md
+UX_TEST_PLAN.md
+audit_report.txt
+audit*.png
+forensic*.png
+professor*.png
+archive_*.png
+mobile_menu_audit.png
+audit*.mjs
+check*.mjs
+check_res.cjs
+debug*.mjs
+forensic_audit.mjs
+professor_audit.mjs
+start-*.sh
+
 
