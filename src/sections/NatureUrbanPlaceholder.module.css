@@ -1,11 +1,11 @@
 .root {
   --flight-travel: 320vh;
-  --flight-travel: 320dvh;
+  --flight-travel: 320lvh;
   position: relative;
   z-index: 1;
   height: 420vh;
   height: calc(100vh + var(--flight-travel));
-  height: calc(100dvh + var(--flight-travel));
+  height: calc(100lvh + var(--flight-travel));
   background: transparent;
   pointer-events: none;
 }

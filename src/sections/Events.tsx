@@ -115,19 +115,27 @@ export function Events() {
     const maxIndex = beats.length - 1;
     const visualProxy = { cursor: 0 };
     let currentStep = 0;
+    let lastWidth = window.innerWidth;
+    let stableHeight = Math.max(window.innerHeight, pin.offsetHeight || 0);
+
+    const getStepDistance = () => {
+      const isMobile = window.innerWidth <= 820;
+      return isMobile
+        ? Math.round(Math.max(460, Math.min(580, stableHeight * 0.56)))
+        : Math.round(Math.max(580, Math.min(720, stableHeight * 0.62)));
+    };
 
     const ctx = gsap.context(() => {
       ScrollTrigger.create({
         trigger: root,
         start: 'top top',
-        end: () => `+=${maxIndex * Math.min(220, Math.max(150, window.innerHeight * 0.2))}`,
+        end: () => `+=${maxIndex * getStepDistance()}`,
         pin: pin,
         pinSpacing: true,
         invalidateOnRefresh: true,
         onUpdate: (self) => {
           const nearest = Math.max(0, Math.min(maxIndex, Math.round(self.progress * maxIndex)));
           if (nearest !== currentStep) {
-            const stepDiff = Math.abs(nearest - currentStep);
             currentStep = nearest;
             setActiveBeatIdx(nearest);
 
@@ -137,12 +145,11 @@ export function Events() {
               return;
             }
 
-            const velocity = Math.abs(self.getVelocity());
-            const speedFactor = Math.min(1, velocity / 2200);
-            const duration = Math.max(
-              0.14,
-              (0.42 - speedFactor * 0.26) / Math.max(1, stepDiff * 0.65),
-            );
+            const distanceToTarget = Math.abs(nearest - visualProxy.cursor);
+            const duration =
+              distanceToTarget <= 1.15
+                ? 0.62
+                : Math.min(0.76, Math.max(0.46, distanceToTarget * 0.22));
 
             gsap.to(visualProxy, {
               cursor: nearest,
@@ -161,8 +168,15 @@ export function Events() {
       });
     }, root);
 
-    const handleResize = () => ScrollTrigger.refresh();
-    window.addEventListener('resize', handleResize);
+    // Only refresh ScrollTrigger when viewport width changes; ignore mobile address bar height changes
+    const handleResize = () => {
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth;
+        stableHeight = Math.max(window.innerHeight, pin.offsetHeight || 0);
+        ScrollTrigger.refresh();
+      }
+    };
+    window.addEventListener('resize', handleResize, { passive: true });
 
     return () => {
       window.removeEventListener('resize', handleResize);

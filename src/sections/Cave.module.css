@@ -14,7 +14,7 @@
 .bgWrapper {
   position: absolute;
   inset: 0 0 100vh 0;
-  inset: 0 0 100dvh 0;
+  inset: 0 0 100lvh 0;
   pointer-events: none;
   z-index: 10;
   will-change: transform;
@@ -599,7 +599,7 @@
 .exitPortalSpacer {
   position: relative;
   height: 100vh;
-  height: 100dvh;
+  height: 100lvh;
   pointer-events: none;
 }
 

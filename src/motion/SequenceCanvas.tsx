@@ -615,11 +615,9 @@ export const SequenceCanvas = forwardRef<
     resize();
     const observer = new ResizeObserver(scheduleResize);
     observer.observe(canvas);
-    window.visualViewport?.addEventListener("resize", scheduleResize);
 
     return () => {
       observer.disconnect();
-      window.visualViewport?.removeEventListener("resize", scheduleResize);
       if (resizeRafRef.current != null) {
         cancelAnimationFrame(resizeRafRef.current);
         resizeRafRef.current = null;

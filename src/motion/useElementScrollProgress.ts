@@ -25,6 +25,35 @@ export interface SequenceSceneSelection {
   state: ContinuousSceneState;
 }
 
+let cachedWidth = 0;
+let cachedLargeViewportHeight = 0;
+let lvhRuler: HTMLDivElement | null = null;
+
+function getStableViewportHeight(): number {
+  const width = window.innerWidth;
+  if (width !== cachedWidth || cachedLargeViewportHeight <= 0) {
+    cachedWidth = width;
+    if (typeof document !== "undefined" && document.body) {
+      if (!lvhRuler) {
+        lvhRuler = document.createElement("div");
+        lvhRuler.style.cssText =
+          "position:fixed;top:0;left:0;width:0;height:100vh;height:100lvh;pointer-events:none;visibility:hidden;z-index:-1;";
+        document.body.appendChild(lvhRuler);
+      }
+      const measured = lvhRuler.getBoundingClientRect().height;
+      if (measured > 0) {
+        cachedLargeViewportHeight = measured;
+        return cachedLargeViewportHeight;
+      }
+    }
+    cachedLargeViewportHeight = Math.max(
+      window.innerHeight,
+      document.documentElement?.clientHeight ?? 0,
+    );
+  }
+  return cachedLargeViewportHeight;
+}
+
 /**
  * Passive, rAF-coalesced scroll driver. It feeds the imperative canvas API so
  * scrubbing does not cause React to reconcile the page at scroll frequency.
@@ -42,13 +71,14 @@ export function useElementScrollProgress(
   useEffect(() => {
     if (!enabled) return;
     let raf: number | null = null;
+    let lastWidth = window.innerWidth;
 
     const update = () => {
       raf = null;
       const element = targetRef.current;
       if (!element) return;
       const rect = element.getBoundingClientRect();
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      const viewportHeight = getStableViewportHeight();
       if (rect.height <= 0 || viewportHeight <= 0) return;
       onProgressRef.current(
         elementScrollProgress(rect.top, rect.height, viewportHeight),
@@ -59,16 +89,21 @@ export function useElementScrollProgress(
       if (raf == null) raf = requestAnimationFrame(update);
     };
 
+    const onResize = () => {
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth;
+        schedule();
+      }
+    };
+
     window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
-    window.visualViewport?.addEventListener("resize", schedule);
+    window.addEventListener("resize", onResize, { passive: true });
     update();
     schedule();
 
     return () => {
       window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", schedule);
-      window.visualViewport?.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", onResize);
       if (raf != null) cancelAnimationFrame(raf);
     };
   }, [enabled, targetRef]);
@@ -121,10 +156,11 @@ export function useSequenceSceneController(
   useEffect(() => {
     if (!enabled || scenes.length === 0) return;
     let raf: number | null = null;
+    let lastWidth = window.innerWidth;
 
     const update = () => {
       raf = null;
-      const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      const viewportHeight = getStableViewportHeight();
       if (viewportHeight <= 0) return;
       const states: ContinuousSceneState[] = [];
       for (const scene of scenes) {
@@ -152,16 +188,21 @@ export function useSequenceSceneController(
       if (raf == null) raf = requestAnimationFrame(update);
     };
 
+    const onResize = () => {
+      if (window.innerWidth !== lastWidth) {
+        lastWidth = window.innerWidth;
+        schedule();
+      }
+    };
+
     window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", schedule, { passive: true });
-    window.visualViewport?.addEventListener("resize", schedule);
+    window.addEventListener("resize", onResize, { passive: true });
     update();
     schedule();
 
     return () => {
       window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", schedule);
-      window.visualViewport?.removeEventListener("resize", schedule);
+      window.removeEventListener("resize", onResize);
       if (raf != null) cancelAnimationFrame(raf);
     };
   }, [enabled, scenes]);

@@ -379,7 +379,7 @@
   .header {
     padding: 0; 
     height: 100px;
-    top: 24px;
+    top: 0;
   }
   .headerInner {
     padding: 0 20px;
