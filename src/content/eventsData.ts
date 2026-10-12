@@ -41,7 +41,7 @@ export const events: EventItem[] = [
     locationRu: 'Москва, Библиотека иностранной литературы',
     locationEn: 'Moscow, Library for Foreign Literature',
     locationEs: 'Moscú, Biblioteca de Literatura Extranjera',
-    images: ['/assets/events/event_01.jpeg', '/assets/events/event_03.jpeg', '/assets/events/event_04.jpg'],
+    images: ['/assets/events/event_01.jpeg', '/assets/events/event_02.jpeg', '/assets/events/event_04.jpg'],
     fullStoryRu:
       'В этом культурном проекте встретились сразу несколько стран: Россия, Армения, Венесуэла и Куба. Каждый из художников сохранил свой оригинальный взгляд на мир, используя универсальный язык искусства для выражения собственных идей. Как отметил Мигель Паласио, этот интернациональный союз вызывает только аплодисменты. Выставка стала платформой для диалога о том, как «Искусство Творения» служит фундаментом для взаимопонимания в эпоху глобальной фрагментации.',
     fullStoryEn:
@@ -83,7 +83,7 @@ export const events: EventItem[] = [
     locationRu: 'Москва, Библиотека иностранной литературы',
     locationEn: 'Moscow, Library for Foreign Literature',
     locationEs: 'Moscú, Biblioteca de Literatura Extranjera',
-    images: ['/assets/events/event_02.jpeg', '/assets/events/event_01.jpeg'],
+    images: ['/assets/events/event_05.png', '/assets/events/event_06.png'],
     fullStoryRu:
       'Участники проекта обсудили, как искусство может служить объединяющей силой. Художники Йослен Арриохас Орсини, Петр Цветков, Евгений Глобенко, Омар Годинес, Андрей Ваганов и Томас Арутюнян поделились тем, что вдохновило их работы, исследовали свои личные истоки творчества и рассмотрели разницу между обычным искусством и преображающим «искусством творения».',
     fullStoryEn:
@@ -91,6 +91,12 @@ export const events: EventItem[] = [
     fullStoryEs:
       'Los participantes del proyecto debatieron cómo el arte puede servir como fuerza unificadora. Los artistas Joslen Orsini, Petr Tsvetkov, Evgeny Globenko, Omar Godines, Andrey Vaganov y Thomas Harutunyan compartieron lo que inspiró sus obras, exploraron sus orígenes personales de la creatividad y examinaron la diferencia entre el arte convencional y el transformador "arte de la creación".',
     links: [
+      {
+        titleRu: 'Страница мероприятия',
+        titleEn: 'Event Page',
+        titleEs: 'Página del evento',
+        url: 'https://libfl.ru/ru/event/istoki-tvorchestva-i-novye-gorizonty',
+      },
       {
         titleRu: 'Запись арт-встречи',
         titleEn: 'Art Meeting Video',
