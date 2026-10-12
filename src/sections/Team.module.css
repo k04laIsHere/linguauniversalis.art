@@ -98,25 +98,6 @@
   margin-top: 160px;
 }
 
-.textBack {
-  position: absolute;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%); /* Centering back in CSS for stability */
-  font-size: clamp(80px, 15vw, 140px);
-  line-height: 0.85;
-  font-weight: 800;
-  text-transform: uppercase;
-  color: #fff;
-  opacity: 0.03;
-  white-space: nowrap;
-  pointer-events: none;
-  z-index: 0;
-  text-align: center;
-  user-select: none;
-  will-change: transform, opacity;
-}
-
 .photoWrapper {
   position: relative;
   width: min(340px, 100%);
@@ -218,13 +199,6 @@
     margin-top: 0; /* Remove staggered layout on mobile for consistent gaps */
   }
 
-  .textBack {
-    font-size: clamp(60px, 20vw, 90px);
-    white-space: normal;
-    width: 90%;
-    line-height: 0.8;
-  }
-
   .photoWrapper {
     width: min(300px, 85vw);
   }
@@ -240,7 +214,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card, .photoWrapper, .textBack, .textFront, .photo {
+  .card, .photoWrapper, .textFront, .photo {
     transform: none !important;
     transition: none !important;
     opacity: 1 !important;

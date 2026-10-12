@@ -40,7 +40,6 @@ export function Team() {
       // 2. Card Entrance Animations
       cards.forEach((card, index) => {
         const photoWrapper = card.querySelector(`.${styles.photoWrapper}`);
-        const textBack = card.querySelector(`.${styles.textBack}`);
         const textFront = card.querySelector(`.${styles.textFront}`);
         
         // Ensure cards later in the grid have a higher z-index to stack naturally
@@ -66,7 +65,6 @@ export function Team() {
           transformOrigin: 'center bottom' 
         });
 
-        gsap.set(textBack, { opacity: 0, z: -150 });
         gsap.set(textFront, { opacity: 0, z: 150, y: 0 }); 
         
         // Initial state for photo
@@ -91,13 +89,6 @@ export function Team() {
             ease: 'power4.out',
             force3D: true,
           }, 0)
-          .to(textBack, { 
-            opacity: 0.2, 
-            z: -50, 
-            duration: 0.8,
-            ease: 'power2.out',
-            force3D: true
-          }, 0.2)
           .to(textFront, { 
             opacity: 1, 
             z: 150, 
@@ -143,14 +134,6 @@ export function Team() {
             overwrite: 'auto'
           });
 
-          gsap.to(textBack, {
-            x: -dx / 20,
-            y: -dy / 40, 
-            duration: 0.4,
-            ease: 'power2.out',
-            overwrite: 'auto'
-          });
-
           gsap.to(textFront, {
             x: dx / 30,
             y: dy / 50,
@@ -177,7 +160,7 @@ export function Team() {
             overwrite: 'auto'
           });
 
-          gsap.to([photoWrapper, textBack], {
+          gsap.to(photoWrapper, {
             rotationY: 0,
             rotationX: 0,
             x: 0,
@@ -224,12 +207,6 @@ export function Team() {
         <div ref={containerRef} className={styles.grid}>
           {teamMembers.map((m) => (
             <div key={m.id} className={styles.card}>
-              <div className={styles.textBack} aria-hidden="true">
-                {(lang === 'ru' ? m.nameRu : lang === 'es' ? m.nameEs : m.name).split(' ').map((word, i) => (
-                  <span key={i}>{word}<br /></span>
-                ))}
-              </div>
-              
               <div className={styles.photoWrapper}>
                 <img
                   className={styles.photo}

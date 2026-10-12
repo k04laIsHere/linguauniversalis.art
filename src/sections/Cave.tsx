@@ -4,7 +4,7 @@ import { useViewMode } from '../contexts/ViewModeContext';
 import styles from './Cave.module.css';
 import { gsap, ScrollTrigger } from '../animation/gsap';
 
-export function Cave() {
+export function Cave({ isLoading = false }: { isLoading?: boolean }) {
   const { t } = useI18n();
   const { setMode } = useViewMode();
   const rootRef = useRef<HTMLElement | null>(null);
@@ -15,9 +15,36 @@ export function Cave() {
     const root = rootRef.current;
     if (!root) return;
 
+    if (isLoading) {
+      root.dataset.caveActive = '1';
+      gsap.set(`.${styles.shadowMask}`, { opacity: 1 });
+      gsap.set(`.${styles.archiveBreach}`, {
+        opacity: 0,
+        scale: 0.92,
+        filter: 'blur(10px)',
+      });
+      gsap.set(`.${styles.titleChar}`, {
+        opacity: 0,
+        y: 40,
+        filter: 'blur(15px)',
+        rotationX: -45,
+      });
+      gsap.set(`.${styles.subtitle}`, {
+        opacity: 0,
+        y: 20,
+        filter: 'blur(8px)',
+      });
+      gsap.set(`.${styles.scrollHint}`, {
+        opacity: 0,
+      });
+      return;
+    }
+
     let handleGlobalClick: () => void;
 
     const ctx = gsap.context(() => {
+      root.dataset.caveActive = '1';
+
       // Toggle active state for cave background activation
       ScrollTrigger.create({
         trigger: root,
@@ -51,6 +78,23 @@ export function Cave() {
         }
       );
 
+      // Archive Breach Portal Intro Animation
+      gsap.fromTo(
+        `.${styles.archiveBreach}`,
+        {
+          opacity: 0,
+          scale: 0.92,
+          filter: 'blur(10px)',
+        },
+        {
+          opacity: 1,
+          scale: 1,
+          filter: 'blur(0px)',
+          duration: 1.8,
+          ease: 'expo.out',
+        }
+      );
+
       // Hero Title Animation: Individual characters
       const titleChars = gsap.utils.toArray<HTMLElement>(`.${styles.titleChar}`);
       gsap.fromTo(
@@ -73,6 +117,36 @@ export function Cave() {
             trigger: `.${styles.hero}`,
             start: 'top bottom+=20%', // Trigger much earlier
           },
+        }
+      );
+
+      // Hero Subtitle & Scroll Hint Intro Animation
+      gsap.fromTo(
+        `.${styles.subtitle}`,
+        {
+          opacity: 0,
+          y: 20,
+          filter: 'blur(8px)',
+        },
+        {
+          opacity: 0.9,
+          y: 0,
+          filter: 'blur(0px)',
+          duration: 2.0,
+          delay: 0.4,
+          ease: 'expo.out',
+        }
+      );
+
+      gsap.fromTo(
+        `.${styles.scrollHint}`,
+        { opacity: 0 },
+        {
+          opacity: 0.4,
+          duration: 1.5,
+          delay: 1.0,
+          ease: 'power2.out',
+          clearProps: 'opacity',
         }
       );
 
@@ -188,7 +262,7 @@ export function Cave() {
         window.removeEventListener('click', handleGlobalClick);
       }
     };
-  }, []);
+  }, [isLoading]);
 
   const navigate = (newMode: 'immersive' | 'gallery') => {
     // scale transition starting from white inside the breach

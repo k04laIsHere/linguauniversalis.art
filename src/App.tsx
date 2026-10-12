@@ -91,8 +91,8 @@ function ImmersionExperience({ isLoading }: { isLoading: boolean }) {
         sequence={activeSequence}
         initialProgress={pendingProgressRef.current}
       />
-      <main style={{ visibility: isLoading ? 'hidden' : 'visible' }}>
-        <Cave />
+      <main style={{ pointerEvents: isLoading ? 'none' : 'auto' }}>
+        <Cave isLoading={isLoading} />
         <ExitFlight ref={natureMotionRef} />
         <Team />
         <Events />
