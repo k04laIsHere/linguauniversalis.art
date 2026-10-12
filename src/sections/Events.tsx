@@ -28,7 +28,6 @@ export function Events() {
   }, []);
 
   useEffect(() => {
-    if (reduced) return;
     const root = rootRef.current;
     const pin = pinRef.current;
     if (!root || !pin) return;

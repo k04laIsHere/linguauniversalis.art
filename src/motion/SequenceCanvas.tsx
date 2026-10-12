@@ -10,6 +10,7 @@ import {
 } from "react";
 import { defaultCachePolicy, defaultCanvasQuality } from "./defaults";
 import { FrameLoadLimiter, FrameRepository } from "./FrameRepository";
+import { getSharedSequenceRepositoryPool } from "./linguaSequences";
 import {
   routeSequencePrewarm,
   SequenceRepositoryPool,
@@ -36,6 +37,11 @@ import type {
 export interface SequenceCanvasHandle {
   /** Imperative progress avoids a React render on every scroll event. */
   setProgress: (progress: number, sequenceId?: string) => void;
+  /** Imperatively switch sequence and update progress in the same frame. */
+  activateSequence: (
+    sequence: FrameSequenceDefinition,
+    progress: number,
+  ) => void;
   /** Call when the scene is within the chosen preload window. */
   prewarm: (anticipatedProgress?: number) => void;
   /** Warm another sequence without changing the visible stage. */
@@ -69,18 +75,38 @@ function resolveReducedFrame(
 }
 
 async function loadFallback(url: string): Promise<DecodedFrame> {
-  const image = new Image();
-  image.decoding = "async";
-  image.src = url;
-  await image.decode();
-  return {
-    index: -1,
-    source: image,
-    width: image.naturalWidth,
-    height: image.naturalHeight,
-    estimatedBytes: image.naturalWidth * image.naturalHeight * 4,
-    release: () => undefined,
-  };
+  return new Promise<DecodedFrame>((resolve, reject) => {
+    const image = new Image();
+    image.decoding = "async";
+    const finalize = () => {
+      const width = image.naturalWidth || image.width || 1280;
+      const height = image.naturalHeight || image.height || 1280;
+      resolve({
+        index: -1,
+        source: image,
+        width,
+        height,
+        estimatedBytes: 0,
+        release: () => undefined,
+      });
+    };
+    image.onload = () => {
+      if (typeof image.decode === "function") {
+        image.decode().then(finalize, finalize);
+      } else {
+        finalize();
+      }
+    };
+    image.onerror = () => reject(new Error(`Fallback failed to load: ${url}`));
+    image.src = url;
+    if (image.complete && image.naturalWidth > 0) {
+      if (typeof image.decode === "function") {
+        image.decode().then(finalize, finalize);
+      } else {
+        finalize();
+      }
+    }
+  });
 }
 
 interface RenderedVisual {
@@ -107,7 +133,7 @@ export const SequenceCanvas = forwardRef<
   {
     sequence,
     initialProgress = 0,
-    motionPreference = "auto",
+    motionPreference = "full",
     cachePolicy,
     qualityPolicy,
     className,
@@ -116,16 +142,18 @@ export const SequenceCanvas = forwardRef<
   forwardedRef,
 ) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const currentSequenceRef = useRef<FrameSequenceDefinition>(sequence);
   const repositoryRef = useRef<FrameRepository | null>(null);
-  const repositoryPoolRef = useRef<
-    SequenceRepositoryPool<FrameRepository> | null
-  >(null);
+  const customPoolRef = useRef<SequenceRepositoryPool<FrameRepository> | null>(
+    null,
+  );
   const loadLimiterRef = useRef<FrameLoadLimiter | null>(null);
   const targetFrameRef = useRef(0);
   const renderedFrameRef = useRef<number | null>(null);
   const renderedSequenceRef = useRef<string | null>(null);
   const previousTargetRef = useRef(0);
   const progressRef = useRef(clamp01(initialProgress));
+  const initialProgressRef = useRef(initialProgress);
   const foregroundBusyRef = useRef(false);
   const fallbackPendingRef = useRef(false);
   const generationRef = useRef(0);
@@ -134,10 +162,15 @@ export const SequenceCanvas = forwardRef<
   const onStatusRef = useRef(onStatusChange);
   const statusRef = useRef<SequenceStatusDetail["status"] | null>(null);
   const renderedVisualRef = useRef<RenderedVisual | null>(null);
+  const sizedOnceRef = useRef(false);
 
   useEffect(() => {
     onStatusRef.current = onStatusChange;
   }, [onStatusChange]);
+
+  useEffect(() => {
+    initialProgressRef.current = initialProgress;
+  }, [initialProgress]);
 
   const resolvedCachePolicy = useMemo(
     () => ({ ...defaultCachePolicy(), ...cachePolicy }),
@@ -149,28 +182,24 @@ export const SequenceCanvas = forwardRef<
   );
 
   const getRepositoryPool = useCallback(() => {
-    if (!repositoryPoolRef.current) {
+    if (!cachePolicy) {
+      return getSharedSequenceRepositoryPool();
+    }
+    if (!customPoolRef.current) {
       loadLimiterRef.current ??= new FrameLoadLimiter(
         resolvedCachePolicy.concurrency,
       );
       const limiter = loadLimiterRef.current;
-      repositoryPoolRef.current = new SequenceRepositoryPool(
-        (definition) => new FrameRepository(
-          definition,
-          resolvedCachePolicy,
-          limiter,
-        ),
+      customPoolRef.current = new SequenceRepositoryPool(
+        (definition) =>
+          new FrameRepository(definition, resolvedCachePolicy, limiter),
         (repository) => repository.dispose(),
       );
     }
-    return repositoryPoolRef.current;
-  }, [resolvedCachePolicy]);
+    return customPoolRef.current;
+  }, [cachePolicy, resolvedCachePolicy]);
 
-  const prefersReducedMotion =
-    motionPreference === "reduce" ||
-    (motionPreference === "auto" &&
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  const prefersReducedMotion = motionPreference === "reduce";
 
   const emitStatus = useCallback(
     (
@@ -181,14 +210,38 @@ export const SequenceCanvas = forwardRef<
       if (statusRef.current === status && !error) return;
       statusRef.current = status;
       onStatusRef.current?.({
-        sequenceId: sequence.id,
+        sequenceId: currentSequenceRef.current.id,
         status,
         requestedFrame: targetFrameRef.current,
         renderedFrame,
         error,
       });
     },
-    [sequence.id],
+    [],
+  );
+
+  const ensureCanvasSized = useCallback(
+    (canvas: HTMLCanvasElement) => {
+      if (sizedOnceRef.current && canvas.width >= 1 && canvas.height >= 1) {
+        return;
+      }
+      const rect = canvas.getBoundingClientRect();
+      const cssWidth = rect.width > 0 ? rect.width : window.innerWidth || 1280;
+      const cssHeight =
+        rect.height > 0 ? rect.height : window.innerHeight || 720;
+      if (cssWidth <= 0 || cssHeight <= 0) return;
+      const size = computeBackingStore(
+        cssWidth,
+        cssHeight,
+        window.devicePixelRatio || 1,
+        resolvedQualityPolicy.maxDevicePixelRatio,
+        resolvedQualityPolicy.maxCanvasPixels,
+      );
+      canvas.width = size.width;
+      canvas.height = size.height;
+      sizedOnceRef.current = true;
+    },
+    [resolvedQualityPolicy],
   );
 
   const paint = useCallback(
@@ -196,13 +249,13 @@ export const SequenceCanvas = forwardRef<
       frame: DecodedFrame,
       definition: FrameSequenceDefinition,
       entranceBase?: DecodedFrame,
-      reason?: string,
     ) => {
       const canvas = canvasRef.current;
-      if (!canvas || canvas.width < 1 || canvas.height < 1) return false;
+      if (!canvas) return false;
+      ensureCanvasSized(canvas);
+      if (canvas.width < 1 || canvas.height < 1) return false;
       const context = canvas.getContext("2d", {
         alpha: false,
-        desynchronized: true,
       });
       if (!context) return false;
 
@@ -247,35 +300,44 @@ export const SequenceCanvas = forwardRef<
       renderedVisualRef.current = { definition, frame, entranceBase };
       return true;
     },
-    [],
+    [ensureCanvasSized],
   );
 
   const draw = useCallback(
-    (frame: DecodedFrame, entranceBase?: DecodedFrame, reason?: string) => {
-      const resolvedEntranceBase = entranceBase ?? (
-        needsEntranceBlend(sequence, frame.index)
+    (frame: DecodedFrame, entranceBase?: DecodedFrame) => {
+      const activeSequence = currentSequenceRef.current;
+      const resolvedEntranceBase =
+        entranceBase ??
+        (needsEntranceBlend(activeSequence, frame.index)
           ? repositoryRef.current?.getDecoded(0)
-          : undefined
-      );
-      if (!paint(frame, sequence, resolvedEntranceBase, reason)) return false;
+          : undefined);
+      if (!paint(frame, activeSequence, resolvedEntranceBase)) return false;
       renderedFrameRef.current = frame.index;
-      renderedSequenceRef.current = sequence.id;
-      emitStatus(frame.index < 0 ? "degraded" : "ready", undefined, frame.index);
+      renderedSequenceRef.current = activeSequence.id;
+      emitStatus(
+        frame.index < 0 ? "degraded" : "ready",
+        undefined,
+        frame.index,
+      );
       return true;
     },
-    [emitStatus, paint, sequence],
+    [emitStatus, paint],
   );
 
   const requestFallback = useCallback(
     (cause: Error) => {
-      if (!sequence.fallbackUrl || fallbackPendingRef.current) {
-        emitStatus(renderedFrameRef.current == null ? "error" : "degraded", cause);
+      const activeSequence = currentSequenceRef.current;
+      if (!activeSequence.fallbackUrl || fallbackPendingRef.current) {
+        emitStatus(
+          renderedFrameRef.current == null ? "error" : "degraded",
+          cause,
+        );
         return;
       }
 
       fallbackPendingRef.current = true;
       const generation = generationRef.current;
-      void loadFallback(sequence.fallbackUrl)
+      void loadFallback(activeSequence.fallbackUrl)
         .then((frame) => {
           if (generation === generationRef.current) draw(frame);
         })
@@ -288,7 +350,7 @@ export const SequenceCanvas = forwardRef<
           fallbackPendingRef.current = false;
         });
     },
-    [draw, emitStatus, sequence.fallbackUrl],
+    [draw, emitStatus],
   );
 
   const requestForeground = useCallback(() => {
@@ -304,9 +366,10 @@ export const SequenceCanvas = forwardRef<
           generation === generationRef.current &&
           repository === repositoryRef.current
         ) {
+          const activeSequence = currentSequenceRef.current;
           const requested = targetFrameRef.current;
           const frame = await repository.load(requested, true);
-          const entranceBase = needsEntranceBlend(sequence, requested)
+          const entranceBase = needsEntranceBlend(activeSequence, requested)
             ? await repository.load(0, true)
             : undefined;
           if (
@@ -320,21 +383,22 @@ export const SequenceCanvas = forwardRef<
           const currentRendered = renderedFrameRef.current;
           const direction = currentTarget >= (currentRendered ?? 0) ? 1 : -1;
 
-          // If requested frame is exact target, or is a monotonic step towards target:
           const isMonotonicProgress =
             currentRendered == null ||
+            renderedSequenceRef.current !== activeSequence.id ||
             (direction >= 0
               ? requested > currentRendered && requested <= currentTarget
               : requested < currentRendered && requested >= currentTarget);
 
           if (requested === currentTarget || isMonotonicProgress) {
-            draw(frame, entranceBase, 'foreground');
+            draw(frame, entranceBase);
             if (requested === currentTarget) return;
           }
         }
       } catch (error: unknown) {
         failed = true;
-        const failure = error instanceof Error ? error : new Error(String(error));
+        const failure =
+          error instanceof Error ? error : new Error(String(error));
         if (generation === generationRef.current) requestFallback(failure);
       } finally {
         const stillCurrent =
@@ -350,11 +414,12 @@ export const SequenceCanvas = forwardRef<
     };
 
     void run();
-  }, [draw, requestFallback, sequence]);
+  }, [draw, requestFallback]);
 
   const setProgress = useCallback(
     (progress: number, sequenceId?: string) => {
-      if (sequenceId && sequenceId !== sequence.id) {
+      const activeSequence = currentSequenceRef.current;
+      if (sequenceId && sequenceId !== activeSequence.id) {
         return;
       }
       progressRef.current = clamp01(progress);
@@ -362,183 +427,132 @@ export const SequenceCanvas = forwardRef<
       if (!repository) return;
 
       const target = prefersReducedMotion
-        ? resolveReducedFrame(sequence)
-        : frameIndexForProgress(progressRef.current, sequence.frameCount);
+        ? resolveReducedFrame(activeSequence)
+        : frameIndexForProgress(progressRef.current, activeSequence.frameCount);
       const direction = target >= previousTargetRef.current ? 1 : -1;
       previousTargetRef.current = target;
       targetFrameRef.current = target;
 
+      if (
+        renderedSequenceRef.current === activeSequence.id &&
+        renderedFrameRef.current === target
+      ) {
+        return;
+      }
+
       const decoded = repository.getDecoded(target);
       if (decoded) {
-        if (!draw(decoded, undefined, 'exact')) requestForeground();
+        if (!draw(decoded)) requestForeground();
       } else {
         const nearest = repository.getNearestDecoded(target, {
           direction,
           rendered: renderedFrameRef.current,
-          maxDistance: resolvedCachePolicy.decodeRadius * 2,
+          maxDistance: activeSequence.frameCount,
         });
         const rendered = renderedFrameRef.current;
         if (
           nearest &&
-          renderedSequenceRef.current === sequence.id &&
+          renderedSequenceRef.current === activeSequence.id &&
           (rendered == null ||
             Math.abs(nearest.index - target) < Math.abs(rendered - target))
         ) {
-          draw(nearest, undefined, 'nearest');
+          draw(nearest);
         }
         requestForeground();
       }
 
-      const decodedNeighborhood = frameWindow(
-        target,
-        resolvedCachePolicy.decodeRadius,
-        sequence.frameCount,
-        direction,
-      );
-      const networkNeighborhood = frameWindow(
-        target,
-        resolvedCachePolicy.networkRadius,
-        sequence.frameCount,
-        direction,
-      );
-
-      repository.compact([
-        ...decodedNeighborhood,
-        target,
-        ...(needsEntranceBlend(sequence, target) ? [0] : []),
-        ...(renderedSequenceRef.current === sequence.id &&
-        renderedFrameRef.current != null
-          ? [renderedFrameRef.current]
-          : []),
-      ]);
-      repository.scheduleDecode(decodedNeighborhood, true);
-      repository.scheduleEncoded(networkNeighborhood, true);
+      if (!repository.isFullyLoaded()) {
+        const decodedNeighborhood = frameWindow(
+          target,
+          resolvedCachePolicy.decodeRadius,
+          activeSequence.frameCount,
+          direction,
+        );
+        repository.scheduleDecode(decodedNeighborhood, true);
+      }
     },
-    [
-      draw,
-      prefersReducedMotion,
-      requestForeground,
-      resolvedCachePolicy.decodeRadius,
-      resolvedCachePolicy.networkRadius,
-      sequence,
-    ],
+    [draw, prefersReducedMotion, requestForeground, resolvedCachePolicy.decodeRadius],
+  );
+
+  const activateSequence = useCallback(
+    (nextSequence: FrameSequenceDefinition, nextProgress: number) => {
+      if (
+        currentSequenceRef.current.id !== nextSequence.id ||
+        !repositoryRef.current
+      ) {
+        currentSequenceRef.current = nextSequence;
+        generationRef.current += 1;
+        foregroundBusyRef.current = false;
+        fallbackPendingRef.current = false;
+        statusRef.current = null;
+        const activation = getRepositoryPool().activate(nextSequence);
+        repositoryRef.current = activation.current.repository;
+      }
+      setProgress(nextProgress, nextSequence.id);
+    },
+    [getRepositoryPool, setProgress],
   );
 
   const prewarm = useCallback(
     (anticipatedProgress = progressRef.current) => {
+      const activeSequence = currentSequenceRef.current;
       const repository = repositoryRef.current;
-      if (!repository) return;
+      if (!repository || repository.isFullyLoaded()) return;
       const target = prefersReducedMotion
-        ? resolveReducedFrame(sequence)
-        : frameIndexForProgress(anticipatedProgress, sequence.frameCount);
+        ? resolveReducedFrame(activeSequence)
+        : frameIndexForProgress(anticipatedProgress, activeSequence.frameCount);
       repository.scheduleDecode(
         frameWindow(
           target,
           resolvedCachePolicy.decodeRadius,
-          sequence.frameCount,
+          activeSequence.frameCount,
           1,
         ),
         true,
       );
-      if (!prefersReducedMotion) {
-        repository.scheduleEncoded(
-          frameWindow(
-            target,
-            resolvedCachePolicy.networkRadius,
-            sequence.frameCount,
-            1,
-          ),
-        );
-      }
     },
-    [
-      prefersReducedMotion,
-      resolvedCachePolicy.decodeRadius,
-      resolvedCachePolicy.networkRadius,
-      sequence,
-    ],
+    [prefersReducedMotion, resolvedCachePolicy.decodeRadius],
   );
 
   const prewarmSequence = useCallback(
-    (
-      definition: FrameSequenceDefinition,
-      anticipatedProgress = 0,
-    ) => {
-      const route = routeSequencePrewarm(
-        getRepositoryPool(),
-        definition,
-        {
-          sequenceId: sequence.id,
-          repository: repositoryRef.current,
-          progress: progressRef.current,
-          visual: renderedVisualRef.current,
-        },
-      );
+    (definition: FrameSequenceDefinition, anticipatedProgress = 0) => {
+      const route = routeSequencePrewarm(getRepositoryPool(), definition, {
+        sequenceId: currentSequenceRef.current.id,
+        repository: repositoryRef.current,
+        progress: progressRef.current,
+        visual: renderedVisualRef.current,
+      });
       const repository = route.repository;
+      if (repository.isFullyLoaded()) return;
       const target = prefersReducedMotion
         ? resolveReducedFrame(definition)
         : frameIndexForProgress(anticipatedProgress, definition.frameCount);
-      const decodeRadius = prefersReducedMotion
-        ? 0
-        : Math.min(1, resolvedCachePolicy.decodeRadius);
-      const networkRadius = Math.min(8, resolvedCachePolicy.networkRadius);
-      const rendered = renderedVisualRef.current;
-      const isActive =
-        repository === repositoryRef.current && definition.id === sequence.id;
-      const keep = prefersReducedMotion
-        ? [target]
-        : [
-            target,
-            ...(target <= 5 ? [0] : []),
-            ...(target >= definition.frameCount - 6 ? [definition.frameCount - 1] : []),
-            ...(isActive ? [targetFrameRef.current] : []),
-            ...(rendered?.definition.id === definition.id
-              ? [rendered.frame.index]
-              : []),
-          ];
-
-      repository.protect(keep);
       repository.scheduleDecode(
-        prefersReducedMotion
-          ? [target]
-          : frameWindow(
-              target,
-              decodeRadius,
-              definition.frameCount,
-              anticipatedProgress >= 0.5 ? -1 : 1,
-            ),
+        frameWindow(
+          target,
+          resolvedCachePolicy.decodeRadius,
+          definition.frameCount,
+          anticipatedProgress >= 0.5 ? -1 : 1,
+        ),
         true,
       );
-      if (!prefersReducedMotion) {
-        repository.scheduleEncoded(
-          frameWindow(
-            target,
-            networkRadius,
-            definition.frameCount,
-            1,
-          ),
-          true,
-        );
-      }
     },
-    [
-      getRepositoryPool,
-      prefersReducedMotion,
-      resolvedCachePolicy.decodeRadius,
-      resolvedCachePolicy.networkRadius,
-      sequence.id,
-    ],
+    [getRepositoryPool, prefersReducedMotion, resolvedCachePolicy.decodeRadius],
   );
 
   const redraw = useCallback(() => {
     const visual = renderedVisualRef.current;
-    if (visual && paint(
-      visual.frame,
-      visual.definition,
-      visual.entranceBase,
-    )) return;
+    if (
+      visual &&
+      paint(visual.frame, visual.definition, visual.entranceBase)
+    ) {
+      return;
+    }
+    const repository = repositoryRef.current;
+    const decoded = repository?.getDecoded(targetFrameRef.current);
+    if (decoded && draw(decoded)) return;
     requestForeground();
-  }, [paint, requestForeground]);
+  }, [draw, paint, requestForeground]);
 
   const setPortalOffset = useCallback((offsetPx: number) => {
     const canvas = canvasRef.current;
@@ -552,13 +566,21 @@ export const SequenceCanvas = forwardRef<
     forwardedRef,
     () => ({
       setProgress,
+      activateSequence,
       prewarm,
       prewarmSequence,
       setPortalOffset,
       redraw,
-      getSequenceId: () => sequence.id,
+      getSequenceId: () => currentSequenceRef.current.id,
     }),
-    [prewarm, prewarmSequence, redraw, sequence.id, setPortalOffset, setProgress],
+    [
+      activateSequence,
+      prewarm,
+      prewarmSequence,
+      redraw,
+      setPortalOffset,
+      setProgress,
+    ],
   );
 
   useEffect(() => {
@@ -575,6 +597,7 @@ export const SequenceCanvas = forwardRef<
         resolvedQualityPolicy.maxDevicePixelRatio,
         resolvedQualityPolicy.maxCanvasPixels,
       );
+      sizedOnceRef.current = true;
       if (canvas.width === size.width && canvas.height === size.height) return;
       canvas.width = size.width;
       canvas.height = size.height;
@@ -589,10 +612,10 @@ export const SequenceCanvas = forwardRef<
       });
     };
 
+    resize();
     const observer = new ResizeObserver(scheduleResize);
     observer.observe(canvas);
     window.visualViewport?.addEventListener("resize", scheduleResize);
-    scheduleResize();
 
     return () => {
       observer.disconnect();
@@ -608,64 +631,16 @@ export const SequenceCanvas = forwardRef<
     return () => {
       generationRef.current += 1;
       repositoryRef.current = null;
-      repositoryPoolRef.current?.dispose();
-      repositoryPoolRef.current = null;
+      customPoolRef.current?.dispose();
+      customPoolRef.current = null;
       loadLimiterRef.current = null;
       renderedVisualRef.current = null;
     };
   }, [resolvedCachePolicy]);
 
   useEffect(() => {
-    const generation = generationRef.current + 1;
-    generationRef.current = generation;
-    foregroundBusyRef.current = false;
-    fallbackPendingRef.current = false;
-    statusRef.current = null;
-
-    const activation = getRepositoryPool().activate(sequence);
-    const previousEntry = activation.previous;
-    if (
-      previousEntry &&
-      previousEntry.definition.id !== activation.current.definition.id
-    ) {
-        const rendered = renderedVisualRef.current;
-        previousEntry.repository.compact([
-          0,
-          previousEntry.definition.frameCount - 1,
-          ...(rendered?.definition.id === previousEntry.definition.id
-            ? [rendered.frame.index]
-            : []),
-        ]);
-        // Reset progressRef to initialProgress so the new sequence starts cleanly
-        progressRef.current = clamp01(initialProgress);
-    }
-
-    const repository = activation.current.repository;
-    repositoryRef.current = repository;
-    emitStatus("loading");
-    const initialTarget = prefersReducedMotion
-      ? resolveReducedFrame(sequence)
-      : frameIndexForProgress(initialProgress, sequence.frameCount);
-    repository.scheduleDecode(
-      prefersReducedMotion
-        ? [initialTarget]
-        : frameWindow(
-            initialTarget,
-            resolvedCachePolicy.decodeRadius,
-            sequence.frameCount,
-            1,
-          ),
-      true,
-    );
-    setProgress(progressRef.current, sequence.id);
-  }, [
-    emitStatus,
-    getRepositoryPool,
-    initialProgress,
-    prefersReducedMotion,
-    sequence,
-    setProgress,
-  ]);
+    activateSequence(sequence, initialProgressRef.current);
+  }, [activateSequence, sequence]);
 
   return (
     <canvas

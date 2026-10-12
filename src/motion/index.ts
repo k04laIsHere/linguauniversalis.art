@@ -1,5 +1,12 @@
 export { ImmersionMotionStage } from "./ImmersionMotionStage";
-export { NATURE_TO_SKY, SKY_TO_CITY } from "./linguaSequences";
+export {
+  IMMERSION_SEQUENCES,
+  NATURE_TO_SKY,
+  SKY_TO_CITY,
+  areImmersionSequencesLoaded,
+  getSharedSequenceRepositoryPool,
+  preloadImmersionSequences,
+} from "./linguaSequences";
 export {
   routeSequencePrewarm,
   SequenceRepositoryPool,

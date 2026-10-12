@@ -9,20 +9,18 @@ export function defaultCachePolicy(): SequenceCachePolicy {
 
   return narrow
     ? {
-        maxEncodedBytes: 36 * MEBIBYTE,
-        // Leaves headroom for an inactive sequence's endpoint prewarm.
-        maxDecodedBytes: 36 * MEBIBYTE,
-        concurrency: 2,
-        decodeRadius: 3,
-        networkRadius: 16,
+        maxEncodedBytes: 256 * MEBIBYTE,
+        maxDecodedBytes: 1024 * MEBIBYTE,
+        concurrency: 10,
+        decodeRadius: 12,
+        networkRadius: 64,
       }
     : {
-        maxEncodedBytes: 48 * MEBIBYTE,
-        // Leaves headroom for an inactive sequence's endpoint prewarm.
-        maxDecodedBytes: 88 * MEBIBYTE,
-        concurrency: 4,
-        decodeRadius: 7,
-        networkRadius: 32,
+        maxEncodedBytes: 512 * MEBIBYTE,
+        maxDecodedBytes: 2048 * MEBIBYTE,
+        concurrency: 16,
+        decodeRadius: 24,
+        networkRadius: 128,
       };
 }
 

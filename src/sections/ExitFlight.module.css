@@ -1,18 +1,14 @@
 .root {
+  --flight-travel: 320vh;
   --flight-travel: 320dvh;
   position: relative;
   z-index: 1;
   height: 420vh;
+  height: calc(100vh + var(--flight-travel));
   height: calc(100dvh + var(--flight-travel));
+  margin-top: -100vh;
   margin-top: -100dvh;
   background: transparent;
   pointer-events: none;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .root {
-    height: 100svh;
-    margin-top: 0;
-  }
 }
 

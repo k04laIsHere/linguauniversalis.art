@@ -4,11 +4,6 @@ import type {
   SequenceCachePolicy,
 } from "./types";
 
-interface EncodedFrame {
-  blob: Blob;
-  bytes: number;
-}
-
 type QueuedJob = () => Promise<void>;
 
 export class FrameLoadLimiter {
@@ -53,58 +48,98 @@ function assertFrameIndex(index: number, frameCount: number): void {
   }
 }
 
-async function decodeBlob(index: number, blob: Blob): Promise<DecodedFrame> {
-  if (typeof createImageBitmap === "function") {
-    const bitmap = await createImageBitmap(blob);
-    return {
-      index,
-      source: bitmap,
-      width: bitmap.width,
-      height: bitmap.height,
-      estimatedBytes: bitmap.width * bitmap.height * 4,
-      release: () => bitmap.close(),
-    };
-  }
+function loadDecodedImage(
+  index: number,
+  url: string,
+  signal: AbortSignal,
+): Promise<DecodedFrame> {
+  const attemptLoad = (attempt: number): Promise<DecodedFrame> =>
+    new Promise<DecodedFrame>((resolve, reject) => {
+      if (signal.aborted) {
+        reject(new DOMException("Aborted", "AbortError"));
+        return;
+      }
 
-  const objectUrl = URL.createObjectURL(blob);
-  const image = new Image();
-  image.decoding = "async";
-  image.src = objectUrl;
+      const image = new Image();
+      image.decoding = "async";
 
-  try {
-    await image.decode();
-  } catch (error) {
-    URL.revokeObjectURL(objectUrl);
-    throw error;
-  }
+      const cleanup = () => {
+        signal.removeEventListener("abort", onAbort);
+        image.onload = null;
+        image.onerror = null;
+      };
 
-  return {
-    index,
-    source: image,
-    width: image.naturalWidth,
-    height: image.naturalHeight,
-    estimatedBytes: image.naturalWidth * image.naturalHeight * 4,
-    release: () => URL.revokeObjectURL(objectUrl),
-  };
+      const onAbort = () => {
+        cleanup();
+        image.src = "";
+        reject(new DOMException("Aborted", "AbortError"));
+      };
+
+      const finalize = () => {
+        if (signal.aborted) {
+          reject(new DOMException("Aborted", "AbortError"));
+          return;
+        }
+        const width = image.naturalWidth || image.width || 1280;
+        const height = image.naturalHeight || image.height || 1280;
+        resolve({
+          index,
+          source: image,
+          width,
+          height,
+          estimatedBytes: 0,
+          release: () => undefined,
+        });
+      };
+
+      signal.addEventListener("abort", onAbort, { once: true });
+
+      image.onload = () => {
+        cleanup();
+        if (typeof image.decode === "function") {
+          image.decode().then(finalize, finalize);
+        } else {
+          finalize();
+        }
+      };
+
+      image.onerror = () => {
+        cleanup();
+        if (attempt < 2 && !signal.aborted) {
+          setTimeout(() => {
+            attemptLoad(attempt + 1).then(resolve, reject);
+          }, 150);
+          return;
+        }
+        reject(new Error(`frame ${index} failed to load from ${url}`));
+      };
+
+      image.src = url;
+      if (image.complete && image.naturalWidth > 0) {
+        cleanup();
+        if (typeof image.decode === "function") {
+          image.decode().then(finalize, finalize);
+        } else {
+          finalize();
+        }
+      }
+    });
+
+  return attemptLoad(1);
 }
 
 /**
- * Keeps compressed sequence data separate from the much larger decoded-frame
- * cache. The browser HTTP cache remains the final fallback after LRU eviction.
+ * Retains preloaded HTMLImageElement frames in memory so scrubbing across
+ * transition sequences is synchronous and never blocks on network/decode.
  */
 export class FrameRepository {
   readonly sequence: FrameSequenceDefinition;
 
   private readonly policy: SequenceCachePolicy;
   private readonly abortController = new AbortController();
-  private readonly encoded = new Map<number, EncodedFrame>();
   private readonly decoded = new Map<number, DecodedFrame>();
-  private readonly encodedPending = new Map<number, Promise<EncodedFrame>>();
   private readonly decodedPending = new Map<number, Promise<DecodedFrame>>();
-  private readonly queuedEncoded = new Set<number>();
   private readonly queuedDecoded = new Set<number>();
-  private encodedBytes = 0;
-  private decodedBytes = 0;
   private queue: QueuedJob[] = [];
   private activeJobs = 0;
   private disposed = false;
@@ -125,12 +160,33 @@ export class FrameRepository {
     this.loadLimiter = loadLimiter;
   }
 
+  isFullyLoaded(): boolean {
+    return this.decoded.size >= this.sequence.frameCount;
+  }
+
+  async preloadAll(onFrameLoaded?: () => void): Promise<void> {
+    const tasks: Promise<void>[] = [];
+    for (let i = 0; i < this.sequence.frameCount; i += 1) {
+      if (this.decoded.has(i)) {
+        onFrameLoaded?.();
+        continue;
+      }
+      tasks.push(
+        this.load(i, false)
+          .then(() => {
+            onFrameLoaded?.();
+          })
+          .catch(() => {
+            onFrameLoaded?.();
+          }),
+      );
+    }
+    await Promise.all(tasks);
+  }
+
   getDecoded(index: number): DecodedFrame | undefined {
     const frame = this.decoded.get(index);
     if (!frame) return undefined;
-
-    this.decoded.delete(index);
-    this.decoded.set(index, frame);
     return frame;
   }
 
@@ -144,7 +200,11 @@ export class FrameRepository {
   ): DecodedFrame | undefined {
     let nearest: DecodedFrame | undefined;
     let nearestDistance = Number.POSITIVE_INFINITY;
-    const { direction, rendered, maxDistance = 16 } = options ?? {};
+    const {
+      direction,
+      rendered,
+      maxDistance = this.sequence.frameCount,
+    } = options ?? {};
 
     for (const frame of this.decoded.values()) {
       if (rendered != null && direction != null) {
@@ -164,7 +224,6 @@ export class FrameRepository {
 
   protect(indices: Iterable<number>): void {
     this.protectedFrames = new Set(indices);
-    this.evictDecoded();
   }
 
   async load(index: number, priority = false): Promise<DecodedFrame> {
@@ -177,8 +236,16 @@ export class FrameRepository {
     const pending = this.decodedPending.get(index);
     if (pending) return pending;
 
-    const promise = this.loadEncoded(index, priority)
-      .then(({ blob }) => decodeBlob(index, blob))
+    const promise = this.loadLimiter
+      .run(
+        () =>
+          loadDecodedImage(
+            index,
+            this.sequence.frameUrl(index),
+            this.abortController.signal,
+          ),
+        priority,
+      )
       .then((frame) => {
         if (this.disposed) {
           frame.release();
@@ -186,8 +253,6 @@ export class FrameRepository {
         }
 
         this.decoded.set(index, frame);
-        this.decodedBytes += frame.estimatedBytes;
-        this.evictDecoded();
         return frame;
       })
       .finally(() => this.decodedPending.delete(index));
@@ -226,44 +291,12 @@ export class FrameRepository {
   }
 
   scheduleEncoded(indices: Iterable<number>, priority = false): void {
-    const ordered = Array.from(indices);
-    if (priority) ordered.reverse();
-    for (const index of ordered) {
-      if (
-        index < 0 ||
-        index >= this.sequence.frameCount ||
-        this.encoded.has(index) ||
-        this.encodedPending.has(index) ||
-        this.queuedEncoded.has(index)
-      ) {
-        continue;
-      }
-
-      this.queuedEncoded.add(index);
-      const job = async () => {
-        try {
-          await this.loadEncoded(index);
-        } finally {
-          this.queuedEncoded.delete(index);
-        }
-      };
-      if (priority) this.queue.unshift(job);
-      else this.queue.push(job);
-    }
-
-    this.pump();
+    this.scheduleDecode(indices, priority);
   }
 
-  /** Release inactive decoded frames while keeping compressed data warm. */
+  /** Keep preloaded frames in memory so scrubbing never re-fetches or stalls. */
   compact(keepDecoded: Iterable<number>): void {
-    const keep = new Set(keepDecoded);
-    this.protectedFrames = keep;
-    for (const [index, frame] of this.decoded) {
-      if (keep.has(index)) continue;
-      this.decoded.delete(index);
-      this.decodedBytes -= frame.estimatedBytes;
-      frame.release();
-    }
+    this.protectedFrames = new Set(keepDecoded);
   }
 
   dispose(): void {
@@ -274,56 +307,11 @@ export class FrameRepository {
 
     for (const frame of this.decoded.values()) frame.release();
     this.decoded.clear();
-    this.encoded.clear();
-    this.encodedPending.clear();
     this.decodedPending.clear();
-    this.queuedEncoded.clear();
     this.queuedDecoded.clear();
-    this.encodedBytes = 0;
-    this.decodedBytes = 0;
-  }
-
-  private async loadEncoded(index: number, priority = false): Promise<EncodedFrame> {
-    const cached = this.encoded.get(index);
-    if (cached) {
-      this.encoded.delete(index);
-      this.encoded.set(index, cached);
-      return cached;
-    }
-
-    const pending = this.encodedPending.get(index);
-    if (pending) return pending;
-
-    const promise = this.loadLimiter
-      .run(async () => {
-        const response = await fetch(this.sequence.frameUrl(index), {
-          cache: "force-cache",
-          signal: this.abortController.signal,
-        });
-        if (!response.ok) {
-          throw new Error(
-            `frame ${index} failed with HTTP ${response.status}`,
-          );
-        }
-        return response.blob();
-      }, priority)
-      .then((blob) => {
-        if (this.disposed) throw new Error("frame repository is disposed");
-        const frame = { blob, bytes: blob.size };
-        this.encoded.set(index, frame);
-        this.encodedBytes += frame.bytes;
-        this.evictEncoded();
-        return frame;
-      })
-      .finally(() => this.encodedPending.delete(index));
-
-    this.encodedPending.set(index, promise);
-    return promise;
   }
 
   private pump(): void {
-    // Reserve one slot for the actively requested frame. SequenceCanvas keeps
-    // exactly one foreground request in flight.
     const backgroundLimit = Math.max(1, this.policy.concurrency - 1);
     while (
       !this.disposed &&
@@ -341,25 +329,6 @@ export class FrameRepository {
           this.activeJobs -= 1;
           this.pump();
         });
-    }
-  }
-
-  private evictEncoded(): void {
-    for (const [index, frame] of this.encoded) {
-      if (this.encodedBytes <= this.policy.maxEncodedBytes) return;
-      if (this.protectedFrames.has(index)) continue;
-      this.encoded.delete(index);
-      this.encodedBytes -= frame.bytes;
-    }
-  }
-
-  private evictDecoded(): void {
-    for (const [index, frame] of this.decoded) {
-      if (this.decodedBytes <= this.policy.maxDecodedBytes) return;
-      if (this.protectedFrames.has(index)) continue;
-      this.decoded.delete(index);
-      this.decodedBytes -= frame.estimatedBytes;
-      frame.release();
     }
   }
 }

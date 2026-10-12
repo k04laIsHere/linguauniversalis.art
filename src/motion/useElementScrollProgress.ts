@@ -49,6 +49,7 @@ export function useElementScrollProgress(
       if (!element) return;
       const rect = element.getBoundingClientRect();
       const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      if (rect.height <= 0 || viewportHeight <= 0) return;
       onProgressRef.current(
         elementScrollProgress(rect.top, rect.height, viewportHeight),
       );
@@ -58,13 +59,14 @@ export function useElementScrollProgress(
       if (raf == null) raf = requestAnimationFrame(update);
     };
 
-    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", schedule, { passive: true });
     window.visualViewport?.addEventListener("resize", schedule);
+    update();
     schedule();
 
     return () => {
-      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("scroll", update);
       window.removeEventListener("resize", schedule);
       window.visualViewport?.removeEventListener("resize", schedule);
       if (raf != null) cancelAnimationFrame(raf);
@@ -102,8 +104,8 @@ export function useProximityPrewarm(
 }
 
 /**
- * Resolves an ordered set of passages in one rAF. Later pinned/released scenes
- * own the stage; an approaching scene cannot steal it before its top reaches 0.
+ * Resolves an ordered set of passages. Later pinned/released scenes own the
+ * stage; an approaching scene cannot steal it before its top reaches 0.
  */
 export function useSequenceSceneController(
   scenes: readonly SequenceSceneBinding[],
@@ -123,11 +125,13 @@ export function useSequenceSceneController(
     const update = () => {
       raf = null;
       const viewportHeight = window.visualViewport?.height ?? window.innerHeight;
+      if (viewportHeight <= 0) return;
       const states: ContinuousSceneState[] = [];
       for (const scene of scenes) {
         const element = scene.targetRef.current;
         if (!element) return;
         const rect = element.getBoundingClientRect();
+        if (rect.height <= 0) return;
         states.push(
           continuousSceneState(rect.top, rect.height, viewportHeight),
         );
@@ -148,13 +152,14 @@ export function useSequenceSceneController(
       if (raf == null) raf = requestAnimationFrame(update);
     };
 
-    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("scroll", update, { passive: true });
     window.addEventListener("resize", schedule, { passive: true });
     window.visualViewport?.addEventListener("resize", schedule);
+    update();
     schedule();
 
     return () => {
-      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("scroll", update);
       window.removeEventListener("resize", schedule);
       window.visualViewport?.removeEventListener("resize", schedule);
       if (raf != null) cancelAnimationFrame(raf);

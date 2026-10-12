@@ -13,6 +13,7 @@
 
 .bgWrapper {
   position: absolute;
+  inset: 0 0 100vh 0;
   inset: 0 0 100dvh 0;
   pointer-events: none;
   z-index: 10;

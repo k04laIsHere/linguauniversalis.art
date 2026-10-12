@@ -20,7 +20,6 @@ import {
   ImmersionMotionStage,
   NATURE_TO_SKY,
   SKY_TO_CITY,
-  commitOrDeferSequenceProgress,
   useProximityPrewarm,
   useSequenceSceneController,
   type FrameSequenceDefinition,
@@ -49,16 +48,11 @@ function ImmersionExperience({ isLoading }: { isLoading: boolean }) {
 
   const activateSequence = useCallback((sequence: FrameSequenceDefinition, progress: number) => {
     pendingProgressRef.current = progress;
-    const committedId = stageRef.current?.getSequenceId?.() ?? activeSequenceRef.current.id;
-    commitOrDeferSequenceProgress(
-      committedId,
-      sequence.id,
-      () => {
-        activeSequenceRef.current = sequence;
-        setActiveSequence(sequence);
-      },
-      () => stageRef.current?.setProgress(progress, sequence.id),
-    );
+    stageRef.current?.activateSequence(sequence, progress);
+    if (activeSequenceRef.current.id !== sequence.id) {
+      activeSequenceRef.current = sequence;
+      setActiveSequence(sequence);
+    }
   }, []);
 
   const prewarmSequence = useCallback((
@@ -83,13 +77,11 @@ function ImmersionExperience({ isLoading }: { isLoading: boolean }) {
   useProximityPrewarm(cityMotionRef, () => prewarmSequence(SKY_TO_CITY, cityMotionRef));
 
   useEffect(() => {
-    activeSequenceRef.current = activeSequence;
-    const frame = requestAnimationFrame(() => {
-      stageRef.current?.setProgress(pendingProgressRef.current, activeSequence.id);
-      stageRef.current?.prewarm(pendingProgressRef.current);
-    });
-    return () => cancelAnimationFrame(frame);
-  }, [activeSequence]);
+    if (!isLoading) {
+      ScrollTrigger.refresh();
+      stageRef.current?.redraw();
+    }
+  }, [isLoading]);
 
   return (
     <>
@@ -114,11 +106,19 @@ function ImmersionExperience({ isLoading }: { isLoading: boolean }) {
 }
 
 function AppContent() {
-  const { lang } = useI18n();
+  useI18n();
   const { mode } = useViewMode();
-  const [isLoading, setIsLoading] = useState(true);
-  const reduced = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
-  const [isTransitioning, setIsTransitioning] = useState(false);
+  const [immersionLoaded, setImmersionLoaded] = useState(false);
+  const prevModeRef = useRef(mode);
+
+  if (prevModeRef.current !== mode) {
+    prevModeRef.current = mode;
+    if (mode === 'immersive') {
+      setImmersionLoaded(false);
+    }
+  }
+
+  const isLoading = mode === 'immersive' && !immersionLoaded;
 
   // Handle mode transition
   useEffect(() => {
@@ -151,7 +151,7 @@ function AppContent() {
       const hash = window.location.hash;
       if (hash) {
         const id = hash.split('?')[0].replace('#', '');
-        if (id) {
+        if (id && id !== 'archive' && id !== 'immersive') {
           const el = document.getElementById(id);
           if (el) {
             const rect = el.getBoundingClientRect();
@@ -165,7 +165,7 @@ function AppContent() {
     };
 
     // Wait for all sections to mount and images to potentially load
-    const timer = setTimeout(initRefresh, 1000);
+    const timer = setTimeout(initRefresh, 400);
 
     window.addEventListener('hashchange', handleHash);
     window.addEventListener('load', initRefresh);
@@ -175,11 +175,11 @@ function AppContent() {
       window.removeEventListener('hashchange', handleHash);
       window.removeEventListener('load', initRefresh);
     };
-  }, [isLoading]);
+  }, [isLoading, mode]);
 
   // One global viewport-stable flashlight (prevents scroll/pin-induced drift and flicker).
   useViewportFlashlight({
-    enabled: !reduced && !isLoading,
+    enabled: mode === 'immersive' && !isLoading,
     radius: 520,
     touchRadius: 260,
     defaultPos: { x: window.innerWidth * 0.5, y: window.innerHeight * 0.45 },
@@ -187,20 +187,8 @@ function AppContent() {
 
   return (
     <div className="appRoot">
-      <Loader onLoaded={() => setIsLoading(false)} />
-
-      {/* Mode Transition Overlay */}
-      {isTransitioning && mode === 'immersive' && (
-        <div
-          className="mode-transition-overlay"
-          style={{
-            position: 'fixed',
-            inset: 0,
-            background: '#020305',
-            zIndex: 9999,
-            animation: 'modeFade 1s ease-in-out forwards',
-          }}
-        />
+      {mode === 'immersive' && !immersionLoaded && (
+        <Loader onLoaded={() => setImmersionLoaded(true)} />
       )}
 
       {/* Render based on mode */}

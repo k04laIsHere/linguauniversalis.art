@@ -382,29 +382,12 @@ export function GalleryMode() {
   }, [artistEntries.length, isMobile]);
 
   const toggleModeWithTransition = () => {
-    const overlay = document.createElement('div');
-    overlay.style.position = 'fixed';
-    overlay.style.inset = '0';
-    overlay.style.backgroundColor = 'black';
-    overlay.style.zIndex = '9999';
-    overlay.style.opacity = '0';
-    overlay.style.transition = 'opacity 0.6s ease';
-    overlay.style.pointerEvents = 'none';
-    document.body.appendChild(overlay);
-
-    requestAnimationFrame(() => {
-      overlay.style.opacity = '1';
-    });
-
-    setTimeout(() => {
-      toggleMode();
-      setTimeout(() => {
-        overlay.style.opacity = '0';
-        setTimeout(() => {
-          document.body.removeChild(overlay);
-        }, 600);
-      }, 300);
-    }, 600);
+    setIsMenuOpen(false);
+    setIsDeclarationOpen(false);
+    setDrawerState({ type: 'closed' });
+    document.body.style.overflow = '';
+    document.body.style.paddingRight = '';
+    toggleMode();
   };
 
   const handleRipple = (e: React.MouseEvent<HTMLButtonElement>) => {

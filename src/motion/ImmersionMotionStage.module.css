@@ -8,7 +8,6 @@
   overflow: hidden;
   pointer-events: none;
   background: #020305;
-  contain: strict;
 }
 
 .canvas {

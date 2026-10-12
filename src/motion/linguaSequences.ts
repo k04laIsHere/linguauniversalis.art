@@ -1,3 +1,6 @@
+import { defaultCachePolicy } from "./defaults";
+import { FrameLoadLimiter, FrameRepository } from "./FrameRepository";
+import { SequenceRepositoryPool } from "./SequenceRepositoryPool";
 import type { FrameSequenceDefinition } from "./types";
 
 const frameUrl = (folder: string) => (index: number) =>
@@ -29,3 +32,42 @@ export const SKY_TO_CITY: FrameSequenceDefinition = {
   entranceBlendFrames: 6,
   reducedMotionFrame: "end",
 };
+
+export const IMMERSION_SEQUENCES: readonly FrameSequenceDefinition[] = [
+  NATURE_TO_SKY,
+  SKY_TO_CITY,
+];
+
+let sharedPool: SequenceRepositoryPool<FrameRepository> | null = null;
+let sharedLimiter: FrameLoadLimiter | null = null;
+
+export function getSharedSequenceRepositoryPool(): SequenceRepositoryPool<FrameRepository> {
+  if (!sharedPool) {
+    const policy = defaultCachePolicy();
+    sharedLimiter ??= new FrameLoadLimiter(policy.concurrency);
+    const limiter = sharedLimiter;
+    sharedPool = new SequenceRepositoryPool(
+      (definition) => new FrameRepository(definition, policy, limiter),
+      (repository) => repository.dispose(),
+    );
+  }
+  return sharedPool;
+}
+
+export function areImmersionSequencesLoaded(): boolean {
+  const pool = getSharedSequenceRepositoryPool();
+  return IMMERSION_SEQUENCES.every((seq) =>
+    pool.prewarm(seq).repository.isFullyLoaded(),
+  );
+}
+
+export async function preloadImmersionSequences(
+  onFrameLoaded?: () => void,
+): Promise<void> {
+  const pool = getSharedSequenceRepositoryPool();
+  await Promise.all(
+    IMMERSION_SEQUENCES.map((seq) =>
+      pool.prewarm(seq).repository.preloadAll(onFrameLoaded),
+    ),
+  );
+}
